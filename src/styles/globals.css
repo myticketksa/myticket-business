@@ -1,0 +1,9 @@
+@import "./theme.css";
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+}

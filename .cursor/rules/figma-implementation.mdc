@@ -1,0 +1,148 @@
+---
+description: Permanent Figma-to-React implementation rules — stack, design tokens, components, Figma MCP workflow, Tailwind, TypeScript, Redux, Yup, and quality gates. Apply before converting any Figma screen.
+alwaysApply: true
+---
+
+# Figma Implementation Rules
+
+You are implementing a production React application from Figma using the Figma MCP server.
+
+## Technology Stack
+
+* React
+* TypeScript
+* Tailwind CSS v4
+* shadcn/ui
+* Redux Toolkit
+* Yup (confirmed — do not use Zod)
+
+## Canonical documents
+
+* Tokens, components, Tailwind map, and build order: `docs/MyTicket-Design-System-Specification.md`
+* Remaining Figma extract (nav, badges, forms, tables): `docs/remaining-design-data.md`
+* Frame inventory (67 screens): `docs/MyTicket-Business-Frames.md`
+* Node `177:2037` is the full business page, not one screen. Implement one frame at a time.
+
+## Design System Rules
+
+1. The Figma design system is the visual source of truth.
+2. Always inspect the Figma selection before implementing a screen.
+3. Extract and reuse Figma variables instead of inventing arbitrary values.
+4. Reuse existing project tokens whenever they already represent the same Figma value.
+5. Do not introduce new colors, font sizes, spacing values, radii, or shadows unless required.
+6. Prefer semantic design tokens over raw values.
+7. Preserve visual hierarchy and spacing.
+8. Match Figma layout before making subjective improvements.
+
+## Component Rules
+
+1. Do not create duplicate components.
+2. Check the existing codebase before creating a new component.
+3. Reuse shadcn/ui when it matches the required behavior.
+4. Customize shadcn/ui through composition and Tailwind classes.
+5. Create custom components only when the design requires functionality or visuals not provided by shadcn/ui.
+6. Separate reusable components from page-specific components.
+7. Do not place entire pages inside one giant React component.
+
+## Figma MCP Workflow
+
+Before implementing a screen:
+
+1. Inspect the selected Figma frame.
+2. Get design context.
+3. Get variable definitions and styles used by the frame.
+4. Identify reusable Figma components.
+5. Inspect responsive layouts if available.
+6. Compare the extracted data with existing project components.
+7. Reuse existing code components whenever possible.
+
+If information is missing from the Figma design:
+
+* Do not silently invent a design.
+* Search the existing codebase for established patterns.
+* Reuse the closest existing pattern.
+* Clearly identify assumptions when necessary.
+
+## Tailwind Rules
+
+1. Prefer semantic Tailwind classes and project tokens.
+2. Avoid unnecessary arbitrary values.
+3. Use arbitrary values only when required for exact Figma fidelity.
+4. Do not hardcode repeated values.
+5. Extract repeated design values into shared tokens.
+
+## TypeScript Rules
+
+1. Do not use `any`.
+2. Create explicit interfaces and types.
+3. Type component props.
+4. Type API data.
+5. Use reusable types when appropriate.
+
+## Redux Toolkit Rules
+
+Use Redux Toolkit only for global application state.
+
+Do not use Redux for:
+
+* Local component state
+* Simple UI state
+* Temporary form field state
+
+Use feature-based slices.
+
+## Yup Rules
+
+All forms requiring validation should use Yup schemas.
+
+Validation schemas should:
+
+* Be reusable
+* Match business rules
+* Provide clear error messages
+* Remain separate from UI components where practical
+
+## Responsive Rules
+
+1. Implement responsive behavior based on the Figma design.
+2. Do not rely only on pixel-perfect desktop implementation.
+3. Check mobile and tablet frames when available.
+4. Avoid absolute positioning unless the Figma design genuinely requires it.
+5. Prefer Flexbox, Grid, and responsive layout primitives.
+
+## Implementation Process
+
+For every Figma screen:
+
+1. Inspect
+2. Analyze
+3. Identify components
+4. Implement
+5. Compare
+6. Refine
+7. Verify responsiveness
+
+Do not implement an entire large application in one AI operation.
+
+Implement one logical feature or screen at a time.
+
+## Code Quality
+
+Generated code must be:
+
+* Production-ready
+* Maintainable
+* Accessible
+* Responsive
+* Typed
+* Componentized
+* Consistent with the existing architecture
+
+Before completing any implementation:
+
+* Check for duplicated components
+* Check for unused code
+* Check for TypeScript errors
+* Check for responsive issues
+* Check visual consistency with Figma
+* Check accessibility basics

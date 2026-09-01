@@ -1,0 +1,51 @@
+---
+description: Inspect and implement the currently selected Figma frame with Figma MCP, existing React/shadcn components, and design tokens. Use when starting any Figma frame, screen, or design-to-code task.
+alwaysApply: true
+---
+
+# Figma Frame Implementation
+
+Using the Figma MCP server, inspect the currently selected Figma frame.
+
+Follow this exact process:
+
+1. Get the complete design context for the selected frame.
+2. Get all variable definitions, styles, and tokens used by this frame.
+3. Identify every reusable Figma component used in the frame.
+4. Inspect the current codebase for equivalent existing React components.
+5. Reuse existing project components before creating new ones.
+6. Use shadcn/ui components where appropriate.
+7. Implement the screen using:
+
+   * React
+   * TypeScript
+   * Tailwind CSS
+   * shadcn/ui
+
+Do not use Redux unless this screen requires global state.
+
+If this screen contains forms, create appropriate Yup validation schemas.
+
+## Implementation requirements
+
+* Match the Figma layout accurately.
+* Reuse the extracted design tokens.
+* Do not invent arbitrary colors or spacing.
+* Use responsive layouts.
+* Prefer Grid and Flexbox over absolute positioning.
+* Keep the implementation componentized.
+* Preserve component variants and states.
+* Do not implement unrelated screens.
+* Do not modify existing working components unnecessarily.
+
+## Before writing code
+
+Provide a short implementation plan showing:
+
+1. Existing components to reuse
+2. New components required
+3. shadcn/ui components required
+4. Figma tokens used
+5. Files that will be created or modified
+
+Then implement the screen.
