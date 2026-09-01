@@ -2,7 +2,7 @@
 
 Processed 2026-08-31 against **live Figma** (`get_design_context` on the named nodes). Detail for each id lives in [`ISSUES.md`](./ISSUES.md).
 
-**Crawl:** complete. All 67 frames on page `177:2037` were compared in scans A–D (2026-08-31). Next free id: `AUD-064`.
+**Crawl:** complete. All 67 frames on page `177:2037` were compared in scans A–D (2026-08-31). Next free id: `AUD-069`.
 
 **Rule used:** match the named Figma frame, not the original register’s Expected line when they disagreed. Do not invent modals, menus, file pickers, or pages that are not in the 67. If **Figma destination: none**, keep the control visible.
 
@@ -123,6 +123,33 @@ Second continue pass — Home / Events / Archive / Sales / Scan history re-fetch
 | Archive `298:5826` | 4 rows, 14 archived events, Show 10 more | match |
 | Sales `298:10477` | 28,440 / SAR 1.66M / SAR 412 / 948/day | match |
 | Scan history `298:7620` | All results · 1,270 / Valid · 1,246 / Failed · 24 | match |
+
+---
+
+## Visual QA — pass 4 (Settings / Notifications / Reviews)
+
+1440×900 live screenshots vs Figma `298:10962`, `298:10897`, `298:10750`. Settings/Notifications mains are 1180/1080 as drawn; Reviews 1192.
+
+| ID | Outcome |
+|----|---------|
+| AUD-066 | **fixed** — Settings stack gap 24px, tab bar 28px, section tops 24/24/32 |
+| AUD-067 | **fixed** — Notifications stack gap 24px, filter row gap 10px |
+| AUD-068 | **fixed** — Reviews stack gap 24px, distribution gap 10px, right column 20px |
+
+Also confirmed: pref matrix `rounded-[14px]`, notification rows 38px tile / 20×14 pad, reviews score card 14px gap / 340px column.
+
+---
+
+## Visual QA — pass 3 (Sales / Archive / Support)
+
+1440×900 live screenshots vs Figma `298:10477`, `298:5826`, `298:11110`. Shell still 248 / 1192 / gutter 36. Support main is 1180 as drawn.
+
+| ID | Outcome |
+|----|---------|
+| AUD-064 | **fixed** — Support stack gap 24px |
+| AUD-065 | **fixed** — KpiCard inner gap 10px |
+
+Also confirmed: Archive table 64px rows, 18r card, filter bar 20×16; Sales chart 24×22 / 18 gap; Support 473 / 615 columns.
 
 ---
 

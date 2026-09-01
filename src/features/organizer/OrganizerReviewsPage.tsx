@@ -42,7 +42,7 @@ export function OrganizerReviewsPage() {
   }, [dataset, filter])
 
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-lg px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
       <div className="flex flex-wrap items-end justify-between gap-sm">
         <PageHead
           eyebrow={dataset.eyebrow}
@@ -83,7 +83,7 @@ export function OrganizerReviewsPage() {
                 </p>
               </div>
             </div>
-            <div className="flex flex-col gap-2xs border-t border-border-subtle pt-base">
+            <div className="flex flex-col gap-gap-md border-t border-border-subtle pt-base">
               {dataset.distribution.map((row) => (
                 <BarListRow
                   key={row.name}
@@ -137,7 +137,7 @@ export function OrganizerReviewsPage() {
           )}
         </div>
 
-        <div className="flex flex-col gap-base">
+        <div className="flex flex-col gap-lg">
           <div className="flex flex-wrap items-center gap-2xs">
             {dataset.filters.map((item) =>
               item.stars ? (

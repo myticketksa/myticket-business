@@ -136,7 +136,7 @@ export function OrganizerSalesPage() {
             </div>
           </PanelCard>
 
-          <article className="flex flex-col gap-2xs rounded-lg border border-border-default bg-surface-card px-[22px] py-lg">
+          <article className="flex flex-col gap-gap-md rounded-lg border border-border-default bg-surface-card px-[22px] py-lg">
             <div className="flex items-center gap-[6px] text-[15px] font-bold text-ink-primary">
               <span>View</span>
               <ArrowRightIcon className="size-3.5" weight="bold" />

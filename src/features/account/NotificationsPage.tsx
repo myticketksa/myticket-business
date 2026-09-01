@@ -76,7 +76,7 @@ export function NotificationsPage() {
     .filter((item) => item.unread && !readIds.has(item.id)).length
 
   return (
-    <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-lg px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
       <div className="flex flex-wrap items-end justify-between gap-sm">
         <header className="flex flex-col gap-3xs">
           <p className="text-[12px] font-bold tracking-[0.96px] text-brand-link uppercase">
@@ -120,7 +120,7 @@ export function NotificationsPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2xs">
+      <div className="flex flex-wrap gap-gap-md">
         {filters.map((pill) => (
           <FilterPill
             key={pill.id}

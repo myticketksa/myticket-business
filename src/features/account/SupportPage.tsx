@@ -85,7 +85,7 @@ export function SupportPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-lg px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
       <PageHead eyebrow="Account" title="Support" sub={pageSub} />
       <div className="grid grid-cols-1 items-start gap-lg xl:grid-cols-[minmax(0,473px)_minmax(0,615px)]">
         <PanelCard
@@ -176,7 +176,7 @@ export function SupportCasePage() {
   const headerIcon = active.headerIcon ?? active.icon
 
   return (
-    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-lg px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
       <PageHead eyebrow="Account" title="Support" sub={pageSub} />
       <div className="grid grid-cols-1 items-start gap-lg xl:grid-cols-[minmax(0,473px)_minmax(0,615px)]">
         <CaseList

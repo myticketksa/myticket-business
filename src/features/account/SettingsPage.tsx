@@ -50,10 +50,10 @@ export function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-lg px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
       <PageHead eyebrow="Account" title="Settings" />
 
-      <div className="flex gap-lg border-b border-border-default">
+      <div className="flex gap-[28px] border-b border-border-default">
         <UnderlineTab
           label="Account"
           active={tab === "account"}
@@ -77,7 +77,7 @@ export function SettingsPage() {
         />
       </div>
 
-      <section id="settings-account" className="flex flex-col gap-lg pt-base">
+      <section id="settings-account" className="flex flex-col gap-lg pt-xl">
           <div className="grid grid-cols-1 gap-base md:grid-cols-2">
             <TextInput
               id="full-name"
@@ -123,7 +123,7 @@ export function SettingsPage() {
           </div>
       </section>
 
-      <section id="settings-security" className="flex flex-col pt-base">
+      <section id="settings-security" className="flex flex-col pt-xl">
           <SecurityRow
             icon={<PasswordIcon className="size-[21px]" />}
             title="Password"
@@ -191,7 +191,7 @@ export function SettingsPage() {
           </div>
       </section>
 
-      <section id="settings-prefs" className="flex flex-col gap-xs pt-xl">
+      <section id="settings-prefs" className="flex flex-col gap-xs pt-[32px]">
           <p className="text-[13px] leading-[1.45] text-ink-muted">
             Choose channels per subject. Security alerts always send everywhere.
           </p>

@@ -54,7 +54,7 @@ export function KpiCard({
   return (
     <article
       className={cn(
-        "flex w-full min-w-0 max-w-[320px] flex-col gap-2xs rounded-lg border border-border-default px-[22px] py-lg",
+        "flex w-full min-w-0 max-w-[320px] flex-col gap-gap-md rounded-lg border border-border-default px-[22px] py-lg",
         kind === "coloured" ? "bg-surface-brand-wash" : "bg-surface-card",
         className,
       )}

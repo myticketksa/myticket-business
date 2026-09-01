@@ -1015,7 +1015,7 @@ Do not refile these unless a new Figma frame appears.
 
 ## Next id
 
-`AUD-064`
+`AUD-069`
 
 ---
 
@@ -1082,3 +1082,78 @@ Side-by-side screenshots at 1440×900 vs live Figma for Home `298:4694`, Events 
 | Code | `OrganizerHireRequestsPage` · `TalentHireRequestsPage` · `VendorHireRequestsPage` · `avatar.tsx` |
 | Expected | 42px gradient avatar in thread list and header |
 | Actual | `size={38}` (38px) |
+
+### AUD-064 — Support page stack gap is 20px not 24px
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Support directory and thread use `gap-xl` (24px) between PageHead and the two-column grid. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-01 |
+| Figma | `298:11110` Main: `gap-[24px]` · width 1180 |
+| Figma destination | n/a |
+| Code | `SupportPage` · `SupportCasePage` |
+| Expected | 24px vertical stack under the page head |
+| Actual | `gap-lg` (20px) |
+
+### AUD-065 — KpiCard inner gap is 8px not 10px
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | `KpiCard` and Sales “View → purchase” card use `gap-gap-md` (10px). |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-01 |
+| Figma | `298:10477` Biz/KpiCard `gap-[10px]`; View to purchase card same |
+| Figma destination | n/a |
+| Code | `kpi-card.tsx` · `OrganizerSalesPage` |
+| Expected | 10px stack between label, value, and trend |
+| Actual | `gap-2xs` (8px) |
+
+### AUD-066 — Settings stack and section spacing off
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Main `gap-xl` (24px); tab bar `gap-[28px]`; account/security `pt-xl` (24px); prefs `pt-[32px]`. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-01 |
+| Figma | `298:10962` Main `gap-[24px]`; tab bar `gap-[28px]`; sections `pt-[24px]` / `pt-[32px]` |
+| Figma destination | n/a |
+| Code | `SettingsPage` |
+| Expected | 24px page stack; 28px tab spacing; section tops per frame |
+| Actual | `gap-lg` (20px); tab `gap-lg`; sections `pt-base` / `pt-xl` |
+
+### AUD-067 — Notifications stack and filter gap off
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Main `gap-xl` (24px); filter row `gap-gap-md` (10px). |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-01 |
+| Figma | `298:10897` Main `gap-[24px]`; filter row `gap-[0px_10px]` |
+| Figma destination | n/a |
+| Code | `NotificationsPage` |
+| Expected | 24px vertical stack; 10px between pills |
+| Actual | `gap-lg` (20px); `gap-2xs` (8px) |
+
+### AUD-068 — Reviews stack and column gaps off
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Main `gap-xl` (24px); distribution `gap-gap-md` (10px); right column `gap-lg` (20px). |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-01 |
+| Figma | `298:10750` Main `gap-[24px]`; distribution `gap-[10px]`; right column `gap-[20px]` |
+| Figma destination | n/a |
+| Code | `OrganizerReviewsPage` |
+| Expected | 24px page stack; 10px star breakdown; 20px review column stack |
+| Actual | `gap-lg` (20px); `gap-2xs` (8px); `gap-base` (16px) |
