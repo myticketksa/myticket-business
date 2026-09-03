@@ -24,7 +24,7 @@ const arrivalMax = Math.max(...attendanceArrivalBars.map((bar) => bar.value))
 
 export function OrganizerAttendancePage() {
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-lg px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-lg px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <div className="flex flex-wrap items-end justify-between gap-sm">
         <PageHead eyebrow="Door operations" title="Attendance" sub={attendanceSub} />
         <div className="flex flex-wrap items-center gap-gap-md">
@@ -105,7 +105,6 @@ export function OrganizerAttendancePage() {
             tone="neutral"
             lead={attendanceHistory.lead}
             body={attendanceHistory.body}
-            className="border-transparent bg-surface-canvas"
           />
         </div>
       </div>

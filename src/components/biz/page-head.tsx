@@ -15,7 +15,7 @@ export function PageHead({ eyebrow, title, sub, sub2, badge }: PageHeadProps) {
         {eyebrow}
       </p>
       <div className="flex flex-wrap items-center gap-sm">
-        <h1 className="text-[28px] leading-normal font-extrabold tracking-[-0.84px] text-ink-primary">
+        <h1 className="text-[22px] leading-normal font-extrabold tracking-[-0.84px] text-ink-primary sm:text-[28px]">
           {title}
         </h1>
         {badge}

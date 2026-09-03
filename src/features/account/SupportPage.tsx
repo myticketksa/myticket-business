@@ -85,7 +85,7 @@ export function SupportPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-xl px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <PageHead eyebrow="Account" title="Support" sub={pageSub} />
       <div className="grid grid-cols-1 items-start gap-lg xl:grid-cols-[minmax(0,473px)_minmax(0,615px)]">
         <PanelCard
@@ -176,7 +176,7 @@ export function SupportCasePage() {
   const headerIcon = active.headerIcon ?? active.icon
 
   return (
-    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-xl px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <PageHead eyebrow="Account" title="Support" sub={pageSub} />
       <div className="grid grid-cols-1 items-start gap-lg xl:grid-cols-[minmax(0,473px)_minmax(0,615px)]">
         <CaseList
@@ -188,7 +188,7 @@ export function SupportCasePage() {
         />
 
         <section className="flex flex-col overflow-hidden rounded-lg border border-border-default bg-surface-card">
-          <header className="flex flex-wrap items-center gap-sm border-b border-border-subtle px-lg py-base">
+          <header className="flex flex-wrap items-center gap-sm border-b border-border-subtle px-base py-base sm:px-lg">
             <span
               className={cn(
                 "flex size-[38px] shrink-0 items-center justify-center rounded-sm",
@@ -269,7 +269,7 @@ export function SupportCasePage() {
           </div>
 
           <form
-            className="flex items-center gap-2xs border-t border-border-subtle px-lg py-base"
+            className="flex flex-wrap items-center gap-2xs border-t border-border-subtle px-base py-base sm:flex-nowrap sm:px-lg"
             onSubmit={(event) => {
               event.preventDefault()
             }}
@@ -324,15 +324,17 @@ function CaseList({
     <PanelCard
       title="Your cases"
       action={
-        <SearchField
-          size="pill"
-          placeholder="Search history…"
-          value={query}
-          onChange={(event) => {
-            onQueryChange(event.target.value)
-          }}
-          className="w-[190px]"
-        />
+        <div className="w-full min-w-0 sm:w-[190px]">
+          <SearchField
+            size="pill"
+            placeholder="Search history…"
+            value={query}
+            onChange={(event) => {
+              onQueryChange(event.target.value)
+            }}
+            className="w-full"
+          />
+        </div>
       }
     >
       <ul>

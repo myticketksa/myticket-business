@@ -1015,7 +1015,7 @@ Do not refile these unless a new Figma frame appears.
 
 ## Next id
 
-`AUD-069`
+`AUD-086`
 
 ---
 
@@ -1157,3 +1157,258 @@ Side-by-side screenshots at 1440×900 vs live Figma for Home `298:4694`, Events 
 | Code | `OrganizerReviewsPage` |
 | Expected | 24px page stack; 10px star breakdown; 20px review column stack |
 | Actual | `gap-lg` (20px); `gap-2xs` (8px); `gap-base` (16px) |
+
+### AUD-069 — Warm NoteCard draws a brand border Figma does not
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Warm NoteCard is borderless `bg-surface-footer` with `px-[22px] py-lg` and 10px lead/body gap per `Biz/NoteCard` Warm. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | Talent Home `298:9211` portfolio note; DS Warm = `#FFF1E9` / `#C4330B` |
+| Figma destination | n/a |
+| Code | `src/components/biz/note-card.tsx` |
+| Expected | Warm fill only; 22×20 padding; 10px between lead and body |
+| Actual | `border-border-brand` + `p-lg` (20) + `gap-3xs` (4) |
+
+### AUD-070 — Event ops pages stack at 20px; Figma uses 18px
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | `EventOpsChrome` main uses `gap-md` (18px) to match Orders/Tickets/Refunds Main. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:6805` / `298:6925` / `298:7021` Main `gap-[18px]` |
+| Figma destination | n/a |
+| Code | `src/features/organizer/EventOpsChrome.tsx` |
+| Expected | 18px vertical stack between PageHead, tabs, and body |
+| Actual | `gap-lg` (20px) |
+
+### AUD-071 — Orders KPIs use standard KpiCard geometry
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Orders uses `KpiCard` `kind="compact"` — pad 18×20, gap 8, value 26/800 — matching Biz/KpiCompact. |
+| Severity | P2 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:6805` Biz/KpiCompact pad 18 20, value 26/800 |
+| Figma destination | n/a |
+| Code | `src/components/biz/kpi-card.tsx`, `EventOrdersPage.tsx` |
+| Expected | Compact KPI: 18×20 pad, 8px gap, 26px value |
+| Actual | Standard card: 20×22 pad, 10px gap, 30px value |
+
+### AUD-072 — Brand AlertBanner and Tickets complimentary note chrome
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Brand AlertBanner uses `bg-surface-footer`, amber lead, `items-start`. Tickets NoteCard adds `border-border-default` and 18×20 pad override. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | Refunds `298:7021` AlertBanner warm + `#C4330B` lead; Tickets `298:6925` NoteCard bordered |
+| Figma destination | n/a |
+| Code | `alert-banner.tsx`, `EventTicketsPage.tsx` |
+| Expected | Warm `#FFF1E9` banner, amber lead, top-aligned; complimentary note with default border |
+| Actual | Brand-wash `#FFF0E9`, ink lead, centered; note borderless |
+
+### AUD-073 — Danger AlertBanner uses brand/info padding and radius
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Danger tone uses `px-lg py-sm rounded-md` (20×14 / 14). Brand/info keep 22×18 / 16. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | Notify `298:7102` Biz/AlertBanner Danger `px-[20px] py-[14px] rounded-[14px]` |
+| Figma destination | n/a |
+| Code | `src/components/biz/alert-banner.tsx` |
+| Expected | Danger pad 20×14, radius 14 |
+| Actual | Shared 22×18 pad, radius 16 |
+
+### AUD-074 — Notify compose column stretches instead of 630px
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | New message panel is `xl:w-[630px]` beside previously-sent `470px`. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:7102` Message panel `w-[630px]`, Sent panel `w-[470px]` |
+| Figma destination | n/a |
+| Code | `EventNotifyPage.tsx` |
+| Expected | Fixed 630px compose column |
+| Actual | `flex-1` only |
+
+### AUD-075 — Live door chip radius, LiveDot, failed-legend tones
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Gate/Pause chips `rounded-[16px]`; LiveDot 8px / r4; Wrong event legend `bg-accent-amber`. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:7534` chips r16; LiveDot 8×8 r4; Wrong event amber vs Already scanned red |
+| Figma destination | n/a |
+| Code | `live-door-board.tsx`, `live-dot.tsx`, `mocks/live-door.ts` |
+| Expected | 16px chips; 8px square dots; amber Wrong event |
+| Actual | 14px chips; 10px pill dots; Wrong event red |
+
+### AUD-076 — Event Editor stacks at 20px; Figma uses 22px
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | `EventEditorPage` main uses `gap-[22px]` to match Main between head, tabs, and body grid. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:4960` / Main `298:4964` `gap-[22px]` |
+| Figma destination | n/a |
+| Code | `EventEditorPage.tsx` |
+| Expected | 22px vertical stack |
+| Actual | `gap-lg` (20px) |
+
+### AUD-077 — Seating canvas uses 24/36 pad; Figma uses 32/40
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Sections / Free / Rows canvases use `px-[32px] pb-[40px] pt-[26px]`. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:5394` Canvas `px-[32px] pb-[40px] pt-[26px]` |
+| Figma destination | n/a |
+| Code | `seating-canvas.tsx` |
+| Expected | Horizontal 32, bottom 40 |
+| Actual | `px-xl` (24) / `pb-gutter` (36) |
+
+### AUD-078 — Scan history main gap is 20px not 18px
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | `OrganizerScanHistoryPage` main uses `gap-md` (18px). |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:7620` Main `gap-[18px]` |
+| Figma destination | n/a |
+| Code | `OrganizerScanHistoryPage.tsx` |
+| Expected | 18px vertical stack |
+| Actual | `gap-lg` (20px) |
+
+### AUD-079 — NoteCard Icon=No padding and Neutral border off DS
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | NoteCard Icon=No uses `px-lg py-md`, `gap-3xs`, lead 13.5/700; Warm `#FFF1E9` / Neutral `#FFF7F3`; no default border. Tickets complimentary note keeps an explicit border override. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | Biz/NoteCard `298:4117`; Attendance Neutral `298:7779`; Welcome Warm `298:6452` |
+| Figma destination | n/a |
+| Code | `note-card.tsx` |
+| Expected | 20×18 pad, gap 4, borderless; Neutral page fill |
+| Actual | 22×20 pad, gap 10; Neutral still bordered |
+
+### AUD-080 — Sign-in is a centered card, not Figma EntryShell
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | `/auth` under EntryShell; SignInCard 420 / p32 / r22 + routes column (`sign-in-routes` mock). Forgot/Apply remain visible no-ops (AUD-010). |
+| Severity | P2 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:6502` 1040×64 gap; SignInCard + Where sign-in can lead |
+| Figma destination | n/a |
+| Code | `SignInPage.tsx`, `router.tsx`, `mocks/sign-in-routes.ts` |
+| Expected | Two-column EntryShell sign-in |
+| Actual | Centered AuthLayout card titled “Sign in” |
+
+### AUD-081 — Profile identity card pad is 20px not 24px
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Identity card uses `p-xl` (24); logo/fields row `gap-lg` (20). Head actions `gap-gap-md` (10). |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:11752` Identity card `p-[24px]`; Identity top `gap-[20px]`; Actions `gap-[10px]` |
+| Figma destination | n/a |
+| Code | `OrganizerProfilePage.tsx` |
+| Expected | 24px card pad; 20px logo row gap |
+| Actual | `p-lg` (20); `gap-base` (16) |
+
+### AUD-082 — Profile logo Avatar is a circle not 24px squircle
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Avatar `size={96}` `shape="squircle"` `className="rounded-[24px]"`; Change logo uses `rounded-[16px]`. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:11752` logo `size-[96px] rounded-[24px]` |
+| Figma destination | n/a |
+| Code | `OrganizerProfilePage.tsx` |
+| Expected | 96×96, 24px radius |
+| Actual | Circle pill Avatar |
+
+### AUD-083 — Availability status card horizontal pad is 24px not 28px
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Talent and Vendor Availability status cards use `px-[28px] py-[26px]`. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:9491` / `298:8147` Status card `px-[28px] py-[26px]` |
+| Figma destination | n/a |
+| Code | `TalentAvailabilityPage.tsx`, `VendorAvailabilityPage.tsx` |
+| Expected | 28×26 pad |
+| Actual | `px-xl` (24) × 26 |
+
+### AUD-084 — Coloured KpiCard uses brand-wash not warm + accent border
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | `kind="coloured"` uses `bg-surface-footer` (`#FFF1E9`) and `border-border-strong` (`#F5C9B4`). |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | Talent/Vendor Payments coloured KPI `bg-warm` + `border-accent-soft` |
+| Figma destination | n/a |
+| Code | `kpi-card.tsx` |
+| Expected | Warm fill + strong/accent border |
+| Actual | Brand-wash fill + default border |
+
+### AUD-085 — Payments confirm strip radius/pad off Figma
+
+| Field | Value |
+|-------|--------|
+| Status | fixed |
+| Resolution | Talent/Vendor confirm-receipt strip uses `rounded-[16px] px-[22px] py-[18px]`. |
+| Severity | P3 |
+| Type | visual |
+| Logged | 2026-09-03 |
+| Figma | `298:9558` / `298:8230` confirm banner r16 / 22×18 |
+| Figma destination | n/a |
+| Code | `TalentFinancePage.tsx`, `VendorFinancePage.tsx` |
+| Expected | 16px radius, 22×18 pad |
+| Actual | `rounded-lg` (18) / equal 22 pad |

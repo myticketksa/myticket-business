@@ -79,8 +79,8 @@ export function ScannerScanPage() {
         ) : null}
 
         {outcome.showViewport ? (
-          <div className="flex h-[368px] flex-col items-center justify-center gap-gap-md rounded-[20px] bg-[#1a1613]">
-            <div className="size-[252px] rounded-[16px] border-[2.5px] border-brand-light" />
+          <div className="flex aspect-square max-h-[368px] w-full flex-col items-center justify-center gap-gap-md rounded-[20px] bg-[#1a1613]">
+            <div className="size-[min(252px,70vw)] rounded-[16px] border-[2.5px] border-brand-light" />
             <p className="text-[12px] font-medium text-ink-disabled">
               Point at the ticket QR
             </p>
@@ -145,8 +145,10 @@ export function ScannerScanPage() {
                 key={`${row.time}-${row.ticket}`}
                 className="flex h-11 items-center gap-sm border-b border-border-subtle"
               >
-                <p className="w-16 text-[13px] text-ink-disabled">{row.time}</p>
-                <p className="w-[120px] text-[13px] font-bold text-ink-inverse">
+                <p className="w-14 shrink-0 text-[13px] text-ink-disabled sm:w-16">
+                  {row.time}
+                </p>
+                <p className="min-w-0 flex-1 truncate text-[13px] font-bold text-ink-inverse sm:w-[120px] sm:flex-none">
                   {row.ticket}
                 </p>
                 <StatusBadge label={row.result} />

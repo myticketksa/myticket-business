@@ -76,15 +76,15 @@ export function NotificationsPage() {
     .filter((item) => item.unread && !readIds.has(item.id)).length
 
   return (
-    <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-xl px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <div className="flex flex-wrap items-end justify-between gap-sm">
         <header className="flex flex-col gap-3xs">
           <p className="text-[12px] font-bold tracking-[0.96px] text-brand-link uppercase">
             Account
           </p>
-          <h1 className="text-[28px] leading-8 font-extrabold tracking-[-0.84px] text-ink-primary">
+          <h1 className="text-[22px] leading-normal font-extrabold tracking-[-0.84px] text-ink-primary sm:text-[28px] sm:leading-8">
             Notifications
-            <span className="text-[15px] font-bold text-brand-strong">
+            <span className="text-[14px] font-bold text-brand-strong sm:text-[15px]">
               {` · ${unreadCount} unread`}
             </span>
           </h1>

@@ -17,7 +17,7 @@ export function FeedRow({ time, ticket, detail, gate, result }: FeedRowProps) {
   return (
     <div
       className={cn(
-        "flex h-11 items-center gap-sm border-b border-border-subtle px-lg text-[13px]",
+        "flex min-w-[640px] h-11 items-center gap-sm border-b border-border-subtle px-base text-[13px] sm:px-lg",
         failed && "bg-status-danger-light",
       )}
     >

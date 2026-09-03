@@ -31,12 +31,12 @@ export function ApplicationDeclinedPage() {
         <EntryAccountLinks />
       </EntryHeader>
 
-      <div className="flex flex-1 flex-col items-center px-gutter pt-[56px] pb-[100px]">
+      <div className="flex flex-1 flex-col items-center px-base sm:px-gutter pt-10 sm:pt-[56px] pb-[60px] sm:pb-[100px]">
         <div className="flex w-full max-w-[860px] flex-col gap-xl">
           <p className="text-[12px] font-bold tracking-[0.96px] text-brand-link uppercase">
             Organizer application · APP-40219 · reviewed Fri 21 Aug
           </p>
-          <h1 className="text-[28px] leading-[1.16] font-extrabold tracking-[-0.84px] text-ink-primary">
+          <h1 className="text-[22px] leading-[1.16] font-extrabold tracking-[-0.84px] text-ink-primary sm:text-[28px]">
             Not approved yet — here’s exactly what to fix
           </h1>
 
@@ -70,8 +70,8 @@ export function ApplicationDeclinedPage() {
             action={<StatusBadge label="Unlocked" />}
           >
             <div className="flex flex-col gap-[10px] px-lg py-3xs">
-              <div className="flex items-center gap-base border-b border-border-subtle px-xs py-sm">
-                <p className="w-[200px] shrink-0 text-[13px] font-semibold text-ink-faint">
+              <div className="flex flex-col gap-sm border-b border-border-subtle px-xs py-sm sm:flex-row sm:items-center sm:gap-base">
+                <p className="w-full sm:w-[200px] shrink-0 text-[13px] font-semibold text-ink-faint">
                   Company name
                 </p>
                 <p className="min-w-0 flex-1 text-[13.5px] font-medium text-ink-primary">
@@ -109,8 +109,8 @@ export function ApplicationDeclinedPage() {
                 }}
               />
 
-              <div className="flex items-center gap-base px-xs py-sm">
-                <p className="w-[200px] shrink-0 text-[13px] font-semibold text-ink-faint">
+              <div className="flex flex-col gap-sm px-xs py-sm sm:flex-row sm:items-center sm:gap-base">
+                <p className="w-full sm:w-[200px] shrink-0 text-[13px] font-semibold text-ink-faint">
                   Everything else
                 </p>
                 <p className="min-w-0 flex-1 text-[13px] leading-[1.48] font-medium text-ink-faint">
@@ -182,11 +182,11 @@ function FlaggedRow({
   return (
     <div
       className={cn(
-        "flex items-center gap-base border-b border-border-subtle px-xs py-sm",
+        "flex flex-col gap-sm border-b border-border-subtle px-xs py-sm sm:flex-row sm:items-center sm:gap-base",
         flagged && "rounded-badge bg-status-danger-light",
       )}
     >
-      <div className="flex w-[200px] shrink-0 items-center gap-[6px]">
+      <div className="flex w-full sm:w-[200px] shrink-0 items-center gap-[6px]">
         {flagged ? (
           <WarningCircleIcon
             className="size-[15px] text-status-danger-strong"

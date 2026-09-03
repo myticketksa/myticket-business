@@ -24,7 +24,7 @@ export function EventOpsChrome({
   const eyebrow = winter ? `${eventTitle} · Thu 12 Nov` : eventTitle
 
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-lg px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-md px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <div className="flex flex-wrap items-end justify-between gap-sm">
         <PageHead eyebrow={eyebrow} title={title} />
         {action}

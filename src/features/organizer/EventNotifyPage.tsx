@@ -72,7 +72,7 @@ export function EventNotifyPage() {
       title="Notify ticket holders"
     >
       <div className="flex w-full flex-col items-start gap-lg xl:flex-row">
-        <PanelCard className="min-w-0 flex-1" title="New message">
+        <PanelCard className="min-w-0 w-full xl:w-[630px] xl:shrink-0" title="New message">
           <form
             className="flex flex-col gap-base p-xl"
             onSubmit={handleSubmit}

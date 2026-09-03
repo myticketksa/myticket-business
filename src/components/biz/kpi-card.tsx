@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
-export type KpiCardKind = "standard" | "noIcon" | "coloured"
+export type KpiCardKind = "standard" | "noIcon" | "compact" | "coloured"
 export type KpiTrendTone = "success" | "down" | "muted"
 export type KpiValueTone = "ink" | "success" | "danger"
 
@@ -43,7 +43,8 @@ export function KpiCard({
   className,
   showTrendIcon = true,
 }: KpiCardProps) {
-  const showIcon = kind !== "noIcon" && icon
+  const showIcon = kind !== "noIcon" && kind !== "compact" && icon
+  const isCompact = kind === "compact"
   const TrendGlyph =
     trendTone === "down"
       ? CaretDownIcon
@@ -54,8 +55,13 @@ export function KpiCard({
   return (
     <article
       className={cn(
-        "flex w-full min-w-0 max-w-[320px] flex-col gap-gap-md rounded-lg border border-border-default px-[22px] py-lg",
-        kind === "coloured" ? "bg-surface-brand-wash" : "bg-surface-card",
+        "flex w-full min-w-0 sm:max-w-[320px] flex-col rounded-lg border",
+        isCompact
+          ? "gap-2xs px-lg py-md"
+          : "gap-gap-md px-[22px] py-lg",
+        kind === "coloured"
+          ? "border-border-strong bg-surface-footer"
+          : "border-border-default bg-surface-card",
         className,
       )}
     >
@@ -65,7 +71,10 @@ export function KpiCard({
       </div>
       <p
         className={cn(
-          "text-[30px] leading-none font-extrabold tracking-[-0.6px]",
+          "leading-none font-extrabold",
+          isCompact
+            ? "text-[26px] tracking-[-0.52px]"
+            : "text-[30px] tracking-[-0.6px]",
           valueToneClass[valueTone],
         )}
       >

@@ -10,13 +10,13 @@ export function LiveDot({ surface = "light" }: LiveDotProps) {
   return (
     <span
       className={cn(
-        "relative inline-flex size-2.5",
+        "relative inline-flex size-2",
         surface === "dark" ? "text-ink-inverse" : "text-status-success",
       )}
       aria-hidden
     >
-      <span className="absolute inset-0 animate-ping rounded-pill bg-current opacity-40 [animation-duration:1.5s]" />
-      <span className="relative size-2.5 rounded-pill bg-current" />
+      <span className="absolute inset-0 animate-ping rounded-[4px] bg-current opacity-40 [animation-duration:1.5s]" />
+      <span className="relative size-2 rounded-[4px] bg-current" />
     </span>
   )
 }

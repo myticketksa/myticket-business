@@ -22,46 +22,48 @@ export function AlertBanner({
   return (
     <div
       className={cn(
-        "flex items-center gap-sm overflow-clip rounded-[16px] border px-[22px] py-[18px]",
+        "flex flex-col gap-sm overflow-clip border sm:flex-row sm:items-start",
         tone === "danger"
-          ? "border-status-danger-border bg-status-danger-light"
+          ? "rounded-md border-status-danger-border bg-status-danger-light px-base py-sm sm:px-lg"
           : tone === "brand"
-            ? "border-border-default bg-surface-brand-wash"
-            : "border-border-default bg-status-info-light",
+            ? "rounded-[16px] border-border-default bg-surface-footer px-base py-base sm:px-[22px] sm:py-[18px]"
+            : "rounded-[16px] border-border-default bg-status-info-light px-base py-base sm:px-[22px] sm:py-[18px]",
       )}
     >
-      {tone === "danger" ? (
-        <WarningCircleIcon
-          className="size-5 shrink-0 text-status-danger"
-          weight="fill"
-        />
-      ) : (
-        <InfoIcon
-          className={cn(
-            "size-5 shrink-0",
-            tone === "brand" ? "text-brand-primary" : "text-status-info",
-          )}
-          weight="fill"
-        />
-      )}
-      <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-        <p
-          className={cn(
-            "text-[14.5px] font-bold leading-normal",
-            tone === "danger"
-              ? "text-status-danger-strong"
-              : tone === "brand"
-                ? "text-ink-primary"
-                : "text-status-info",
-          )}
-        >
-          {lead}
-        </p>
-        {body ? (
-          <p className="text-[13.5px] leading-[1.55] font-normal text-ink-muted">
-            {body}
+      <div className="flex min-w-0 flex-1 items-start gap-sm">
+        {tone === "danger" ? (
+          <WarningCircleIcon
+            className="mt-3xs size-5 shrink-0 text-status-danger"
+            weight="fill"
+          />
+        ) : (
+          <InfoIcon
+            className={cn(
+              "mt-3xs size-5 shrink-0",
+              tone === "brand" ? "text-accent-amber" : "text-status-info",
+            )}
+            weight="fill"
+          />
+        )}
+        <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+          <p
+            className={cn(
+              "text-[14.5px] font-bold leading-normal",
+              tone === "danger"
+                ? "text-status-danger-strong"
+                : tone === "brand"
+                  ? "text-accent-amber"
+                  : "text-status-info",
+            )}
+          >
+            {lead}
           </p>
-        ) : null}
+          {body ? (
+            <p className="text-[13.5px] leading-[1.55] font-normal text-ink-muted">
+              {body}
+            </p>
+          ) : null}
+        </div>
       </div>
       {ctaLabel ? (
         <AppButton
@@ -69,8 +71,8 @@ export function AlertBanner({
           size="s"
           className={
             tone === "danger"
-              ? "h-[38px] shrink-0 border-status-danger bg-surface-card text-status-danger hover:bg-status-danger-light"
-              : "h-[38px] shrink-0"
+              ? "h-[38px] w-full shrink-0 border-status-danger bg-surface-card text-status-danger hover:bg-status-danger-light sm:w-auto"
+              : "h-[38px] w-full shrink-0 sm:w-auto"
           }
           onClick={onCtaClick}
         >

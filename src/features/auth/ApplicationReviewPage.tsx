@@ -47,13 +47,13 @@ export function ApplicationReviewPage() {
         <EntryAccountLinks />
       </EntryHeader>
 
-      <div className="flex flex-1 flex-col items-center px-gutter pt-[56px] pb-[100px]">
+      <div className="flex flex-1 flex-col items-center px-base sm:px-gutter pt-10 sm:pt-[56px] pb-[60px] sm:pb-[100px]">
         <div className="flex w-full max-w-[860px] flex-col gap-xl">
           <div className="flex flex-col items-center gap-base text-center">
             <span className="inline-flex size-16 items-center justify-center rounded-[32px] bg-surface-brand-wash text-brand-primary">
               <HourglassMediumIcon className="size-[30px]" />
             </span>
-            <h1 className="text-[30px] leading-[1.18] font-extrabold text-ink-primary">
+            <h1 className="text-[22px] leading-[1.18] font-extrabold text-ink-primary sm:text-[30px]">
               Your organizer application is with our review team
             </h1>
             <p className="text-[14.5px] leading-[1.58] font-medium text-ink-muted">
@@ -105,9 +105,9 @@ export function ApplicationReviewPage() {
               {applicationReviewRows.map((row) => (
                 <div
                   key={row.label}
-                  className="flex gap-base border-b border-border-subtle py-sm last:border-b-0"
+                  className="flex flex-col gap-3xs sm:flex-row sm:gap-base border-b border-border-subtle py-sm last:border-b-0"
                 >
-                  <p className="w-[200px] shrink-0 text-[13px] font-semibold text-ink-faint">
+                  <p className="w-full sm:w-[200px] shrink-0 text-[13px] font-semibold text-ink-faint">
                     {row.label}
                   </p>
                   <p className="min-w-0 flex-1 text-[13.5px] leading-[1.5] font-medium text-ink-primary">

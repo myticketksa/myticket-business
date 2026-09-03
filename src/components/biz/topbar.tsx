@@ -2,12 +2,14 @@ import {
   ArrowSquareOutIcon,
   BellIcon,
   CheckCircleIcon,
+  ListIcon,
   PlusIcon,
 } from "@phosphor-icons/react"
 import { Link, useLocation } from "react-router"
 import { AppButton } from "@/components/primitive/app-button"
 import { Avatar } from "@/components/primitive/avatar"
 import { CountBadge } from "@/components/primitive/count-badge"
+import { useSidebar } from "@/layouts/sidebar-context"
 import { useAppSelector } from "@/store/hooks"
 import type { BusinessRole } from "@/types/role"
 
@@ -59,6 +61,7 @@ export function Topbar({
 }: TopbarProps) {
   const user = useAppSelector((state) => state.auth.user)
   const { pathname } = useLocation()
+  const { toggle } = useSidebar()
   const resolvedKind = resolveKind(pathname, user?.role, kind)
   const hideBell = pathname.startsWith("/app/notifications")
   const showArabic =
@@ -69,18 +72,32 @@ export function Topbar({
   }
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border-default bg-surface-canvas/92 px-[36px] backdrop-blur-[14px]">
-      <p className="min-w-0 flex-1 truncate text-[13.5px] leading-normal font-normal text-ink-faint">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border-default bg-surface-canvas/92 px-base lg:px-[36px] backdrop-blur-[14px]">
+      <button
+        type="button"
+        className="mr-xs inline-flex size-9 items-center justify-center rounded-sm text-ink-primary lg:hidden"
+        aria-label="Open menu"
+        onClick={toggle}
+      >
+        <ListIcon className="size-5" weight="bold" />
+      </button>
+
+      <p className="min-w-0 flex-1 truncate text-[13.5px] leading-normal font-normal text-ink-faint max-lg:hidden">
         <span>{crumb}</span>
         <span> / </span>
         <span className="font-semibold text-ink-primary">{current}</span>
+      </p>
+
+      {/* Mobile: show page title */}
+      <p className="min-w-0 flex-1 truncate text-[15px] font-bold text-ink-primary lg:hidden">
+        {current}
       </p>
 
       <div className="flex shrink-0 items-center gap-xs">
         {resolvedKind === "mainWebsite" ? (
           <a
             href="https://myticket.sa"
-            className="inline-flex items-center gap-[6px] text-[13px] font-semibold text-ink-muted"
+            className="hidden items-center gap-[6px] text-[13px] font-semibold text-ink-muted sm:inline-flex"
           >
             Main website
             <ArrowSquareOutIcon className="size-[15px]" />
@@ -88,7 +105,7 @@ export function Topbar({
         ) : null}
 
         {resolvedKind === "editorMeta" ? (
-          <p className="inline-flex items-center gap-2xs text-[13px] font-medium text-ink-muted">
+          <p className="hidden items-center gap-2xs text-[13px] font-medium text-ink-muted sm:inline-flex">
             <CheckCircleIcon className="size-4 text-status-success" weight="fill" />
             Draft saved just now
           </p>
@@ -101,7 +118,7 @@ export function Topbar({
         ) : null}
 
         {showArabic ? (
-          <span className="font-arabic rounded-[17px] border-[1.5px] border-border-default bg-surface-card px-xs py-[4px] text-[12.5px] font-bold text-ink-muted">
+          <span className="font-arabic hidden rounded-[17px] border-[1.5px] border-border-default bg-surface-card px-xs py-[4px] text-[12.5px] font-bold text-ink-muted sm:inline-flex">
             العربية
           </span>
         ) : null}

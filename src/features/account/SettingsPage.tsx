@@ -50,31 +50,33 @@ export function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-xl px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <PageHead eyebrow="Account" title="Settings" />
 
-      <div className="flex gap-[28px] border-b border-border-default">
-        <UnderlineTab
-          label="Account"
-          active={tab === "account"}
-          onClick={() => {
-            goTo("account")
-          }}
-        />
-        <UnderlineTab
-          label="Security"
-          active={tab === "security"}
-          onClick={() => {
-            goTo("security")
-          }}
-        />
-        <UnderlineTab
-          label="Notification preferences"
-          active={tab === "prefs"}
-          onClick={() => {
-            goTo("prefs")
-          }}
-        />
+      <div className="-mx-base overflow-x-auto px-base sm:mx-0 sm:px-0">
+        <div className="flex min-w-max gap-base border-b border-border-default sm:gap-[28px]">
+          <UnderlineTab
+            label="Account"
+            active={tab === "account"}
+            onClick={() => {
+              goTo("account")
+            }}
+          />
+          <UnderlineTab
+            label="Security"
+            active={tab === "security"}
+            onClick={() => {
+              goTo("security")
+            }}
+          />
+          <UnderlineTab
+            label="Notification preferences"
+            active={tab === "prefs"}
+            onClick={() => {
+              goTo("prefs")
+            }}
+          />
+        </div>
       </div>
 
       <section id="settings-account" className="flex flex-col gap-lg pt-xl">
@@ -196,15 +198,19 @@ export function SettingsPage() {
             Choose channels per subject. Security alerts always send everywhere.
           </p>
           <div className="overflow-hidden rounded-[14px] border border-border-default bg-surface-card">
-            <div className="flex items-center bg-surface-canvas px-lg py-[13px] text-[11.5px] font-bold tracking-[0.69px] text-ink-faint uppercase">
-              <p className="min-w-0 flex-1">Subject</p>
-              <p className="w-[90px] text-center">Email</p>
-              <p className="w-[90px] text-center">Push</p>
-              <p className="w-[90px] text-center">SMS</p>
+            <div className="overflow-x-auto">
+              <div className="min-w-[480px]">
+                <div className="flex items-center bg-surface-canvas px-base py-[13px] text-[11.5px] font-bold tracking-[0.69px] text-ink-faint uppercase sm:px-lg">
+                  <p className="min-w-0 flex-1">Subject</p>
+                  <p className="w-[90px] text-center">Email</p>
+                  <p className="w-[90px] text-center">Push</p>
+                  <p className="w-[90px] text-center">SMS</p>
+                </div>
+                {prefs.map((row) => (
+                  <PrefRowView key={row.id} row={row} onToggle={toggle} />
+                ))}
+              </div>
             </div>
-            {prefs.map((row) => (
-              <PrefRowView key={row.id} row={row} onToggle={toggle} />
-            ))}
           </div>
         </section>
     </main>
@@ -223,12 +229,12 @@ function VerifiedField({
   return (
     <div className="flex flex-col gap-gap-md">
       <p className="text-body-s text-ink-body">{label}</p>
-      <div className="flex items-center gap-2xs">
-        <TextInput id={id} value={value} disabled className="flex-1" />
+      <div className="flex flex-col gap-2xs sm:flex-row sm:items-center">
+        <TextInput id={id} value={value} disabled className="min-w-0 flex-1" />
         <AppButton
           variant="secondary"
           size="m"
-          className="shrink-0 border-border-default text-ink-primary hover:bg-surface-tint"
+          className="w-full shrink-0 border-border-default text-ink-primary hover:bg-surface-tint sm:w-auto"
         >
           Change
         </AppButton>
@@ -251,14 +257,16 @@ function SecurityRow({
   trailing?: ReactNode
 }) {
   return (
-    <div className="flex items-center gap-sm border-b border-border-subtle py-base">
-      <span className="text-ink-primary">{icon}</span>
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2xs">
-          <p className="text-[14px] font-bold text-ink-primary">{title}</p>
-          {badge ? <StatusBadge label={badge} /> : null}
+    <div className="flex flex-col gap-sm border-b border-border-subtle py-base sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-1 items-start gap-sm sm:items-center">
+        <span className="shrink-0 text-ink-primary">{icon}</span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2xs">
+            <p className="text-[14px] font-bold text-ink-primary">{title}</p>
+            {badge ? <StatusBadge label={badge} /> : null}
+          </div>
+          <p className="text-[12.5px] font-medium text-ink-faint">{note}</p>
         </div>
-        <p className="text-[12.5px] font-medium text-ink-faint">{note}</p>
       </div>
       {trailing}
     </div>
@@ -273,7 +281,7 @@ function PrefRowView({
   onToggle: (rowId: string, channel: "email" | "push" | "sms") => void
 }) {
   return (
-    <div className="flex items-center border-b border-border-subtle px-lg py-[13px] last:border-b-0">
+    <div className="flex items-center border-b border-border-subtle px-base py-[13px] last:border-b-0 sm:px-lg">
       <div className="min-w-0 flex-1">
         <p className="text-[13.5px] font-bold text-ink-primary">{row.subject}</p>
         <p className="text-[12px] leading-[1.4] font-medium text-ink-faint">{row.note}</p>

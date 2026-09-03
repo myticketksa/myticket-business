@@ -68,14 +68,14 @@ export function OrganizerProfilePage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-[22px] px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-[22px] px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <div className="flex flex-wrap items-end justify-between gap-sm">
         <PageHead
           eyebrow="Account"
           title="Public profile"
           sub="What customers, talents and vendors see at myticket.sa/o/riyadh-events. Edits go to review; the approved version stays live meanwhile."
         />
-        <div className="flex flex-wrap items-center gap-2xs">
+        <div className="flex flex-wrap items-center gap-gap-md">
           <AppButton
             variant="secondary"
             size="m"
@@ -103,14 +103,19 @@ export function OrganizerProfilePage() {
         noValidate
       >
         <div className="flex flex-col gap-lg">
-          <section className="rounded-lg border border-border-default bg-surface-card p-lg">
-            <div className="flex flex-col gap-base sm:flex-row sm:items-start">
+          <section className="rounded-lg border border-border-default bg-surface-card p-xl">
+            <div className="flex flex-col gap-lg sm:flex-row sm:items-start">
               <div className="flex flex-col items-center gap-2xs">
-                <Avatar initials="RE" size={96} />
+                <Avatar
+                  initials="RE"
+                  size={96}
+                  shape="squircle"
+                  className="rounded-[24px]"
+                />
                 <AppButton
                   variant="secondary"
                   size="s"
-                  className="h-[38px] border-border-default text-ink-primary hover:bg-surface-tint"
+                  className="h-[38px] rounded-[16px] border-border-default text-ink-primary hover:bg-surface-tint"
                 >
                   Change logo
                 </AppButton>

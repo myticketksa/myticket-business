@@ -34,7 +34,7 @@ const kpiIcon: Record<TalentFinanceKpiIcon, ReactNode> = {
 
 export function TalentFinancePage() {
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-[22px] px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-[22px] px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <div className="flex flex-wrap items-end justify-between gap-sm">
         <PageHead
           eyebrow="Money"
@@ -54,7 +54,7 @@ export function TalentFinancePage() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-sm rounded-lg border border-border-default bg-surface-footer p-[22px] md:flex-row md:items-center">
+      <div className="flex flex-col gap-sm rounded-[16px] border border-border-default bg-surface-footer px-[22px] py-[18px] md:flex-row md:items-center">
         <HandCoinsIcon className="size-[22px] shrink-0 text-accent-amber" />
         <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
           <p className="text-[14.5px] font-bold text-status-danger-strong">

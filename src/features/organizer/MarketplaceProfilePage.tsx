@@ -44,7 +44,7 @@ export function MarketplaceProfilePage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-lg px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-lg px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <article className="flex flex-col gap-xl rounded-lg border border-border-default bg-surface-card p-xl md:flex-row">
         <HatchPlaceholder
           caption="talent photo"

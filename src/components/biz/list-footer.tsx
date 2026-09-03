@@ -7,11 +7,11 @@ interface ListFooterProps {
 
 export function ListFooter({ buttonLabel, meta }: ListFooterProps) {
   return (
-    <div className="flex items-center justify-between px-lg py-sm">
+    <div className="flex flex-col gap-2xs px-base py-sm sm:flex-row sm:items-center sm:justify-between sm:px-lg">
       <AppButton
         variant="secondary"
         size="s"
-        className="h-[38px] border-border-default text-ink-primary hover:bg-surface-tint"
+        className="h-[38px] w-full border-border-default text-ink-primary hover:bg-surface-tint sm:w-auto"
       >
         {buttonLabel}
       </AppButton>

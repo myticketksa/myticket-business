@@ -37,7 +37,6 @@ import { SettingsPage } from "@/features/account/SettingsPage"
 import { SupportCasePage, SupportPage } from "@/features/account/SupportPage"
 import { OrganizerReviewsPage } from "@/features/organizer/OrganizerReviewsPage"
 import { AppShell } from "@/layouts/AppShell"
-import { AuthLayout } from "@/layouts/AuthLayout"
 import { EntryShell } from "@/layouts/EntryShell"
 import { MockSession } from "@/layouts/MockSession"
 import { ScannerShell } from "@/layouts/ScannerShell"
@@ -206,11 +205,8 @@ export function AppRouter() {
           <Route path="/app/*" element={<ShellCanvas />} />
         </Route>
 
-        <Route element={<AuthLayout />}>
-          <Route path="/auth" element={<SignInPage />} />
-        </Route>
-
         <Route element={<EntryShell />}>
+          <Route path="/auth" element={<SignInPage />} />
           <Route path="/welcome" element={<WelcomePage />} />
           <Route
             path="/application/review"

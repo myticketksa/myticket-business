@@ -21,14 +21,14 @@ export function VendorAvailabilityPage() {
   const [available, setAvailable] = useState(false)
 
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-[22px] px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-[22px] px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <PageHead
         eyebrow="Work"
         title="Availability"
         sub="What organizers see in the marketplace next to your name, right now."
       />
 
-      <section className="flex flex-col gap-lg rounded-lg border border-border-default bg-surface-card px-xl py-[26px] md:flex-row md:items-center">
+      <section className="flex flex-col gap-lg rounded-lg border border-border-default bg-surface-card px-[28px] py-[26px] md:flex-row md:items-center">
         <span
           className={cn(
             "inline-flex size-16 shrink-0 items-center justify-center rounded-lg",

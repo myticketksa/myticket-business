@@ -68,7 +68,7 @@ export function PanelCard({
         className,
       )}
     >
-      <header className="flex items-center justify-between gap-sm border-b border-border-subtle px-lg py-base">
+      <header className="flex flex-wrap items-center justify-between gap-sm border-b border-border-subtle px-base py-base sm:px-lg">
         <h2 className="text-[17px] font-bold text-ink-primary">{title}</h2>
         {meta ? <p className="text-[12.5px] font-medium text-ink-faint">{meta}</p> : null}
         {action}

@@ -43,7 +43,7 @@ const complianceIcon = {
 
 export function OrganizerFinancePage() {
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-[22px] px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-[22px] px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <div className="flex flex-wrap items-end justify-between gap-sm">
         <PageHead
           eyebrow="Money"
@@ -149,9 +149,9 @@ export function OrganizerFinancePage() {
               {financeEventRevenue.map((event) => (
                 <li
                   key={event.name}
-                  className="flex items-center gap-sm border-b border-border-subtle px-lg py-sm last:border-b-0"
+                  className="flex flex-col gap-sm border-b border-border-subtle px-base py-sm last:border-b-0 sm:flex-row sm:items-center sm:px-lg"
                 >
-                  <div className="flex w-[240px] shrink-0 flex-col gap-[2px]">
+                  <div className="flex min-w-0 flex-1 flex-col gap-[2px] sm:w-[240px] sm:shrink-0 sm:flex-none">
                     <p className="text-[13.5px] font-bold text-ink-primary">
                       {event.name}
                     </p>
@@ -162,7 +162,7 @@ export function OrganizerFinancePage() {
                   <div className="min-w-0 flex-1">
                     <ProgressBar value={event.percent} size={10} />
                   </div>
-                  <p className="w-[130px] shrink-0 text-right text-[13.5px] font-bold text-ink-primary">
+                  <p className="w-auto shrink-0 text-left text-[13.5px] font-bold text-ink-primary sm:w-[130px] sm:text-right">
                     {event.amount}
                   </p>
                 </li>

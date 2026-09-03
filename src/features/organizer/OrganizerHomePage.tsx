@@ -87,7 +87,7 @@ export function OrganizerHomePage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-xl px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <div className="flex flex-col gap-sm lg:flex-row lg:items-end lg:justify-between">
         <PageHead
           eyebrow="Saturday 22 August · Riyadh"
@@ -165,35 +165,39 @@ export function OrganizerHomePage() {
               {organizerAttentionItems.map((item) => (
                 <li
                   key={item.id}
-                  className="flex items-center gap-base border-b border-border-subtle px-lg py-base last:border-b-0"
+                  className="flex flex-col gap-sm border-b border-border-subtle px-base py-base last:border-b-0 sm:flex-row sm:items-center sm:gap-base sm:px-lg"
                 >
-                  <span
-                    className={cn(
-                      "inline-flex size-[38px] shrink-0 items-center justify-center rounded-sm",
-                      attentionToneClass[item.tone],
-                    )}
-                  >
-                    {attentionIcon[item.icon]}
-                  </span>
-                  <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                    <p className="text-[14px] font-bold text-ink-primary">
-                      {item.title}
-                    </p>
-                    <p className="text-[12.5px] leading-[1.45] text-ink-muted">
-                      {item.body}
-                    </p>
+                  <div className="flex items-center gap-sm sm:min-w-0 sm:flex-1 sm:gap-base">
+                    <span
+                      className={cn(
+                        "inline-flex size-[38px] shrink-0 items-center justify-center rounded-sm",
+                        attentionToneClass[item.tone],
+                      )}
+                    >
+                      {attentionIcon[item.icon]}
+                    </span>
+                    <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
+                      <p className="text-[14px] font-bold text-ink-primary">
+                        {item.title}
+                      </p>
+                      <p className="text-[12.5px] leading-[1.45] text-ink-muted">
+                        {item.body}
+                      </p>
+                    </div>
                   </div>
-                  <p className="shrink-0 text-[12px] text-ink-faint">{item.meta}</p>
-                  <AppButton
-                    variant="secondary"
-                    size="s"
-                    className="h-9 border-border-default text-ink-primary hover:bg-surface-tint"
-                    onClick={() => {
-                      navigate(item.href)
-                    }}
-                  >
-                    {item.action}
-                  </AppButton>
+                  <div className="flex items-center gap-sm sm:shrink-0">
+                    <p className="shrink-0 text-[12px] text-ink-faint">{item.meta}</p>
+                    <AppButton
+                      variant="secondary"
+                      size="s"
+                      className="h-9 border-border-default text-ink-primary hover:bg-surface-tint"
+                      onClick={() => {
+                        navigate(item.href)
+                      }}
+                    >
+                      {item.action}
+                    </AppButton>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -263,7 +267,7 @@ export function OrganizerHomePage() {
               {organizerHomeEvents.map((event) => (
                 <li
                   key={event.id}
-                  className="flex items-center gap-sm border-b border-border-subtle px-lg py-sm last:border-b-0"
+                  className="flex items-center gap-sm border-b border-border-subtle px-base py-sm last:border-b-0 sm:px-lg"
                 >
                   <DateChip month={event.month} day={event.day} />
                   <div className="flex min-w-0 flex-1 flex-col gap-[2px]">

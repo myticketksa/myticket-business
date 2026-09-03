@@ -103,7 +103,7 @@ export function EventRefundsPage() {
 
 function RefundRow({ card }: { card: EventRefundCard }) {
   return (
-    <article className="flex flex-wrap items-start gap-base border-b border-border-subtle px-lg py-base">
+    <article className="flex flex-wrap items-start gap-sm sm:gap-base border-b border-border-subtle px-base py-base sm:px-lg">
       <span
         className={cn(
           "inline-flex size-[38px] shrink-0 items-center justify-center rounded-sm",

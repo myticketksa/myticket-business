@@ -17,14 +17,14 @@ import { cn } from "@/lib/utils"
 
 export function TalentPortfolioPage() {
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-[22px] px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-[22px] px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <div className="flex flex-wrap items-end justify-between gap-sm">
         <PageHead
           eyebrow="Presence"
           title="Portfolio"
           sub="What organizers see when deciding to hire you. Drag to reorder — the lead item opens your public profile."
         />
-        <div className="flex flex-wrap items-center gap-2xs">
+        <div className="flex flex-wrap items-center gap-gap-md">
           <AppButton
             variant="secondary"
             size="m"

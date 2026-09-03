@@ -24,10 +24,10 @@ export const liveDoorFailedIntro =
 export const liveDoorFailedReasons: {
   label: string
   count: string
-  tone: "danger" | "muted"
+  tone: "danger" | "amber" | "muted"
 }[] = [
   { label: "Already scanned", count: "14", tone: "danger" },
-  { label: "Wrong event", count: "6", tone: "danger" },
+  { label: "Wrong event", count: "6", tone: "amber" },
   { label: "Refunded ticket", count: "3", tone: "muted" },
   { label: "Unreadable code", count: "1", tone: "muted" },
 ]

@@ -44,7 +44,7 @@ export function OrganizerScanHistoryPage() {
   }, [filter, query])
 
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-lg px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-md px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <div className="flex flex-wrap items-end justify-between gap-sm">
         <PageHead
           eyebrow="Door operations"
@@ -61,7 +61,7 @@ export function OrganizerScanHistoryPage() {
 
       <section className="overflow-hidden rounded-lg border border-border-default bg-surface-card">
         <div className="flex flex-wrap items-center gap-gap-md border-b border-border-subtle px-lg py-base">
-          <div className="w-[250px]">
+          <div className="w-full sm:w-[250px]">
             <SearchField
               size="pill"
               placeholder="Search ticket or holder…"

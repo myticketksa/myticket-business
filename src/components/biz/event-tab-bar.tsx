@@ -37,7 +37,8 @@ export function EventTabBar({
   activeId,
 }: EventTabBarProps) {
   return (
-    <nav className="flex gap-lg border-b border-border-default">
+    <nav className="-mx-base overflow-x-auto px-base sm:mx-0 sm:px-0">
+      <div className="flex min-w-max gap-sm sm:gap-lg border-b border-border-default">
       {tabs.map((tab) => (
         <NavLink
           key={tab.id}
@@ -57,6 +58,7 @@ export function EventTabBar({
           ) : null}
         </NavLink>
       ))}
+      </div>
     </nav>
   )
 }

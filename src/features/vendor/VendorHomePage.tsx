@@ -45,7 +45,7 @@ export function VendorHomePage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-xl px-gutter pt-8 pb-[80px]">
+    <main className="mx-auto flex w-full max-w-[1192px] flex-col gap-xl px-base sm:px-gutter pt-6 sm:pt-8 pb-[60px] sm:pb-[80px]">
       <div className="flex flex-col gap-sm lg:flex-row lg:items-end lg:justify-between">
         <PageHead
           eyebrow="Saturday 22 August"
@@ -128,32 +128,34 @@ export function VendorHomePage() {
               {vendorWaitingRequests.map((request) => (
                 <li
                   key={request.id}
-                  className="flex items-center gap-sm border-b border-border-subtle px-lg py-sm"
+                  className="flex flex-col gap-sm border-b border-border-subtle px-base py-sm sm:flex-row sm:items-center sm:px-lg"
                 >
-                  <Avatar initials={request.initials} size={44} />
-                  <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-                    <p className="flex flex-wrap items-center gap-[6px] text-[13.5px] font-bold text-ink-primary">
-                      {request.name}
-                      <span className="font-medium text-ink-faint">
-                        · {request.meta}
-                      </span>
-                    </p>
-                    <p className="truncate text-[12.5px] font-medium text-ink-muted">
-                      {request.brief}
-                    </p>
-                    <p
-                      className={cn(
-                        "inline-flex items-center gap-[5px] text-[12px] font-semibold",
-                        waitToneClass[request.waitTone],
-                      )}
-                    >
-                      <ClockIcon className="size-3" />
-                      {request.wait}
-                    </p>
+                  <div className="flex items-center gap-sm sm:min-w-0 sm:flex-1">
+                    <Avatar initials={request.initials} size={44} />
+                    <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+                      <p className="flex flex-wrap items-center gap-[6px] text-[13.5px] font-bold text-ink-primary">
+                        {request.name}
+                        <span className="font-medium text-ink-faint">
+                          · {request.meta}
+                        </span>
+                      </p>
+                      <p className="truncate text-[12.5px] font-medium text-ink-muted">
+                        {request.brief}
+                      </p>
+                      <p
+                        className={cn(
+                          "inline-flex items-center gap-[5px] text-[12px] font-semibold",
+                          waitToneClass[request.waitTone],
+                        )}
+                      >
+                        <ClockIcon className="size-3" />
+                        {request.wait}
+                      </p>
+                    </div>
                   </div>
                   <AppButton
                     size="s"
-                    className="h-[38px] shrink-0 px-md text-[13px] font-bold"
+                    className="h-[38px] w-full shrink-0 px-md text-[13px] font-bold sm:w-auto"
                     onClick={() => {
                       navigate(`/app/hire-requests?thread=${request.id}`)
                     }}

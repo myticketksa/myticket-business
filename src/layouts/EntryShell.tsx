@@ -17,7 +17,7 @@ interface EntryHeaderProps {
 
 export function EntryHeader({ children }: EntryHeaderProps) {
   return (
-    <header className="flex h-[72px] items-center justify-between border-b border-border-default bg-surface-card px-gutter xl:px-[160px]">
+    <header className="flex h-[72px] items-center justify-between border-b border-border-default bg-surface-card px-base sm:px-gutter xl:px-[160px]">
       <div className="flex items-center gap-gap-md">
         <img
           src="/brand/myticket-logo.png"
@@ -38,8 +38,8 @@ export function EntryAccountLinks() {
   const navigate = useNavigate()
 
   return (
-    <div className="flex items-center gap-xl text-[13.5px] font-semibold text-ink-muted">
-      <a href="https://myticket.sa">Use MyTicket as a customer</a>
+    <div className="flex items-center gap-sm sm:gap-xl text-[12px] sm:text-[13.5px] font-semibold text-ink-muted">
+      <a href="https://myticket.sa" className="max-sm:hidden">Use MyTicket as a customer</a>
       <button
         type="button"
         onClick={() => {

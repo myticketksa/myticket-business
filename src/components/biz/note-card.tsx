@@ -21,29 +21,34 @@ export function NoteCard({
   return (
     <aside
       className={cn(
-        "flex gap-sm rounded-lg border p-lg",
-        tone === "warm"
-          ? "border-border-brand bg-surface-footer"
-          : "border-border-default bg-surface-card",
+        "rounded-lg px-base py-md sm:px-lg",
+        showIcon ? "flex gap-sm" : "flex flex-col gap-3xs",
+        tone === "warm" ? "bg-surface-footer" : "bg-surface-canvas",
         className,
       )}
     >
       {showIcon ? (
         <InfoIcon
-          className="mt-3xs size-5 shrink-0 text-accent-amber"
+          className="mt-3xs size-[17px] shrink-0 text-accent-amber"
           weight="fill"
         />
       ) : null}
-      <div className="flex flex-col gap-3xs">
+      <div className="flex min-w-0 flex-col gap-3xs">
         <p
           className={cn(
-            "text-title-m",
+            showIcon
+              ? "text-[15px] font-bold"
+              : "text-[13.5px] font-bold",
             tone === "warm" ? "text-accent-amber" : "text-ink-primary",
           )}
         >
           {lead}
         </p>
-        {body ? <p className="text-body-s text-ink-body">{body}</p> : null}
+        {body ? (
+          <p className="text-[13.5px] leading-[1.55] font-normal text-ink-muted">
+            {body}
+          </p>
+        ) : null}
       </div>
     </aside>
   )

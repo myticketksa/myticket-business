@@ -36,7 +36,7 @@ export function NotificationRow({
   return (
     <article
       className={cn(
-        "flex items-start gap-xs px-lg py-sm",
+        "flex items-start gap-xs px-base py-sm sm:px-lg",
         unread || needsAction ? "bg-surface-canvas" : "bg-surface-card",
       )}
     >
@@ -59,7 +59,7 @@ export function NotificationRow({
         />
       )}
       <div className="flex min-w-0 flex-1 flex-col gap-3xs">
-        <div className="flex items-start justify-between gap-sm">
+        <div className="flex flex-col gap-3xs sm:flex-row sm:items-start sm:justify-between sm:gap-sm">
           <div className="flex min-w-0 flex-wrap items-center gap-2xs">
             <p className="text-[14px] font-bold text-ink-primary">{title}</p>
             {needsAction ? <StatusBadge label="Action needed" /> : null}

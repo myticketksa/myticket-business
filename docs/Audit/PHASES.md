@@ -2,7 +2,7 @@
 
 Processed 2026-08-31 against **live Figma** (`get_design_context` on the named nodes). Detail for each id lives in [`ISSUES.md`](./ISSUES.md).
 
-**Crawl:** complete. All 67 frames on page `177:2037` were compared in scans A–D (2026-08-31). Next free id: `AUD-069`.
+**Crawl:** complete. All 67 frames on page `177:2037` were compared in scans A–D (2026-08-31). Next free id: `AUD-086`.
 
 **Rule used:** match the named Figma frame, not the original register’s Expected line when they disagreed. Do not invent modals, menus, file pickers, or pages that are not in the 67. If **Figma destination: none**, keep the control visible.
 
@@ -123,6 +123,128 @@ Second continue pass — Home / Events / Archive / Sales / Scan history re-fetch
 | Archive `298:5826` | 4 rows, 14 archived events, Show 10 more | match |
 | Sales `298:10477` | 28,440 / SAR 1.66M / SAR 412 / 948/day | match |
 | Scan history `298:7620` | All results · 1,270 / Valid · 1,246 / Failed · 24 | match |
+
+---
+
+## Visual QA — pass 11–16 (remaining frames)
+
+1440×900 (desktop) / 390×844 (scanner) vs live Figma for all leftover business-page routes.
+
+### Pass 11 — Talent Hire / Availability / Finance / Portfolio
+Frames `298:9377`, `298:9491`, `298:9558`, `298:9675`.
+
+| ID | Outcome |
+|----|---------|
+| AUD-083 | **fixed** — Availability status card `px-[28px] py-[26px]` (talent + vendor) |
+| AUD-084 | **fixed** — Coloured `KpiCard` uses warm `#FFF1E9` + `border-strong` |
+| AUD-085 | **fixed** — Talent/Vendor payments confirm strip `rounded-[16px]` / 22×18 |
+
+Also confirmed: Hire split 380 / avatars 42; Portfolio main 22 / cards 266·341·r16 / lead brand border; Payments main 22 / KPI grid 16 / 668·432; NoteCard 20×18.
+
+### Pass 12 — Talent Profile / Support / Notifications / Hire completed
+Frames `298:9746`, `298:10111`, `298:10178`, `298:10364` (thread via `?thread=`).
+
+Confirmed: Profile identity `p-xl` / gap 22 / 668·432; Support/Notifications stack 24 (shared templates); completed hire thread chrome matches inbox pattern.
+
+### Pass 13 — Vendor Hire / Availability / Finance / Gallery
+Frames `298:8033`, `298:8147`, `298:8230`, `298:8348`.
+
+Confirmed: Hire 380 pane; Availability status pad (AUD-083); Finance coloured KPI + confirm strip (AUD-084/085); Gallery card grid matches Portfolio recipe.
+
+### Pass 14 — Vendor Profile / Declined hire / Available state
+Frames `298:8432`, `298:9035`, `298:9141`.
+
+Confirmed: Profile identity `p-xl` / main 22; Available toggle reuses Availability chrome; declined thread via hire inbox.
+
+### Pass 15 — Support case thread + Seating unlocked
+Frames `298:11188`, `298:5926`.
+
+Confirmed: Support thread main 24 / 1180 / 473·615 grid; seating unlocked remains query-flag only (AUD-059).
+
+### Pass 16 — Scanner app
+Frames `298:7163`–`298:7344` at 390×844.
+
+Confirmed: Sign-in canvas / gap 20 / device error r14; Events list; Scan dark shell `#12100d`, viewport 368 / reticle 252, result panel success/danger, outcome chips (dev-only). Copy left as drawn (AUD-042).
+
+---
+
+## Visual QA — pass 10 (Venues / Profile / Marketplace Profile)
+
+1440×900 live screenshots vs Figma `298:5729`, `298:11752`, `298:11493`. Venues main 20 / card row 18 / cards ~360 / body 22×18; Profile main 22 / grid 668·432; Marketplace hero 24×24 / intel 16 / 668·432.
+
+| ID | Outcome |
+|----|---------|
+| AUD-081 | **fixed** — Profile identity card `p-xl` (24), logo row `gap-lg` (20) |
+| AUD-082 | **fixed** — Profile logo Avatar 96 squircle `rounded-[24px]` |
+
+Also confirmed: Venues chrome matches; Marketplace Profile hero / intel / two-col match; head actions gap 10px; bio counter 600; brand AlertBanner 22×18 r16.
+
+---
+
+## Visual QA — pass 9 (Attendance / Scan history / Auth)
+
+1440×900 live screenshots vs Figma `298:7779`, `298:7620`, `298:6502`, `298:6452` (also spot-checked Review `298:6578` / Declined `298:6646`). Attendance main 20px / KPI 16 / grid 668·432; Scan history main 18px; Sign-in EntryShell 1040 / 64 / card 420×32×22; Welcome NoteCard 20×18 / gap 4 / borderless.
+
+| ID | Outcome |
+|----|---------|
+| AUD-078 | **fixed** — Scan history main `gap-md` (18px) |
+| AUD-079 | **fixed** — NoteCard Icon=No: pad 20×18, gap 4, borderless; Neutral page fill |
+| AUD-080 | **fixed** — Sign-in rebuilt to two-column EntryShell (`298:6502`) |
+
+Also confirmed: Attendance NoteCard Neutral matches; Welcome chrome / checklist / CTA match; Review and Declined EntryShell chrome match.
+
+---
+
+## Visual QA — pass 8 (Editor / Seating)
+
+1440×900 live screenshots vs Figma `298:4960`, `298:5394`. Editor Main `gap-[22px]`; body grid 292 / 22 / 806. Seating full-bleed chrome, tool rail 300 / gap 18, canvas pad 32×26×40, inner 980.
+
+| ID | Outcome |
+|----|---------|
+| AUD-076 | **fixed** — Event Editor main stack `gap-[22px]` |
+| AUD-077 | **fixed** — Seating canvas `px-[32px] pb-[40px]` (all layout modes) |
+
+Also confirmed: area nav r14, readiness/area cards r18, seating lock strip 28×10 / brand-wash, regenerate blocked chrome. Layout-modes `298:6258` remains annotation-only.
+
+---
+
+## Visual QA — pass 7 (Notify / Live door)
+
+1440×900 live screenshots vs Figma `298:7102`, `298:7534`. Notify EventOps stack 18px; compose 630 / history 470. Live door standalone `/app/live-door`, main gap 20, KPI gap 16, feed 668 / side 432.
+
+| ID | Outcome |
+|----|---------|
+| AUD-073 | **fixed** — danger AlertBanner pad 20×14 / radius 14 |
+| AUD-074 | **fixed** — Notify compose column `xl:w-[630px]` |
+| AUD-075 | **fixed** — Live door chips 16r, LiveDot 8×8 r4, Wrong-event amber legend |
+
+Also confirmed: Notify form pad 24, cancellation pill chrome, Live door scanned inverse KPI, gate bars, disconnect note.
+
+---
+
+## Visual QA — pass 6 (Orders / Tickets / Refunds)
+
+1440×900 live screenshots vs Figma `298:6805`, `298:6925`, `298:7021`. EventOps stack gap 18px; Orders KpiCompact pad 18×20 / value 26; Tickets complimentary note bordered; Refunds brand AlertBanner `#FFF1E9` / amber lead / items-start.
+
+| ID | Outcome |
+|----|---------|
+| AUD-070 | **fixed** — EventOpsChrome stack `gap-md` (18px) |
+| AUD-071 | **fixed** — Orders KPIs use `KpiCard` `kind="compact"` |
+| AUD-072 | **fixed** — brand AlertBanner warm fill + amber lead; Tickets NoteCard border |
+
+Also confirmed: tab bar gap 20, filter bars `gap-gap-md` / `px-lg py-base`, refund request tiles 38px.
+
+---
+
+## Visual QA — pass 5 (Talent Home / Vendor Home)
+
+1440×900 live screenshots vs Figma `298:9211`, `298:7882`. Shell 248 / 1192 / gutter 36. Columns 668 / 432, stack gap 24, waiting avatars 44px.
+
+| ID | Outcome |
+|----|---------|
+| AUD-069 | **fixed** — warm NoteCard is borderless `#FFF1E9`, 22×20 pad, 10px lead/body gap |
+
+Also confirmed: Available/Reserved chrome, vendor reserved banner 16r / 20×16, strength panels, public-profile stats grids.
 
 ---
 

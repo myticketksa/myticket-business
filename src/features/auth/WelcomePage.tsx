@@ -42,21 +42,22 @@ export function WelcomePage() {
       <EntryHeader>
         <button
           type="button"
-          className="inline-flex items-center gap-[6px] text-[13.5px] font-semibold text-ink-muted"
+          className="inline-flex max-w-[55%] items-center gap-[6px] text-[12px] font-semibold text-ink-muted sm:max-w-none sm:text-[13.5px]"
           onClick={goWorkspace}
         >
-          Skip for now — go to my workspace
-          <ArrowRightIcon className="size-[15px]" weight="bold" />
+          <span className="truncate sm:hidden">Skip — workspace</span>
+          <span className="hidden sm:inline">Skip for now — go to my workspace</span>
+          <ArrowRightIcon className="size-[15px] shrink-0" weight="bold" />
         </button>
       </EntryHeader>
 
-      <div className="flex flex-1 flex-col items-center px-gutter pt-[56px] pb-[100px]">
+      <div className="flex flex-1 flex-col items-center px-base sm:px-gutter pt-10 sm:pt-[56px] pb-[60px] sm:pb-[100px]">
         <div className="flex w-full max-w-[860px] flex-col gap-xl">
           <div className="flex flex-col items-center gap-lg text-center">
             <span className="inline-flex size-[68px] items-center justify-center rounded-[34px] bg-brand-gradient text-ink-inverse shadow-[0px_8px_24px_0px_rgba(242,92,43,0.35)]">
               <ConfettiIcon className="size-8" />
             </span>
-            <h1 className="text-[32px] leading-[1.12] font-extrabold text-ink-primary">
+            <h1 className="text-[24px] leading-[1.12] font-extrabold text-ink-primary sm:text-[32px]">
               You’re approved, {user.displayName}
             </h1>
             <p className="max-w-[860px] text-[15px] leading-[1.55] font-medium text-ink-muted">
@@ -102,26 +103,28 @@ function WelcomeTaskRow({
   const navigate = useNavigate()
 
   return (
-    <div className="flex items-center gap-base border-t border-border-subtle px-xl py-lg first:border-t-0">
-      {task.done ? (
-        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[20px] bg-status-success-light text-status-success">
-          <CheckIcon className="size-5" weight="bold" />
-        </span>
-      ) : (
-        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[20px] bg-surface-brand-wash text-[15px] font-extrabold text-brand-primary">
-          {step}
-        </span>
-      )}
-      <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-        <p className="text-[15px] font-bold text-ink-primary">{task.title}</p>
-        <p className="text-[13px] leading-[1.45] font-medium text-ink-muted">
-          {task.body}
-        </p>
+    <div className="flex flex-col gap-sm border-t border-border-subtle px-base py-lg first:border-t-0 sm:flex-row sm:items-center sm:gap-base sm:px-xl">
+      <div className="flex items-center gap-sm sm:gap-base">
+        {task.done ? (
+          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[20px] bg-status-success-light text-status-success">
+            <CheckIcon className="size-5" weight="bold" />
+          </span>
+        ) : (
+          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[20px] bg-surface-brand-wash text-[15px] font-extrabold text-brand-primary">
+            {step}
+          </span>
+        )}
+        <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+          <p className="text-[15px] font-bold text-ink-primary">{task.title}</p>
+          <p className="text-[13px] leading-[1.45] font-medium text-ink-muted">
+            {task.body}
+          </p>
+        </div>
       </div>
       <AppButton
         variant={task.done ? "secondary" : "primary"}
         size={task.done ? "m" : "s"}
-        className={task.done ? secondaryClass : "h-9"}
+        className={task.done ? secondaryClass : "h-9 w-full sm:w-auto shrink-0"}
         onClick={() => {
           navigate(task.href)
         }}

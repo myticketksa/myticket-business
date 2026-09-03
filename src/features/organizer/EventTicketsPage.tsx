@@ -64,7 +64,7 @@ export function EventTicketsPage() {
     >
       <section className="overflow-hidden rounded-lg border border-border-default bg-surface-card">
         <div className="flex flex-wrap items-center gap-gap-md border-b border-border-subtle px-lg py-base">
-          <div className="w-[248px]">
+          <div className="w-full sm:w-[248px]">
             <SearchField
               size="pill"
               placeholder="Search by code or holder…"
@@ -119,6 +119,7 @@ export function EventTicketsPage() {
 
       <NoteCard
         tone="warm"
+        className="border border-border-default"
         lead={eventTicketsNote.lead}
         body={eventTicketsNote.body}
       />

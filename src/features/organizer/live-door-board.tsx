@@ -28,7 +28,7 @@ const secondaryClass =
   "h-[42px] border-border-default text-ink-primary hover:bg-surface-tint"
 
 const chipClass =
-  "inline-flex items-center gap-[5px] rounded-md border-[1.5px] border-border-default bg-surface-card px-xs py-[10px] text-[12.5px] font-semibold text-ink-primary"
+  "inline-flex items-center gap-[5px] rounded-[16px] border-[1.5px] border-border-default bg-surface-card px-xs py-[10px] text-[12.5px] font-semibold text-ink-primary"
 
 export function LiveDoorBoard() {
   return (
@@ -92,7 +92,7 @@ export function LiveDoorBoard() {
               </button>
             </div>
           </header>
-          <div>
+          <div className="overflow-x-auto">
             {liveDoorScans.map((scan) => (
               <FeedRow
                 key={`${scan.ticket}-${scan.time}`}
@@ -133,7 +133,9 @@ export function LiveDoorBoard() {
                     className={
                       reason.tone === "danger"
                         ? "size-2 shrink-0 rounded-pill bg-status-danger"
-                        : "size-2 shrink-0 rounded-pill bg-ink-faint"
+                        : reason.tone === "amber"
+                          ? "size-2 shrink-0 rounded-pill bg-accent-amber"
+                          : "size-2 shrink-0 rounded-pill bg-ink-faint"
                     }
                   />
                   <p className="min-w-0 flex-1 text-[13px] font-medium text-ink-primary">

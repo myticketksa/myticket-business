@@ -59,7 +59,7 @@ interface SectionsCanvasProps {
 
 export function SectionsCanvas({ sections, onToggleSeat }: SectionsCanvasProps) {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center overflow-auto px-xl pb-gutter pt-[26px]">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center overflow-auto px-[32px] pb-[40px] pt-[26px]">
       <div className="flex w-full max-w-[980px] flex-col gap-md">
         <StageBar />
         <div className="h-7" />
@@ -111,7 +111,7 @@ export function SectionsCanvas({ sections, onToggleSeat }: SectionsCanvasProps) 
 
 export function FreeSeatingCanvas() {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center overflow-auto px-xl pb-gutter pt-[26px]">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center overflow-auto px-[32px] pb-[40px] pt-[26px]">
       <div className="flex w-full max-w-[720px] flex-col">
         <div className="flex h-[44px] items-center justify-center rounded-sm bg-surface-inverse">
           <p className="text-[12px] font-bold tracking-[1.68px] text-ink-inverse uppercase">
@@ -141,7 +141,7 @@ export function FreeSeatingCanvas() {
 
 export function RowsCanvas() {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center overflow-auto px-xl pb-gutter pt-[26px]">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-center overflow-auto px-[32px] pb-[40px] pt-[26px]">
       <div className="flex flex-col">
         <div className="flex h-[44px] w-full items-center justify-center rounded-sm bg-surface-inverse">
           <p className="text-[12px] font-bold tracking-[1.68px] text-ink-inverse uppercase">
