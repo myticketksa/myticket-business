@@ -101,94 +101,63 @@ export default function EventsListPage() {
           </label>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-          {/* A wide table makes the list unusable on a phone. Render the same
-              information as compact cards below the small breakpoint instead. */}
-          <div className="divide-y divide-slate-100 pane-sm:hidden">
-            {isLoading &&
-              Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="p-4">
-                  <div className="h-4 animate-pulse rounded bg-slate-100" />
-                </div>
-              ))}
-
-            {!isLoading && (data?.data?.length ?? 0) === 0 && (
-              <p className="px-4 py-10 text-center text-sm text-slate-500">{t('events.list.noEvents')}</p>
-            )}
-
-            {data?.data.map((event) => (
-              <Link
-                key={event.id}
-                to={`/events/${event.id}`}
-                className="block p-4 transition-colors hover:bg-slate-50"
-              >
-                <h2 className="min-w-0 text-sm font-semibold text-slate-900">
-                  {event.title.en || event.title.ar || '—'}
-                </h2>
-                <dl className="mt-3 grid gap-2 text-sm">
-                  <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500">{t('events.list.colVenue')}</dt>
-                    <dd className="min-w-0 text-end text-slate-700">{event.place || '—'}</dd>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500">{t('events.list.colStarts')}</dt>
-                    <dd className="text-end text-slate-700">{formatDateTime(event.startTime)}</dd>
-                  </div>
-                </dl>
-              </Link>
+        {/* Most organizers run one or two events at a time, so a dense
+            admin-style table is the wrong shape here — cards read better
+            at that scale, and each one gets an explicit view-details
+            button instead of relying on the whole row being clickable. */}
+        {isLoading && (
+          <div className="grid grid-cols-1 gap-4 pane-sm:grid-cols-2 pane-lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="h-32 animate-pulse rounded-lg border border-slate-200 bg-white" />
             ))}
           </div>
+        )}
 
-          <div className="hidden pane-sm:block">
-          <table className="w-full text-start text-sm">
-            <thead>
-              <tr className="bg-gradient-to-r from-slate-800 to-slate-700 text-white">
-                <th className="px-4 py-3 font-medium">{t('events.list.colTitle')}</th>
-                <th className="px-4 py-3 font-medium">{t('events.list.colVenue')}</th>
-                <th className="px-4 py-3 font-medium">{t('events.list.colStarts')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {isLoading &&
-                Array.from({ length: 5 }).map((_, index) => (
-                  <tr key={index}>
-                    <td colSpan={3} className="px-4 py-4">
-                      <div className="h-4 animate-pulse rounded bg-slate-100" />
-                    </td>
-                  </tr>
-                ))}
-
-              {!isLoading && (data?.data?.length ?? 0) === 0 && (
-                <tr>
-                  <td colSpan={3} className="px-4 py-10 text-center text-slate-500">
-                    {t('events.list.noEvents')}
-                  </td>
-                </tr>
-              )}
-
-              {data?.data.map((event) => (
-                <tr key={event.id} className="transition-colors hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-900">
-                    <Link to={`/events/${event.id}`} className="block">
-                      {event.title.en || event.title.ar || '—'}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">
-                    <Link to={`/events/${event.id}`} className="block">
-                      {event.place}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">
-                    <Link to={`/events/${event.id}`} className="block">
-                      {formatDateTime(event.startTime)}
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {!isLoading && (data?.data?.length ?? 0) === 0 && (
+          <div className="rounded-lg border border-slate-200 bg-white py-16 text-center text-sm text-slate-500 shadow-sm">
+            {t('events.list.noEvents')}
           </div>
-        </div>
+        )}
+
+        {!isLoading && (data?.data?.length ?? 0) > 0 && (
+          <div className="grid grid-cols-1 gap-4 pane-sm:grid-cols-2 pane-lg:grid-cols-3">
+            {data?.data.map((event) => (
+              <div
+                key={event.id}
+                className="flex flex-col justify-between rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-900">
+                    {event.title.en || event.title.ar || '—'}
+                  </h2>
+                  <dl className="mt-3 space-y-1.5 text-sm">
+                    <div className="flex justify-between gap-4">
+                      <dt className="shrink-0 text-slate-500">{t('events.list.colVenue')}</dt>
+                      <dd className="min-w-0 text-end text-slate-700">{event.place || '—'}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="shrink-0 text-slate-500">{t('events.list.colStarts')}</dt>
+                      <dd className="text-end text-slate-700">{formatDateTime(event.startTime)}</dd>
+                    </div>
+                  </dl>
+                </div>
+                <Link
+                  to={`/events/${event.id}`}
+                  className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700 transition-colors hover:bg-orange-100"
+                >
+                  {t('events.list.viewDetails')}
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 rtl:-scale-x-100">
+                    <path
+                      fillRule="evenodd"
+                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
 
         {data && data.pagination.totalPages > 1 && (
           <div className="mt-4 flex flex-col gap-3 text-sm text-slate-600 pane-sm:flex-row pane-sm:items-center pane-sm:justify-between">
