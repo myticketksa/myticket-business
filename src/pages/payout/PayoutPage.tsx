@@ -52,7 +52,8 @@ export default function PayoutPage() {
                 <thead>
                   <tr className="bg-gradient-to-r from-slate-800 to-slate-700 text-white">
                     <th className="px-4 py-3 font-medium">{t('payout.colEvent')}</th>
-                    <th className="px-4 py-3 font-medium">{t('payout.colAmount')}</th>
+                    <th className="px-4 py-3 font-medium">{t('payout.colAdminBalance')}</th>
+                    <th className="px-4 py-3 font-medium">{t('payout.colOrganizerBalance')}</th>
                     <th className="px-4 py-3 font-medium">{t('payout.colStatus')}</th>
                     <th className="px-4 py-3 font-medium">{t('payout.colDate')}</th>
                   </tr>
@@ -61,7 +62,7 @@ export default function PayoutPage() {
                   {isLoading &&
                     Array.from({ length: 5 }).map((_, index) => (
                       <tr key={index}>
-                        <td colSpan={4} className="px-4 py-4">
+                        <td colSpan={5} className="px-4 py-4">
                           <div className="h-4 animate-pulse rounded bg-slate-100" />
                         </td>
                       </tr>
@@ -69,7 +70,7 @@ export default function PayoutPage() {
 
                   {!isLoading && (data?.data?.length ?? 0) === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-4 py-10 text-center text-slate-500">
+                      <td colSpan={5} className="px-4 py-10 text-center text-slate-500">
                         {t('payout.noTransfers')}
                       </td>
                     </tr>
@@ -78,6 +79,9 @@ export default function PayoutPage() {
                   {data?.data.map((transfer) => (
                     <tr key={transfer.id} className="transition-colors hover:bg-slate-50">
                       <td className="px-4 py-3 text-slate-600">#{transfer.event_id}</td>
+                      <td className="px-4 py-3 text-slate-600">
+                        {transfer.adminBalance.toLocaleString()} {transfer.currency}
+                      </td>
                       <td className="px-4 py-3 font-medium text-slate-900">
                         {transfer.amount.toLocaleString()} {transfer.currency}
                       </td>

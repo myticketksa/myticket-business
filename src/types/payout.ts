@@ -13,6 +13,7 @@ export interface Transfer {
   event_id: number
   organizer_id: number
   amount: number
+  adminBalance: number
   currency: string
   status: TransferStatus
   created_at: string

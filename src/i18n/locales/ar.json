@@ -28,7 +28,7 @@
     "from": "من",
     "to": "إلى",
     "users": "المستخدمون",
-    "payout": "التحويلات المالية",
+    "payout": "الحاسبة",
     "talents": "المواهب",
     "subAdmins": "المشرفون الفرعيون",
     "emailTemplates": "قوالب البريد الإلكتروني",
@@ -534,7 +534,7 @@
     "localFilterNotice": "البحث يتم على الصفحة المعروضة فقط — لا يدعم الخادم البحث في المستخدمين بعد. تصفية الدور تتم على الخادم."
   },
   "payout": {
-    "pageTitle": "التحويلات المالية",
+    "pageTitle": "الحاسبة",
     "totalBalance": "الرصيد الإجمالي",
     "eventBalanceLookup": "الاستعلام عن رصيد فعالية",
     "eventIdPlaceholder": "معرّف الفعالية",
@@ -549,6 +549,8 @@
     "transferErrorGeneric": "تعذر إتمام التحويل. تحقق من المعرّفات وحاول مرة أخرى.",
     "operations": "عمليات التحويل",
     "colEvent": "الفعالية",
+    "colAdminBalance": "حساب الادمن",
+    "colOrganizerBalance": "حساب منظم الفاعلية",
     "colOrganizer": "المنظّم",
     "colAmount": "المبلغ",
     "colStatus": "الحالة",

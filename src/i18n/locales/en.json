@@ -549,6 +549,8 @@
     "transferErrorGeneric": "Could not complete this transfer. Check the IDs and try again.",
     "operations": "Transfer operations",
     "colEvent": "Event",
+    "colAdminBalance": "Admin balance",
+    "colOrganizerBalance": "Event organizer balance",
     "colOrganizer": "Organizer",
     "colAmount": "Amount",
     "colStatus": "Status",
