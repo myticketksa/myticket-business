@@ -54,9 +54,13 @@ export default function EventDetailPage() {
               <table className="w-full text-start text-sm">
                 <thead>
                   <tr className="text-slate-500">
-                    <th className="pb-2 font-medium">{t('events.detail.colName')}</th>
-                    <th className="pb-2 font-medium">{t('events.detail.colPrice')}</th>
-                    <th className="pb-2 font-medium">{t('events.detail.colSoldTotal')}</th>
+                    {/* Browsers center <th> text by default regardless of the
+                      * table's own text-start — that default wins over the
+                      * inherited value, so the header drifted away from the
+                      * left-aligned data under it unless overridden here. */}
+                    <th className="pb-2 text-start font-medium">{t('events.detail.colName')}</th>
+                    <th className="pb-2 text-start font-medium">{t('events.detail.colPrice')}</th>
+                    <th className="pb-2 text-start font-medium">{t('events.detail.colSoldTotal')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
