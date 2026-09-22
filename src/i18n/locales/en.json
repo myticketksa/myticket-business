@@ -548,6 +548,10 @@
   },
   "payout": {
     "pageTitle": "Payout",
+    "balanceHeld": "Balance held",
+    "netSales": "Net sales",
+    "organizerShare": "Your share",
+    "transferredOut": "Transferred out",
     "totalBalance": "Total balance",
     "eventBalanceLookup": "Look up event balance",
     "eventIdPlaceholder": "Event ID",

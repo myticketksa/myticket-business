@@ -548,6 +548,10 @@
   },
   "payout": {
     "pageTitle": "الحاسبة",
+    "balanceHeld": "الرصيد المحتجز",
+    "netSales": "صافي المبيعات",
+    "organizerShare": "حصتك",
+    "transferredOut": "تم تحويله",
     "totalBalance": "الرصيد الإجمالي",
     "eventBalanceLookup": "الاستعلام عن رصيد فعالية",
     "eventIdPlaceholder": "معرّف الفعالية",
