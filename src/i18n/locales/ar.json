@@ -70,7 +70,20 @@
     "notAdmin": "هذا الحساب لا يملك صلاحية وصول المنظم.",
     "invalidCredentials": "البريد الإلكتروني أو رقم الهاتف أو كلمة المرور غير صحيحة.",
     "identifierRequired": "أدخل البريد الإلكتروني أو رقم الهاتف",
-    "passwordRequired": "أدخل كلمة المرور"
+    "passwordRequired": "أدخل كلمة المرور",
+    "forgotPasswordHint": "أدخل بريدك الإلكتروني وسنرسل لك رمزًا لإعادة تعيين كلمة المرور.",
+    "sendCode": "إرسال الرمز",
+    "sendingCode": "جارٍ الإرسال…",
+    "forgotPasswordError": "تعذّر إرسال الرمز. تحقق من البريد الإلكتروني وحاول مرة أخرى.",
+    "resetPasswordHint": "أدخل الرمز المرسل إلى {{email}} وكلمة مرور جديدة.",
+    "codePlaceholder": "الرمز",
+    "newPasswordPlaceholder": "كلمة المرور الجديدة",
+    "confirmPasswordPlaceholder": "تأكيد كلمة المرور الجديدة",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "resettingPassword": "جارٍ إعادة التعيين…",
+    "resetPasswordError": "تعذّر إعادة تعيين كلمة المرور. تحقق من الرمز وحاول مرة أخرى.",
+    "backToLogin": "العودة لتسجيل الدخول"
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",

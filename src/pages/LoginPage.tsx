@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAppDispatch } from '@/app/hooks'
 import loginBg from '@/assets/login-bg.png'
 import logoWhite from '@/assets/logo-white.png'
@@ -107,12 +107,12 @@ export default function LoginPage() {
               {isLoading ? t('auth.signingIn') : t('auth.signIn')}
             </button>
 
-            <a
-              href="#"
+            <Link
+              to="/forgot-password"
               className="inline-block pt-2 text-sm text-white transition-colors hover:text-orange-400"
             >
               {t('auth.forgotPassword')}
-            </a>
+            </Link>
           </form>
         </div>
       </div>

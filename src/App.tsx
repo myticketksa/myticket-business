@@ -5,6 +5,7 @@ import CashiersListPage from '@/pages/cashiers/CashiersListPage'
 import DashboardPage from '@/pages/DashboardPage'
 import EventDetailPage from '@/pages/events/EventDetailPage'
 import EventsListPage from '@/pages/events/EventsListPage'
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage'
 import LoginPage from '@/pages/LoginPage'
 import PayoutPage from '@/pages/payout/PayoutPage'
 import StatsPage from '@/pages/stats/StatsPage'
@@ -14,6 +15,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route
           path="/*"
           element={

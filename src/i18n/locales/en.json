@@ -70,7 +70,20 @@
     "notAdmin": "This account does not have organizer access.",
     "invalidCredentials": "Invalid email/phone or password.",
     "identifierRequired": "Enter your email or phone",
-    "passwordRequired": "Enter your password"
+    "passwordRequired": "Enter your password",
+    "forgotPasswordHint": "Enter your email and we'll send you a code to reset your password.",
+    "sendCode": "Send code",
+    "sendingCode": "Sending…",
+    "forgotPasswordError": "Couldn't send the code. Check the email and try again.",
+    "resetPasswordHint": "Enter the code sent to {{email}} and a new password.",
+    "codePlaceholder": "Code",
+    "newPasswordPlaceholder": "New password",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "passwordMismatch": "Passwords don't match",
+    "resetPassword": "Reset password",
+    "resettingPassword": "Resetting…",
+    "resetPasswordError": "Couldn't reset the password. Check the code and try again.",
+    "backToLogin": "Back to sign in"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
