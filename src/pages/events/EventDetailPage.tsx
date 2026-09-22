@@ -28,10 +28,6 @@ export default function EventDetailPage() {
 
       <div className="animate-fade-in grid grid-cols-1 gap-6 px-4 pb-12 pane-sm:px-8 pane-lg:grid-cols-3">
         <div className="space-y-6 pane-lg:col-span-2">
-          {event.banner && (
-            <img src={event.banner} alt="" className="h-64 w-full rounded-lg object-cover shadow-sm" />
-          )}
-
           <div className="rounded-lg border border-slate-200 bg-white p-5">
             <h2 className="mb-2 text-sm font-semibold text-slate-800">
               {t('events.detail.descriptionEn')}

@@ -42,7 +42,6 @@ export interface EventListItem {
   seatingType: 'free' | 'assigned'
   ticketTypes: TicketType[]
   cover: string | null
-  banner: string | null
   isFeatured: boolean
   isFree: boolean
   created_at: string
