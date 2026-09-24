@@ -6,16 +6,21 @@ export interface MyBalance {
   balanceHeld: number
 }
 
-export type TransferStatus = 'completed' | 'reversed'
+export type SettlementStatus = 'completed' | 'reversed'
 
-export interface Transfer {
+export interface Settlement {
   id: number
-  event_id: number
-  organizer_id: number
-  amount: number
-  adminBalance: number
+  eventId: number
+  eventTitle: string | null
+  organizerId: number
+  status: SettlementStatus
+  scopeType: 'all_pending' | 'ticket_numbers' | 'cutoff_date' | 'migrated'
+  grossAmount: number
+  platformAmount: number
+  organizerAmount: number
+  ticketCount: number
   currency: string
-  status: TransferStatus
-  created_at: string
-  updated_at: string
+  reference: string | null
+  isMigrated: boolean
+  createdAt: string
 }
