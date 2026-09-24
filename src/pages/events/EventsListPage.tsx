@@ -27,6 +27,8 @@ export default function EventsListPage() {
   const search = useDebouncedValue(searchInput)
   useEffect(() => setPage(1), [search, status, category, free, from, to])
 
+  const hasNoFilters = !search && !status && !category && !free && !from && !to
+
   const { data: categories } = useGetEventCategoriesQuery()
   const { data, isLoading, isFetching } = useGetEventsQuery({
     page,
@@ -114,8 +116,19 @@ export default function EventsListPage() {
         )}
 
         {!isLoading && (data?.data?.length ?? 0) === 0 && (
-          <div className="rounded-lg border border-slate-200 bg-white py-16 text-center text-sm text-slate-500 shadow-sm">
-            {t('events.list.noEvents')}
+          <div className="flex flex-col items-center gap-3 rounded-lg border border-slate-200 bg-white py-16 text-center text-sm text-slate-500 shadow-sm">
+            {/* Only shows with no filters active — an organizer who already
+              * has an event can't create a second (see EventService::create),
+              * so this is really "no event yet" rather than "no results". */}
+            <p>{hasNoFilters ? t('events.list.noEventYet') : t('events.list.noEvents')}</p>
+            {hasNoFilters && (
+              <Link
+                to="/events/new"
+                className="rounded-md bg-gradient-to-r from-orange-500 to-orange-400 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
+              >
+                {t('events.form.createEvent')}
+              </Link>
+            )}
           </div>
         )}
 

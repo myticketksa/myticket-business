@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import PageHeader from '@/components/PageHeader'
 import { useGetEventQuery } from '@/services/eventsApi'
@@ -24,6 +24,14 @@ export default function EventDetailPage() {
           { label: eventTitle },
         ]}
         title={eventTitle}
+        action={
+          <Link
+            to={`/events/${event.id}/edit`}
+            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            {t('common.edit')}
+          </Link>
+        }
       />
 
       <div className="animate-fade-in grid grid-cols-1 gap-6 px-4 pb-12 pane-sm:px-8 pane-lg:grid-cols-3">
@@ -56,6 +64,7 @@ export default function EventDetailPage() {
                       * left-aligned data under it unless overridden here. */}
                     <th className="pb-2 text-start font-medium">{t('events.detail.colName')}</th>
                     <th className="pb-2 text-start font-medium">{t('events.detail.colPrice')}</th>
+                    <th className="pb-2 text-start font-medium">{t('events.detail.colVat')}</th>
                     <th className="pb-2 text-start font-medium">{t('events.detail.colSoldTotal')}</th>
                   </tr>
                 </thead>
@@ -64,6 +73,9 @@ export default function EventDetailPage() {
                     <tr key={ticketType.id}>
                       <td className="py-2">{ticketType.name}</td>
                       <td className="py-2">{ticketType.price}</td>
+                      <td className="py-2">
+                        {ticketType.isVatIncluded ? t('events.detail.vatIncluded') : t('events.detail.vatExcluded')}
+                      </td>
                       <td className="py-2">
                         {ticketType.quantity_sold ?? '—'} / {ticketType.quantity_total ?? '—'}
                       </td>

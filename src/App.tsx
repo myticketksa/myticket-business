@@ -4,6 +4,7 @@ import OrganizerLayout from '@/layouts/OrganizerLayout'
 import CashiersListPage from '@/pages/cashiers/CashiersListPage'
 import DashboardPage from '@/pages/DashboardPage'
 import EventDetailPage from '@/pages/events/EventDetailPage'
+import EventFormPage from '@/pages/events/EventFormPage'
 import EventsListPage from '@/pages/events/EventsListPage'
 import ForgotPasswordPage from '@/pages/ForgotPasswordPage'
 import LoginPage from '@/pages/LoginPage'
@@ -24,7 +25,9 @@ export default function App() {
                 <Routes>
                   <Route path="/" element={<DashboardPage />} />
                   <Route path="/events" element={<EventsListPage />} />
+                  <Route path="/events/new" element={<EventFormPage />} />
                   <Route path="/events/:id" element={<EventDetailPage />} />
+                  <Route path="/events/:id/edit" element={<EventFormPage />} />
                   <Route path="/cashiers" element={<CashiersListPage />} />
                   <Route path="/payout" element={<PayoutPage />} />
                   <Route path="/reports" element={<StatsPage />} />

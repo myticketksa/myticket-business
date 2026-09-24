@@ -13,6 +13,8 @@ export interface TicketType {
   id: number
   name: string
   price: string
+  isSpecialNeeds?: boolean
+  isVatIncluded?: boolean
   // Both are real columns, but the ticket-type response carries only id, name
   // and price — so treat them as absent rather than assuming a zero.
   quantity_total?: number | null
