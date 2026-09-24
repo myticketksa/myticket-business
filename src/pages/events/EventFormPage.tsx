@@ -369,7 +369,15 @@ export default function EventFormPage() {
               <button
                 type="button"
                 onClick={() =>
-                  append({ name: '', isSpecialNeeds: false, price: '', isVatIncluded: true, quantityTotal: '' })
+                  append({
+                    name: '',
+                    isSpecialNeeds: false,
+                    price: '',
+                    isVatIncluded: true,
+                    entryTimeStart: '',
+                    entryTimeEnd: '',
+                    quantityTotal: '',
+                  })
                 }
                 className="text-sm font-medium text-orange-600 hover:text-orange-700"
               >
@@ -436,6 +444,28 @@ export default function EventFormPage() {
                       />
                       {t('events.form.ticketVatIncluded')}
                     </label>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <label
+                      htmlFor={`ticketTypes.${index}.entryTimeStart`}
+                      className="flex items-center gap-2 text-sm text-slate-700"
+                    >
+                      {t('events.form.entryWindow')}
+                      <input
+                        id={`ticketTypes.${index}.entryTimeStart`}
+                        type="time"
+                        className="rounded-md border border-slate-300 px-2 py-1 text-sm"
+                        {...register(`ticketTypes.${index}.entryTimeStart`)}
+                      />
+                    </label>
+                    <span className="text-sm text-slate-400">–</span>
+                    <input
+                      aria-label={t('events.form.entryWindowEnd')}
+                      type="time"
+                      className="rounded-md border border-slate-300 px-2 py-1 text-sm"
+                      {...register(`ticketTypes.${index}.entryTimeEnd`)}
+                    />
+                    <span className="text-xs text-slate-400">{t('events.form.entryWindowHint')}</span>
                   </div>
                 </div>
               ))}

@@ -48,6 +48,8 @@ function toCreatePayload(values: EventFormValues) {
       is_special_needs: ticketType.isSpecialNeeds ?? false,
       price: ticketType.price,
       is_vat_inclusive: ticketType.isVatIncluded ?? true,
+      entry_time_start: ticketType.entryTimeStart || undefined,
+      entry_time_end: ticketType.entryTimeEnd || undefined,
       quantity_total: ticketType.quantityTotal,
     })),
     // No myticketCommission/is_featured/status here — those are the

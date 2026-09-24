@@ -65,6 +65,7 @@ export default function EventDetailPage() {
                     <th className="pb-2 text-start font-medium">{t('events.detail.colName')}</th>
                     <th className="pb-2 text-start font-medium">{t('events.detail.colPrice')}</th>
                     <th className="pb-2 text-start font-medium">{t('events.detail.colVat')}</th>
+                    <th className="pb-2 text-start font-medium">{t('events.detail.colEntryWindow')}</th>
                     <th className="pb-2 text-start font-medium">{t('events.detail.colSoldTotal')}</th>
                   </tr>
                 </thead>
@@ -75,6 +76,11 @@ export default function EventDetailPage() {
                       <td className="py-2">{ticketType.price}</td>
                       <td className="py-2">
                         {ticketType.isVatIncluded ? t('events.detail.vatIncluded') : t('events.detail.vatExcluded')}
+                      </td>
+                      <td className="py-2">
+                        {ticketType.entryTimeStart && ticketType.entryTimeEnd
+                          ? `${ticketType.entryTimeStart}–${ticketType.entryTimeEnd}`
+                          : t('events.detail.anytime')}
                       </td>
                       <td className="py-2">
                         {ticketType.quantity_sold ?? '—'} / {ticketType.quantity_total ?? '—'}

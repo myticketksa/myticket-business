@@ -54,6 +54,9 @@ export function buildEventFormSchema(t: T, isEdit = false) {
             isSpecialNeeds: z.boolean().optional(),
             price: z.string().min(1, t('events.form.validation.ticketPriceRequired')),
             isVatIncluded: z.boolean().optional(),
+            // Time of day, not a date — leave both blank for no restriction.
+            entryTimeStart: z.string().optional(),
+            entryTimeEnd: z.string().optional(),
             quantityTotal: z.string().min(1, t('events.form.validation.ticketQuantityRequired')),
           }),
         )
