@@ -144,7 +144,7 @@ export default function EventSeatMapPage() {
             <SeatGridEditor
               grid={grid}
               onChange={setGrid}
-              ticketTypeOptions={event.ticketTypes.map((tt) => ({ value: String(tt.id), label: `${tt.name} (${tt.price})` }))}
+              ticketTypeOptions={event.ticketTypes.map((tt) => ({ value: String(tt.id), label: `${tt.name} (${tt.price})`, accessible: tt.isSpecialNeeds }))}
             />
 
             <div className="mt-4 flex flex-wrap items-center gap-3">

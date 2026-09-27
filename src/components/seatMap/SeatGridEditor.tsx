@@ -18,7 +18,13 @@ export const TYPE_COLORS = ['#E0451A', '#2563EB', '#16A34A', '#9333EA', '#D97706
 
 export interface GridCell {
   type: string
-  accessible: boolean
+}
+
+/** `accessible`: the ticket type for guests with disabilities — its seats are the accessible ones. */
+export interface TicketTypeOption {
+  value: string
+  label: string
+  accessible?: boolean
 }
 
 export interface SeatGrid {
@@ -74,12 +80,12 @@ export function gridToBlocks(grid: SeatGrid): SeatBlock[] {
   grid.cells.forEach((cells, r) => {
     const row = rowLetter(r)
     let number = 0
-    let run: { type: string; start: number; count: number; accessible: number[] } | null = null
+    let run: { type: string; start: number; count: number } | null = null
 
     const flush = () => {
       if (!run) return
       const block = blocks.get(run.type) ?? { ticketTypeId: Number(run.type), rows: [] }
-      block.rows.push({ row, seatCount: run.count, startNumber: run.start, accessibleNumbers: run.accessible })
+      block.rows.push({ row, seatCount: run.count, startNumber: run.start })
       blocks.set(run.type, block)
       run = null
     }
@@ -92,10 +98,9 @@ export function gridToBlocks(grid: SeatGrid): SeatBlock[] {
       number += 1
       if (!run || run.type !== cell.type) {
         flush()
-        run = { type: cell.type, start: number, count: 0, accessible: [] }
+        run = { type: cell.type, start: number, count: 0 }
       }
       run.count += 1
-      if (cell.accessible) run.accessible.push(number)
     })
     flush()
   })
@@ -103,7 +108,7 @@ export function gridToBlocks(grid: SeatGrid): SeatBlock[] {
   return Array.from(blocks.values())
 }
 
-type Tool = { kind: 'type'; type: string } | { kind: 'erase' } | { kind: 'accessible' }
+type Tool = { kind: 'type'; type: string } | { kind: 'erase' }
 
 export default function SeatGridEditor({
   grid,
@@ -112,11 +117,13 @@ export default function SeatGridEditor({
 }: {
   grid: SeatGrid
   onChange: (grid: SeatGrid) => void
-  ticketTypeOptions: { value: string; label: string }[]
+  ticketTypeOptions: TicketTypeOption[]
 }) {
   const { t } = useTranslation()
   const [tool, setTool] = useState<Tool>({ kind: 'type', type: ticketTypeOptions[0]?.value ?? '' })
-  const painting = useRef<{ accessible: boolean } | null>(null)
+  const painting = useRef(false)
+
+  const isAccessibleType = (type: string) => ticketTypeOptions.some((o) => o.value === type && o.accessible)
 
   const colorOf = (type: string) => {
     const index = ticketTypeOptions.findIndex((option) => option.value === type)
@@ -131,45 +138,35 @@ export default function SeatGridEditor({
   }, [ticketTypeOptions, tool])
 
   useEffect(() => {
-    const stop = () => (painting.current = null)
+    const stop = () => (painting.current = false)
     window.addEventListener('mouseup', stop)
     return () => window.removeEventListener('mouseup', stop)
   }, [])
 
-  const apply = (cells: SeatGrid['cells'], r: number, c: number, accessibleTarget: boolean) => {
-    const cell = cells[r][c]
-    if (tool.kind === 'erase') cells[r][c] = null
-    else if (tool.kind === 'type') cells[r][c] = { type: tool.type, accessible: cell?.accessible ?? false }
-    else if (cell) cells[r][c] = { ...cell, accessible: accessibleTarget }
-  }
+  const cellFor = (): GridCell | null => (tool.kind === 'erase' ? null : { type: tool.type })
 
-  const paint = (r: number, c: number, accessibleTarget: boolean) => {
+  const paint = (r: number, c: number) => {
     if (tool.kind === 'type' && !tool.type) return
     const cells = grid.cells.map((row) => [...row])
-    apply(cells, r, c, accessibleTarget)
+    cells[r][c] = cellFor()
     onChange({ ...grid, cells })
   }
 
   const paintRow = (r: number) => {
+    if (tool.kind === 'type' && !tool.type) return
     const cells = grid.cells.map((row) => [...row])
-    const target = tool.kind === 'accessible' ? !cells[r].every((cell) => !cell || cell.accessible) : false
-    cells[r].forEach((_, c) => apply(cells, r, c, target))
+    cells[r] = cells[r].map(() => cellFor())
     onChange({ ...grid, cells })
   }
 
   const startPaint = (r: number, c: number) => {
-    // A wheelchair drag sets every seat it crosses the same way as the first.
-    const target = tool.kind === 'accessible' ? !grid.cells[r][c]?.accessible : false
-    painting.current = { accessible: target }
-    paint(r, c, target)
+    painting.current = true
+    paint(r, c)
   }
 
   const fillAll = () => {
     if (tool.kind !== 'type' || !tool.type) return
-    onChange({
-      ...grid,
-      cells: grid.cells.map((row) => row.map((cell) => ({ type: tool.type, accessible: cell?.accessible ?? false }))),
-    })
+    onChange({ ...grid, cells: grid.cells.map((row) => row.map(() => ({ type: tool.type }))) })
   }
 
   const counts = seatCountsByType(grid)
@@ -229,13 +226,10 @@ export default function SeatGridEditor({
           >
             <SeatGlyph color={colorOf(option.value)} size={16} />
             {option.label}
+            {option.accessible && <span aria-hidden>♿</span>}
             <span className="text-slate-400">{counts.get(option.value) ?? 0}</span>
           </button>
         ))}
-        <button type="button" onClick={() => setTool({ kind: 'accessible' })} className={toolButton(tool.kind === 'accessible')}>
-          <span aria-hidden>♿</span>
-          {t('events.seatGrid.accessibleTool')}
-        </button>
         <button type="button" onClick={() => setTool({ kind: 'erase' })} className={toolButton(tool.kind === 'erase')}>
           <span className="inline-block h-3.5 w-3.5 rounded border border-dashed border-slate-400" />
           {t('events.seatGrid.aisleTool')}
@@ -270,7 +264,7 @@ export default function SeatGridEditor({
                         e.preventDefault()
                         startPaint(r, c)
                       }}
-                      onMouseEnter={() => painting.current && paint(r, c, painting.current.accessible)}
+                      onMouseEnter={() => painting.current && paint(r, c)}
                       className="relative flex h-8 w-7 flex-col items-center justify-center"
                       title={cell ? `${rowLetter(r)}-${number}` : ''}
                     >
@@ -278,7 +272,7 @@ export default function SeatGridEditor({
                         <>
                           <span className="text-[8px] leading-none text-slate-400">{number}</span>
                           <SeatGlyph color={colorOf(cell.type)} size={20} />
-                          {cell.accessible && <span className="absolute -right-0.5 -top-0.5 text-[10px]">♿</span>}
+                          {isAccessibleType(cell.type) && <span className="absolute -right-0.5 -top-0.5 text-[10px]">♿</span>}
                         </>
                       ) : (
                         <span className="h-4 w-4 rounded border border-dashed border-slate-300" />

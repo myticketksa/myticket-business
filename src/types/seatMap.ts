@@ -17,7 +17,6 @@ export interface SeatBlockRow {
   row: string
   seatCount: number
   startNumber?: number
-  accessibleNumbers?: number[]
 }
 
 export interface SeatBlock {

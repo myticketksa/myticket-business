@@ -89,10 +89,11 @@ export default function EventFormPage() {
   // map — the server refuses one without it.
   const needsSeatMap = seatingType === 'assigned' && (!isEdit || event?.seatingType !== 'assigned')
   const seatTicketTypeOptions = isEdit
-    ? (event?.ticketTypes ?? []).map((tt) => ({ value: String(tt.id), label: `${tt.name} (${tt.price})` }))
+    ? (event?.ticketTypes ?? []).map((tt) => ({ value: String(tt.id), label: `${tt.name} (${tt.price})`, accessible: tt.isSpecialNeeds }))
     : (ticketTypeValues ?? []).map((tt, index) => ({
         value: String(index),
         label: tt.name ? `${tt.name}${tt.price ? ` (${tt.price})` : ''}` : t('events.form.ticketTypeNumber', { number: index + 1 }),
+        accessible: tt.isSpecialNeeds,
       }))
 
   const onSubmit = async (values: EventFormValues) => {
