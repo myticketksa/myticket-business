@@ -224,7 +224,8 @@
         "ticketQuantityRequired": "Quantity is required",
         "commissionRequired": "Commission is required",
         "commissionRange": "Must be between 0 and 100",
-        "coverImageRequired": "Cover image is required"
+        "coverImageRequired": "Cover image is required",
+        "quantityBelowSold": "Can't be less than the {{count}} already sold or being bought."
       },
       "myticketCommission": "MyTicket commission (%)",
       "myticketCommissionPlaceholder": "e.g. 15",
@@ -234,7 +235,12 @@
       "seatMapIncomplete": "Place at least one seat on the seat map.",
       "seatMapMissingType": "\"{{name}}\" has no seats on the seat map. Every ticket type of a seated event needs seats.",
       "ticketTypeNumber": "Ticket type {{number}}",
-      "seatMapStaleType": "Some seats use a ticket type that was removed. Repaint them with a current ticket type."
+      "seatMapStaleType": "Some seats use a ticket type that was removed. Repaint them with a current ticket type.",
+      "coverImageReplace": "Cover image (choose a file to replace it)",
+      "lockedAfterBooking": "Can't be changed: tickets for this event have already been booked.",
+      "ticketTypeSold": "{{count}} already sold or being bought. The quantity can't go below that, and this type can't be removed. A new price only applies to future sales.",
+      "cantRemoveSold": "This ticket type has sales, so it can't be removed.",
+      "noNewTypeSeated": "A seated event can't get a new ticket type after its seat map is built."
     },
     "seating": {
       "manageLink": "Manage seating",

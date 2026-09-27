@@ -40,6 +40,9 @@ function toCreatePayload(values: WithSeatMap) {
     // Datetime boxes hold local wall time; the API stores UTC. See lib/datetime.
     starts_at: localInputToUtc(values.startsAt),
     ends_at: localInputToUtc(values.endsAt),
+    sales_start_at: localInputToUtc(values.salesStartAt),
+    sales_end_at: localInputToUtc(values.salesEndAt),
+    min_age: values.minAge || undefined,
     cover_image: values.coverImage,
     discount_type: values.discountType || undefined,
     discount_value: values.discountValue || undefined,
@@ -68,19 +71,38 @@ function toCreatePayload(values: WithSeatMap) {
   }
 }
 
-// The update endpoint only accepts this subset (see UpdateEventRequest on the backend) —
-// category, venue, seating type, free flag, discounts and ticket types can't be
-// changed after creation, and status is admin-only.
+// Optional fields go as '' when empty so clearing one actually clears it
+// on the server (a missing field means "leave unchanged").
 function toUpdatePayload(values: WithSeatMap) {
   return {
+    category_id: values.categoryId,
+    venue_id: values.venueId,
+    is_free: values.isFree,
+    cover_image: values.coverImage,
     starts_at: localInputToUtc(values.startsAt),
-    ends_at: localInputToUtc(values.endsAt),
-    sales_start_at: localInputToUtc(values.salesStartAt),
-    sales_end_at: localInputToUtc(values.salesEndAt),
-    min_age: values.minAge || undefined,
+    ends_at: localInputToUtc(values.endsAt) ?? '',
+    sales_start_at: localInputToUtc(values.salesStartAt) ?? '',
+    sales_end_at: localInputToUtc(values.salesEndAt) ?? '',
+    min_age: values.minAge ?? '',
+    discount_type: values.discountType || '',
+    discount_value: values.discountValue || '',
+    discount_starts_at: localInputToUtc(values.discountStartsAt) ?? '',
+    discount_ends_at: localInputToUtc(values.discountEndsAt) ?? '',
     seeting_type: values.seatingType,
     seatMap: values.seatMap ? JSON.stringify(values.seatMap) : undefined,
     translations: toTranslationsArray(values.translations),
+    // The full list: rows with an id are updated, new rows added, and ones
+    // left out removed (the server refuses removing one with sales).
+    ticketTypes: values.ticketTypes?.map((ticketType) => ({
+      id: ticketType.id,
+      name: ticketType.name,
+      is_special_needs: ticketType.isSpecialNeeds ?? false,
+      price: ticketType.price,
+      is_vat_inclusive: ticketType.isVatIncluded ?? true,
+      entry_time_start: ticketType.entryTimeStart || undefined,
+      entry_time_end: ticketType.entryTimeEnd || undefined,
+      quantity_total: ticketType.quantityTotal,
+    })),
   }
 }
 

@@ -35,8 +35,8 @@ export default function EventFormPage() {
   const eventId = id ? Number(id) : undefined
   const navigate = useNavigate()
 
-  const { data: categories } = useGetEventCategoriesQuery(undefined, { skip: isEdit })
-  const { data: venues } = useGetVenuesQuery(undefined, { skip: isEdit })
+  const { data: categories } = useGetEventCategoriesQuery()
+  const { data: venues } = useGetVenuesQuery()
   const { data: event, isLoading: isLoadingEvent } = useGetEventQuery(eventId!, { skip: !isEdit })
 
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation()
@@ -60,15 +60,41 @@ export default function EventFormPage() {
     defaultValues: emptyEventFormValues,
   })
 
-  const { fields, append, remove } = useFieldArray({ control, name: 'ticketTypes' })
+  // keyName 'key': ticket types carry their own database `id`, which the
+  // field array would otherwise overwrite with its internal one.
+  const { fields, append, remove } = useFieldArray({ control, name: 'ticketTypes', keyName: 'key' })
+  const hasBookings = Boolean(event?.manage?.hasBookings)
   const seatingType = watch('seatingType')
   const ticketTypeValues = watch('ticketTypes')
 
   useEffect(() => {
     if (!event) return
+    const manage = event.manage
     reset({
       ...emptyEventFormValues,
+      categoryId: manage?.categoryId ? String(manage.categoryId) : '',
+      venueId: manage?.venueId ? String(manage.venueId) : '',
+      isFree: event.isFree,
       startsAt: utcToLocalInput(event.startTime),
+      endsAt: utcToLocalInput(manage?.endsAt),
+      salesStartAt: utcToLocalInput(manage?.salesStartAt),
+      salesEndAt: utcToLocalInput(manage?.salesEndAt),
+      minAge: manage?.minAge ?? '',
+      discountType: manage?.discountType ?? '',
+      discountValue: manage?.discountValue ?? '',
+      discountStartsAt: utcToLocalInput(manage?.discountStartsAt),
+      discountEndsAt: utcToLocalInput(manage?.discountEndsAt),
+      ticketTypes: event.ticketTypes.map((tt) => ({
+        id: tt.id,
+        sold: (tt.quantity_sold ?? 0) + (tt.quantity_reserved ?? 0),
+        name: tt.name,
+        isSpecialNeeds: tt.isSpecialNeeds ?? false,
+        price: String(tt.price),
+        isVatIncluded: tt.isVatIncluded ?? true,
+        entryTimeStart: tt.entryTimeStart ?? '',
+        entryTimeEnd: tt.entryTimeEnd ?? '',
+        quantityTotal: tt.quantity_total != null ? String(tt.quantity_total) : '',
+      })),
       seatingType: event.seatingType,
       translations: {
         en: {
@@ -153,102 +179,99 @@ export default function EventFormPage() {
         noValidate
         className="animate-fade-in space-y-6 px-4 pb-12 pane-sm:px-8"
       >
-        {isEdit && (
-          <section className="rounded-lg border border-slate-200 bg-white p-5">
-            <label htmlFor="seatingTypeEdit" className="mb-1 block text-sm font-medium text-slate-700">
+
+        <section className="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-5 pane-sm:grid-cols-2">
+          <div>
+            <label htmlFor="categoryId" className="mb-1 block text-sm font-medium text-slate-700">
+              {t('events.form.category')}
+            </label>
+            <select
+              id="categoryId"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              {...register('categoryId')}
+            >
+              <option value="">{t('events.form.selectCategory')}</option>
+              {categories?.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name.en || category.name.ar}
+                </option>
+              ))}
+            </select>
+            {errors.categoryId && <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="venueId" className="mb-1 block text-sm font-medium text-slate-700">
+              {t('events.form.venue')}
+            </label>
+            <select
+              id="venueId"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              {...register('venueId')}
+            >
+              <option value="">{t('events.form.selectVenue')}</option>
+              {venues?.map((venue) => (
+                <option key={venue.id} value={venue.id}>
+                  {venue.name}
+                </option>
+              ))}
+            </select>
+            {errors.venueId && <p className="mt-1 text-sm text-red-600">{errors.venueId.message}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="seatingType" className="mb-1 block text-sm font-medium text-slate-700">
               {t('events.form.seatingType')}
             </label>
             <select
-              id="seatingTypeEdit"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm pane-sm:w-1/2"
+              id="seatingType"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              // Locked, not disabled: a disabled input can drop its value
+              // from the submitted form. The server refuses the change anyway.
+              tabIndex={hasBookings ? -1 : undefined}
+              aria-disabled={hasBookings}
+              style={hasBookings ? { pointerEvents: 'none', opacity: 0.6 } : undefined}
               {...register('seatingType')}
             >
               <option value="assigned">{t('events.form.seatingAssigned')}</option>
               <option value="free">{t('events.form.seatingFree')}</option>
             </select>
-            <p className="mt-1 text-xs text-slate-500">{t('events.form.seatingHintEdit')}</p>
-          </section>
-        )}
+            <p className="mt-1 text-xs text-slate-500">
+              {hasBookings ? t('events.form.lockedAfterBooking') : isEdit ? t('events.form.seatingHintEdit') : t('events.form.seatingHint')}
+            </p>
+          </div>
 
-        {!isEdit && (
-          <section className="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-5 pane-sm:grid-cols-2">
-            <div>
-              <label htmlFor="categoryId" className="mb-1 block text-sm font-medium text-slate-700">
-                {t('events.form.category')}
-              </label>
-              <select
-                id="categoryId"
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                {...register('categoryId')}
-              >
-                <option value="">{t('events.form.selectCategory')}</option>
-                {categories?.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name.en || category.name.ar}
-                  </option>
-                ))}
-              </select>
-              {errors.categoryId && <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="venueId" className="mb-1 block text-sm font-medium text-slate-700">
-                {t('events.form.venue')}
-              </label>
-              <select
-                id="venueId"
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                {...register('venueId')}
-              >
-                <option value="">{t('events.form.selectVenue')}</option>
-                {venues?.map((venue) => (
-                  <option key={venue.id} value={venue.id}>
-                    {venue.name}
-                  </option>
-                ))}
-              </select>
-              {errors.venueId && <p className="mt-1 text-sm text-red-600">{errors.venueId.message}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="seatingType" className="mb-1 block text-sm font-medium text-slate-700">
-                {t('events.form.seatingType')}
-              </label>
-              <select
-                id="seatingType"
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                {...register('seatingType')}
-              >
-                <option value="assigned">{t('events.form.seatingAssigned')}</option>
-                <option value="free">{t('events.form.seatingFree')}</option>
-              </select>
-              <p className="mt-1 text-xs text-slate-500">{t('events.form.seatingHint')}</p>
-            </div>
-
-            <div className="flex items-end">
-              <label htmlFor="isFree" className="flex items-center gap-2 text-sm text-slate-700">
-                <input id="isFree" type="checkbox" {...register('isFree')} />{' '}
-                {t('events.form.freeEventCheckbox')}
-              </label>
-            </div>
-
-            <div>
-              <label htmlFor="coverImage" className="mb-1 block text-sm font-medium text-slate-700">
-                {t('events.form.coverImage')}
-              </label>
+          <div className="flex items-end">
+            <label htmlFor="isFree" className="flex items-center gap-2 text-sm text-slate-700">
               <input
-                id="coverImage"
-                type="file"
-                accept="image/png,image/jpeg"
-                onChange={(e) => setValue('coverImage', e.target.files?.[0])}
-                className="w-full text-sm"
-              />
-              {errors.coverImage && (
-                <p className="mt-1 text-sm text-red-600">{errors.coverImage.message}</p>
-              )}
-            </div>
-          </section>
-        )}
+                id="isFree"
+                type="checkbox"
+                tabIndex={hasBookings ? -1 : undefined}
+                aria-disabled={hasBookings}
+                style={hasBookings ? { pointerEvents: 'none', opacity: 0.6 } : undefined}
+                {...register('isFree')}
+              />{' '}
+              {t('events.form.freeEventCheckbox')}
+            </label>
+          </div>
+
+          <div>
+            <label htmlFor="coverImage" className="mb-1 block text-sm font-medium text-slate-700">
+              {isEdit ? t('events.form.coverImageReplace') : t('events.form.coverImage')}
+            </label>
+            {isEdit && event?.cover && <img src={event.cover} alt="" className="mb-2 h-16 w-28 rounded object-cover" />}
+            <input
+              id="coverImage"
+              type="file"
+              accept="image/png,image/jpeg"
+              onChange={(e) => setValue('coverImage', e.target.files?.[0])}
+              className="w-full text-sm"
+            />
+            {errors.coverImage && (
+              <p className="mt-1 text-sm text-red-600">{errors.coverImage.message}</p>
+            )}
+          </div>
+        </section>
 
         <section className="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-5 pane-sm:grid-cols-2">
           <div>
@@ -275,79 +298,73 @@ export default function EventFormPage() {
             />
           </div>
 
-          {isEdit && (
-            <>
-              <div>
-                <label htmlFor="salesStartAt" className="mb-1 block text-sm font-medium text-slate-700">
-                  {t('events.form.salesStart')}
-                </label>
-                <input
-                  id="salesStartAt"
-                  type="datetime-local"
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  {...register('salesStartAt')}
-                />
-              </div>
-              <div>
-                <label htmlFor="salesEndAt" className="mb-1 block text-sm font-medium text-slate-700">
-                  {t('events.form.salesEnd')}
-                </label>
-                <input
-                  id="salesEndAt"
-                  type="datetime-local"
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  {...register('salesEndAt')}
-                />
-              </div>
-              <div>
-                <label htmlFor="minAge" className="mb-1 block text-sm font-medium text-slate-700">
-                  {t('events.form.minAge')}
-                </label>
-                <input
-                  id="minAge"
-                  type="text"
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  {...register('minAge')}
-                />
-              </div>
-            </>
-          )}
+          <div>
+            <label htmlFor="salesStartAt" className="mb-1 block text-sm font-medium text-slate-700">
+              {t('events.form.salesStart')}
+            </label>
+            <input
+              id="salesStartAt"
+              type="datetime-local"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              {...register('salesStartAt')}
+            />
+          </div>
+          <div>
+            <label htmlFor="salesEndAt" className="mb-1 block text-sm font-medium text-slate-700">
+              {t('events.form.salesEnd')}
+            </label>
+            <input
+              id="salesEndAt"
+              type="datetime-local"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              {...register('salesEndAt')}
+            />
+          </div>
+          <div>
+            <label htmlFor="minAge" className="mb-1 block text-sm font-medium text-slate-700">
+              {t('events.form.minAge')}
+            </label>
+            <input
+              id="minAge"
+              type="text"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              {...register('minAge')}
+            />
+          </div>
         </section>
 
-        {!isEdit && (
-          <section className="rounded-lg border border-slate-200 bg-white p-5">
-            <h2 className="mb-3 text-sm font-semibold text-slate-800">{t('events.form.discountTitle')}</h2>
-            <div className="grid grid-cols-1 gap-4 pane-sm:grid-cols-4">
-              <select
-                aria-label={t('events.form.discountTitle')}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                {...register('discountType')}
-              >
-                <option value="">{t('events.form.discountNone')}</option>
-                <option value="fixed">{t('events.form.discountFixed')}</option>
-                <option value="percentage">{t('events.form.discountPercentage')}</option>
-              </select>
-              <input
-                type="text"
-                placeholder={t('events.form.valuePlaceholder')}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                {...register('discountValue')}
-              />
-              <input
-                type="datetime-local"
-                aria-label={t('events.form.discountStartsAt')}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                {...register('discountStartsAt')}
-              />
-              <input
-                type="datetime-local"
-                aria-label={t('events.form.discountEndsAt')}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                {...register('discountEndsAt')}
-              />
-            </div>
-          </section>
-        )}
+        <section className="rounded-lg border border-slate-200 bg-white p-5">
+          <h2 className="mb-3 text-sm font-semibold text-slate-800">{t('events.form.discountTitle')}</h2>
+          <div className="grid grid-cols-1 gap-4 pane-sm:grid-cols-4">
+            <select
+              aria-label={t('events.form.discountTitle')}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              {...register('discountType')}
+            >
+              <option value="">{t('events.form.discountNone')}</option>
+              <option value="fixed">{t('events.form.discountFixed')}</option>
+              <option value="percentage">{t('events.form.discountPercentage')}</option>
+            </select>
+            <input
+              type="text"
+              placeholder={t('events.form.valuePlaceholder')}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              {...register('discountValue')}
+            />
+            <input
+              type="datetime-local"
+              aria-label={t('events.form.discountStartsAt')}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              {...register('discountStartsAt')}
+            />
+            <input
+              type="datetime-local"
+              aria-label={t('events.form.discountEndsAt')}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              {...register('discountEndsAt')}
+            />
+          </div>
+        </section>
 
         <section className="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-5 pane-md:grid-cols-2">
           {(['en', 'ar'] as const).map((locale) => (
@@ -412,116 +429,123 @@ export default function EventFormPage() {
           ))}
         </section>
 
-        {!isEdit && (
-          <section className="rounded-lg border border-slate-200 bg-white p-5">
-            <div className="mb-1 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-800">{t('events.form.ticketTypesTitle')}</h2>
-              <button
-                type="button"
-                onClick={() =>
-                  append({
-                    name: '',
-                    isSpecialNeeds: false,
-                    price: '',
-                    isVatIncluded: true,
-                    entryTimeStart: '',
-                    entryTimeEnd: '',
-                    quantityTotal: '',
-                  })
-                }
-                className="text-sm font-medium text-orange-600 hover:text-orange-700"
-              >
-                {t('events.form.addTicketType')}
-              </button>
-            </div>
-            {seatingType === 'assigned' && (
-              <p className="mb-3 text-xs text-slate-500">{t('events.form.ticketTypesAssignedHint')}</p>
-            )}
-            {errors.ticketTypes && !Array.isArray(errors.ticketTypes) && (
-              <p className="mb-2 text-sm text-red-600">{errors.ticketTypes.message}</p>
-            )}
-            <div className="space-y-3">
-              {fields.map((field, index) => (
-                <div key={field.id} className="rounded-md border border-slate-200 p-3">
-                  <div className="grid grid-cols-1 gap-3 pane-sm:grid-cols-4">
+        <section className="rounded-lg border border-slate-200 bg-white p-5">
+          <div className="mb-1 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-800">{t('events.form.ticketTypesTitle')}</h2>
+            <button
+              type="button"
+              disabled={isEdit && event?.seatingType === 'assigned'}
+              title={isEdit && event?.seatingType === 'assigned' ? t('events.form.noNewTypeSeated') : undefined}
+              onClick={() =>
+                append({
+                  name: '',
+                  isSpecialNeeds: false,
+                  price: '',
+                  isVatIncluded: true,
+                  entryTimeStart: '',
+                  entryTimeEnd: '',
+                  quantityTotal: '',
+                })
+              }
+              className="text-sm font-medium text-orange-600 hover:text-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {t('events.form.addTicketType')}
+            </button>
+          </div>
+          {seatingType === 'assigned' && (
+            <p className="mb-3 text-xs text-slate-500">{t('events.form.ticketTypesAssignedHint')}</p>
+          )}
+          {errors.ticketTypes && !Array.isArray(errors.ticketTypes) && (
+            <p className="mb-2 text-sm text-red-600">{errors.ticketTypes.message}</p>
+          )}
+          <div className="space-y-3">
+            {fields.map((field, index) => (
+              <div key={field.key} className="rounded-md border border-slate-200 p-3">
+                {(ticketTypeValues?.[index]?.sold ?? 0) > 0 && (
+                  <p className="mb-2 text-xs text-slate-500">
+                    {t('events.form.ticketTypeSold', { count: ticketTypeValues?.[index]?.sold ?? 0 })}
+                  </p>
+                )}
+                <div className="grid grid-cols-1 gap-3 pane-sm:grid-cols-4">
+                  <input
+                    type="text"
+                    placeholder={t('events.form.namePlaceholder')}
+                    className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                    {...register(`ticketTypes.${index}.name`)}
+                  />
+                  <input
+                    type="text"
+                    placeholder={t('events.form.pricePlaceholder')}
+                    className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                    {...register(`ticketTypes.${index}.price`)}
+                  />
+                  <input
+                    type="text"
+                    placeholder={t('events.form.quantityPlaceholder')}
+                    className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                    {...register(`ticketTypes.${index}.quantityTotal`)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => remove(index)}
+                    disabled={(ticketTypeValues?.[index]?.sold ?? 0) > 0}
+                    title={(ticketTypeValues?.[index]?.sold ?? 0) > 0 ? t('events.form.cantRemoveSold') : undefined}
+                    className="text-sm text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {t('events.form.remove')}
+                  </button>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-4">
+                  <label
+                    htmlFor={`ticketTypes.${index}.isSpecialNeeds`}
+                    className="flex items-center gap-2 text-sm text-slate-700"
+                  >
                     <input
-                      type="text"
-                      placeholder={t('events.form.namePlaceholder')}
-                      className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                      {...register(`ticketTypes.${index}.name`)}
+                      id={`ticketTypes.${index}.isSpecialNeeds`}
+                      type="checkbox"
+                      {...register(`ticketTypes.${index}.isSpecialNeeds`)}
                     />
+                    {t('events.form.ticketSpecialNeeds')}
+                  </label>
+                  <label
+                    htmlFor={`ticketTypes.${index}.isVatIncluded`}
+                    className="flex items-center gap-2 text-sm text-slate-700"
+                  >
                     <input
-                      type="text"
-                      placeholder={t('events.form.pricePlaceholder')}
-                      className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                      {...register(`ticketTypes.${index}.price`)}
+                      id={`ticketTypes.${index}.isVatIncluded`}
+                      type="checkbox"
+                      defaultChecked
+                      {...register(`ticketTypes.${index}.isVatIncluded`)}
                     />
+                    {t('events.form.ticketVatIncluded')}
+                  </label>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <label
+                    htmlFor={`ticketTypes.${index}.entryTimeStart`}
+                    className="flex items-center gap-2 text-sm text-slate-700"
+                  >
+                    {t('events.form.entryWindow')}
                     <input
-                      type="text"
-                      placeholder={t('events.form.quantityPlaceholder')}
-                      className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                      {...register(`ticketTypes.${index}.quantityTotal`)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => remove(index)}
-                      className="text-sm text-red-600 hover:text-red-700"
-                    >
-                      {t('events.form.remove')}
-                    </button>
-                  </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-4">
-                    <label
-                      htmlFor={`ticketTypes.${index}.isSpecialNeeds`}
-                      className="flex items-center gap-2 text-sm text-slate-700"
-                    >
-                      <input
-                        id={`ticketTypes.${index}.isSpecialNeeds`}
-                        type="checkbox"
-                        {...register(`ticketTypes.${index}.isSpecialNeeds`)}
-                      />
-                      {t('events.form.ticketSpecialNeeds')}
-                    </label>
-                    <label
-                      htmlFor={`ticketTypes.${index}.isVatIncluded`}
-                      className="flex items-center gap-2 text-sm text-slate-700"
-                    >
-                      <input
-                        id={`ticketTypes.${index}.isVatIncluded`}
-                        type="checkbox"
-                        defaultChecked
-                        {...register(`ticketTypes.${index}.isVatIncluded`)}
-                      />
-                      {t('events.form.ticketVatIncluded')}
-                    </label>
-                  </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-3">
-                    <label
-                      htmlFor={`ticketTypes.${index}.entryTimeStart`}
-                      className="flex items-center gap-2 text-sm text-slate-700"
-                    >
-                      {t('events.form.entryWindow')}
-                      <input
-                        id={`ticketTypes.${index}.entryTimeStart`}
-                        type="time"
-                        className="rounded-md border border-slate-300 px-2 py-1 text-sm"
-                        {...register(`ticketTypes.${index}.entryTimeStart`)}
-                      />
-                    </label>
-                    <span className="text-sm text-slate-400">–</span>
-                    <input
-                      aria-label={t('events.form.entryWindowEnd')}
+                      id={`ticketTypes.${index}.entryTimeStart`}
                       type="time"
                       className="rounded-md border border-slate-300 px-2 py-1 text-sm"
-                      {...register(`ticketTypes.${index}.entryTimeEnd`)}
+                      {...register(`ticketTypes.${index}.entryTimeStart`)}
                     />
-                    <span className="text-xs text-slate-400">{t('events.form.entryWindowHint')}</span>
-                  </div>
+                  </label>
+                  <span className="text-sm text-slate-400">–</span>
+                  <input
+                    aria-label={t('events.form.entryWindowEnd')}
+                    type="time"
+                    className="rounded-md border border-slate-300 px-2 py-1 text-sm"
+                    {...register(`ticketTypes.${index}.entryTimeEnd`)}
+                  />
+                  <span className="text-xs text-slate-400">{t('events.form.entryWindowHint')}</span>
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
+              </div>
+            ))}
+          </div>
+        </section>
 
         {needsSeatMap && (
           <section className="rounded-lg border border-slate-200 bg-white p-5">

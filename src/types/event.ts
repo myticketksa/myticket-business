@@ -21,6 +21,22 @@ export interface TicketType {
   // and price — so treat them as absent rather than assuming a zero.
   quantity_total?: number | null
   quantity_sold?: number | null
+  quantity_reserved?: number | null
+}
+
+/** Only for the event's own organizer (and admins): what the edit form pre-fills from. */
+export interface EventManageFields {
+  categoryId: number | null
+  venueId: number | null
+  endsAt: string | null
+  salesStartAt: string | null
+  salesEndAt: string | null
+  minAge: string | null
+  discountType: 'fixed' | 'percentage' | null
+  discountValue: string | null
+  discountStartsAt: string | null
+  discountEndsAt: string | null
+  hasBookings: boolean
 }
 
 export interface OrganizerSummary {
@@ -56,6 +72,7 @@ export interface EventListItem {
 
 export interface EventDetail extends EventListItem {
   description: LocalizedText
+  manage?: EventManageFields
 }
 
 export interface EventCategory {

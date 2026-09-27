@@ -20,15 +20,8 @@ export function buildEventFormSchema(t: T, isEdit = false) {
 
   return z
     .object({
-      // Category/venue are only shown (and only settable) at creation — in
-      // edit mode these stay blank since they're not editable, so they can't
-      // be required or the form would silently refuse to ever save an edit.
-      categoryId: isEdit
-        ? z.string().optional()
-        : z.string().min(1, t('events.form.validation.categoryRequired')),
-      venueId: isEdit
-        ? z.string().optional()
-        : z.string().min(1, t('events.form.validation.venueRequired')),
+      categoryId: z.string().min(1, t('events.form.validation.categoryRequired')),
+      venueId: z.string().min(1, t('events.form.validation.venueRequired')),
       seatingType: z.enum(['free', 'assigned']),
       isFree: z.boolean(),
       startsAt: z.string().min(1, t('events.form.validation.startsAtRequired')),
@@ -50,6 +43,10 @@ export function buildEventFormSchema(t: T, isEdit = false) {
       ticketTypes: z
         .array(
           z.object({
+            // Set for a ticket type that already exists (edit); `sold` is
+            // display-only, the count already sold or being bought.
+            id: z.number().optional(),
+            sold: z.number().optional(),
             name: z.string().min(1, t('events.form.validation.ticketNameRequired')),
             isSpecialNeeds: z.boolean().optional(),
             price: z.string().min(1, t('events.form.validation.ticketPriceRequired')),
@@ -71,10 +68,19 @@ export function buildEventFormSchema(t: T, isEdit = false) {
         : z.instanceof(File, { message: t('events.form.validation.coverImageRequired') }),
     })
     .superRefine((values, ctx) => {
+      values.ticketTypes?.forEach((ticketType, index) => {
+        if (ticketType.sold && Number(ticketType.quantityTotal) < ticketType.sold) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['ticketTypes', index, 'quantityTotal'],
+            message: t('events.form.validation.quantityBelowSold').replace('{{count}}', String(ticketType.sold)),
+          })
+        }
+      })
       // Both seating kinds need at least one ticket type; an assigned event's
       // seats get built against these afterward, on the event's own detail
       // page.
-      if (!isEdit && (!values.ticketTypes || values.ticketTypes.length === 0)) {
+      if (!values.ticketTypes || values.ticketTypes.length === 0) {
         ctx.addIssue({
           code: 'custom',
           path: ['ticketTypes'],
