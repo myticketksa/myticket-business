@@ -270,10 +270,23 @@
       "fillAll": "Fill all with selected type",
       "clearAll": "Clear all",
       "aisleTool": "Aisle / no seat",
-      "hint": "Pick a ticket type, then click or drag across the grid to place seats. Use \"Aisle / no seat\" to leave gaps, and click a row letter to fill the whole row. Seats of the ticket type marked for guests with disabilities (♿) are the accessible seats. Seats are numbered left to right in each row.",
+      "hint": "Pick a ticket type (or \"Aisle / no seat\"), then drag a rectangle over the grid to fill a whole block at once, or switch to Brush to paint seat by seat. Click a row letter or column number to apply to that whole row or column — clearing a column makes a vertical aisle. Seats of the ticket type marked for guests with disabilities (♿) are the accessible seats. Seats are numbered left to right in each row.",
       "stage": "Stage",
       "paintRow": "Apply to the whole row",
-      "total": "{{count}} seats in total"
+      "total": "{{count}} seats in total",
+      "maxSize": "Up to {{rows}} rows × {{cols}} seats",
+      "zoom": "Zoom",
+      "zoom_small": "S",
+      "zoom_medium": "M",
+      "zoom_large": "L",
+      "paintWith": "Paint with",
+      "drawAs": "Draw as",
+      "shapeRect": "Rectangle",
+      "shapeBrush": "Brush",
+      "rowsFrom": "Rows",
+      "rowsTo": "to",
+      "applyToRows": "Apply to these rows",
+      "paintColumn": "Apply to the whole column"
     }
   },
   "applications": {

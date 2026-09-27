@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { SeatBlock } from '@/types/seatMap'
 
@@ -33,8 +33,10 @@ export interface SeatGrid {
   cells: (GridCell | null)[][]
 }
 
-const MAX_ROWS = 40
-const MAX_COLS = 60
+const MAX_ROWS = 100
+const MAX_COLS = 100
+const ZOOM = { small: 12, medium: 18, large: 24 } as const
+type Zoom = keyof typeof ZOOM
 
 export function rowLetter(index: number): string {
   let label = ''
@@ -47,7 +49,7 @@ export function rowLetter(index: number): string {
   return label
 }
 
-export function emptyGrid(rows = 8, cols = 12): SeatGrid {
+export function emptyGrid(rows = 10, cols = 20): SeatGrid {
   return { rows, cols, cells: Array.from({ length: rows }, () => Array.from({ length: cols }, () => null)) }
 }
 
@@ -55,9 +57,7 @@ function resize(grid: SeatGrid, rows: number, cols: number): SeatGrid {
   return {
     rows,
     cols,
-    cells: Array.from({ length: rows }, (_, r) =>
-      Array.from({ length: cols }, (_, c) => grid.cells[r]?.[c] ?? null),
-    ),
+    cells: Array.from({ length: rows }, (_, r) => Array.from({ length: cols }, (_, c) => grid.cells[r]?.[c] ?? null)),
   }
 }
 
@@ -108,7 +108,50 @@ export function gridToBlocks(grid: SeatGrid): SeatBlock[] {
   return Array.from(blocks.values())
 }
 
-type Tool = { kind: 'type'; type: string } | { kind: 'erase' }
+type Paint = { kind: 'type'; type: string } | { kind: 'erase' }
+type Shape = 'rect' | 'brush'
+type Point = { r: number; c: number }
+
+const Cell = memo(function Cell({
+  r,
+  c,
+  color,
+  accessible,
+  highlighted,
+  size,
+  onDown,
+  onEnter,
+}: {
+  r: number
+  c: number
+  color: string | null
+  accessible: boolean
+  highlighted: boolean
+  size: number
+  onDown: (r: number, c: number) => void
+  onEnter: (r: number, c: number) => void
+}) {
+  return (
+    <div
+      onMouseDown={(e) => {
+        e.preventDefault()
+        onDown(r, c)
+      }}
+      onMouseEnter={() => onEnter(r, c)}
+      style={{ width: size + 4, height: size + 4 }}
+      className={`relative flex shrink-0 cursor-crosshair items-center justify-center ${highlighted ? 'bg-orange-200' : ''}`}
+    >
+      {color ? (
+        <>
+          <SeatGlyph color={color} size={size} />
+          {accessible && size >= ZOOM.medium && <span className="absolute -right-0.5 -top-1 text-[9px]">♿</span>}
+        </>
+      ) : (
+        <span className="rounded-sm border border-dashed border-slate-300" style={{ width: size * 0.6, height: size * 0.6 }} />
+      )}
+    </div>
+  )
+})
 
 export default function SeatGridEditor({
   grid,
@@ -120,77 +163,115 @@ export default function SeatGridEditor({
   ticketTypeOptions: TicketTypeOption[]
 }) {
   const { t } = useTranslation()
-  const [tool, setTool] = useState<Tool>({ kind: 'type', type: ticketTypeOptions[0]?.value ?? '' })
-  const painting = useRef(false)
+  const [paintWith, setPaintWith] = useState<Paint>({ kind: 'type', type: ticketTypeOptions[0]?.value ?? '' })
+  const [shape, setShape] = useState<Shape>('rect')
+  const [zoom, setZoom] = useState<Zoom>(grid.rows * grid.cols > 1500 ? 'small' : 'medium')
+  const [drag, setDrag] = useState<{ from: Point; to: Point } | null>(null)
+  const [rangeFrom, setRangeFrom] = useState(0)
+  const [rangeTo, setRangeTo] = useState(0)
+  const [sizeDraft, setSizeDraft] = useState({ rows: String(grid.rows), cols: String(grid.cols) })
 
-  const isAccessibleType = (type: string) => ticketTypeOptions.some((o) => o.value === type && o.accessible)
+  // Refs so the window-level mouseup (and memoised cells) see current values.
+  const latest = useRef({ grid, onChange, paintWith, shape, drag })
+  latest.current = { grid, onChange, paintWith, shape, drag }
+  const brushing = useRef(false)
 
-  const colorOf = (type: string) => {
-    const index = ticketTypeOptions.findIndex((option) => option.value === type)
-    return TYPE_COLORS[(index < 0 ? 0 : index) % TYPE_COLORS.length]
-  }
+  const cellSize = ZOOM[zoom]
+  const colorIndex = new Map(ticketTypeOptions.map((option, index) => [option.value, TYPE_COLORS[index % TYPE_COLORS.length]]))
+  const accessibleTypes = new Set(ticketTypeOptions.filter((o) => o.accessible).map((o) => o.value))
 
   // Keep the chosen type valid as ticket types are added or removed.
   useEffect(() => {
-    if (tool.kind === 'type' && !ticketTypeOptions.some((o) => o.value === tool.type) && ticketTypeOptions[0]) {
-      setTool({ kind: 'type', type: ticketTypeOptions[0].value })
+    if (paintWith.kind === 'type' && !ticketTypeOptions.some((o) => o.value === paintWith.type) && ticketTypeOptions[0]) {
+      setPaintWith({ kind: 'type', type: ticketTypeOptions[0].value })
     }
-  }, [ticketTypeOptions, tool])
+  }, [ticketTypeOptions, paintWith])
+
+  useEffect(() => setSizeDraft({ rows: String(grid.rows), cols: String(grid.cols) }), [grid.rows, grid.cols])
+
+  const canPaint = (p: Paint) => p.kind === 'erase' || Boolean(p.type)
+  const valueFor = (p: Paint): GridCell | null => (p.kind === 'erase' ? null : { type: p.type })
+
+  /** Applies the current paint to every cell `inside` accepts. */
+  const applyWhere = (inside: (r: number, c: number) => boolean) => {
+    const { grid: g, onChange: change, paintWith: p } = latest.current
+    if (!canPaint(p)) return
+    const value = valueFor(p)
+    change({ ...g, cells: g.cells.map((row, r) => row.map((cell, c) => (inside(r, c) ? value : cell))) })
+  }
 
   useEffect(() => {
-    const stop = () => (painting.current = false)
-    window.addEventListener('mouseup', stop)
-    return () => window.removeEventListener('mouseup', stop)
+    const finish = () => {
+      brushing.current = false
+      const current = latest.current.drag
+      if (!current) return
+      const [r1, r2] = [Math.min(current.from.r, current.to.r), Math.max(current.from.r, current.to.r)]
+      const [c1, c2] = [Math.min(current.from.c, current.to.c), Math.max(current.from.c, current.to.c)]
+      applyWhere((r, c) => r >= r1 && r <= r2 && c >= c1 && c <= c2)
+      setDrag(null)
+    }
+    window.addEventListener('mouseup', finish)
+    return () => window.removeEventListener('mouseup', finish)
+    // applyWhere reads everything through `latest`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const cellFor = (): GridCell | null => (tool.kind === 'erase' ? null : { type: tool.type })
+  const onDown = useRef((r: number, c: number) => {
+    if (latest.current.shape === 'rect') {
+      setDrag({ from: { r, c }, to: { r, c } })
+    } else {
+      brushing.current = true
+      applyWhere((rr, cc) => rr === r && cc === c)
+    }
+  }).current
 
-  const paint = (r: number, c: number) => {
-    if (tool.kind === 'type' && !tool.type) return
-    const cells = grid.cells.map((row) => [...row])
-    cells[r][c] = cellFor()
-    onChange({ ...grid, cells })
-  }
+  const onEnter = useRef((r: number, c: number) => {
+    if (latest.current.shape === 'rect') {
+      setDrag((d) => (d ? { ...d, to: { r, c } } : d))
+    } else if (brushing.current) {
+      applyWhere((rr, cc) => rr === r && cc === c)
+    }
+  }).current
 
-  const paintRow = (r: number) => {
-    if (tool.kind === 'type' && !tool.type) return
-    const cells = grid.cells.map((row) => [...row])
-    cells[r] = cells[r].map(() => cellFor())
-    onChange({ ...grid, cells })
-  }
+  const inDrag = (r: number, c: number) =>
+    drag !== null &&
+    r >= Math.min(drag.from.r, drag.to.r) &&
+    r <= Math.max(drag.from.r, drag.to.r) &&
+    c >= Math.min(drag.from.c, drag.to.c) &&
+    c <= Math.max(drag.from.c, drag.to.c)
 
-  const startPaint = (r: number, c: number) => {
-    painting.current = true
-    paint(r, c)
-  }
-
-  const fillAll = () => {
-    if (tool.kind !== 'type' || !tool.type) return
-    onChange({ ...grid, cells: grid.cells.map((row) => row.map(() => ({ type: tool.type }))) })
+  const commitSize = () => {
+    const rows = Math.min(Math.max(Number(sizeDraft.rows) || 1, 1), MAX_ROWS)
+    const cols = Math.min(Math.max(Number(sizeDraft.cols) || 1, 1), MAX_COLS)
+    setRangeFrom((v) => Math.min(v, rows - 1))
+    setRangeTo((v) => Math.min(v, rows - 1))
+    onChange(resize(grid, rows, cols))
   }
 
   const counts = seatCountsByType(grid)
   const total = Array.from(counts.values()).reduce((sum, n) => sum + n, 0)
-  const setSize = (rows: number, cols: number) =>
-    onChange(resize(grid, Math.min(Math.max(rows, 1), MAX_ROWS), Math.min(Math.max(cols, 1), MAX_COLS)))
+  const rowOptions = Array.from({ length: grid.rows }, (_, r) => rowLetter(r))
 
-  const toolButton = (active: boolean) =>
+  const chip = (active: boolean) =>
     `flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
       active ? 'border-orange-500 bg-orange-50 text-slate-900' : 'border-slate-300 text-slate-700 hover:bg-slate-50'
     }`
+  const smallButton = 'rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50'
 
   return (
-    <div className="select-none">
-      <div className="mb-4 flex flex-wrap items-end gap-4">
+    <div className="select-none space-y-3">
+      <div className="flex flex-wrap items-end gap-3">
         <label className="text-xs font-medium text-slate-700">
           {t('events.seatGrid.rows')}
           <input
             type="number"
             min={1}
             max={MAX_ROWS}
-            value={grid.rows}
-            onChange={(e) => setSize(Number(e.target.value) || 1, grid.cols)}
-            className="mt-1 block w-24 rounded-md border border-slate-300 px-3 py-2 text-sm"
+            value={sizeDraft.rows}
+            onChange={(e) => setSizeDraft((s) => ({ ...s, rows: e.target.value }))}
+            onBlur={commitSize}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), commitSize())}
+            className="mt-1 block w-20 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
           />
         </label>
         <label className="text-xs font-medium text-slate-700">
@@ -199,94 +280,140 @@ export default function SeatGridEditor({
             type="number"
             min={1}
             max={MAX_COLS}
-            value={grid.cols}
-            onChange={(e) => setSize(grid.rows, Number(e.target.value) || 1)}
-            className="mt-1 block w-24 rounded-md border border-slate-300 px-3 py-2 text-sm"
+            value={sizeDraft.cols}
+            onChange={(e) => setSizeDraft((s) => ({ ...s, cols: e.target.value }))}
+            onBlur={commitSize}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), commitSize())}
+            className="mt-1 block w-20 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
           />
         </label>
-        <button type="button" onClick={fillAll} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">
-          {t('events.seatGrid.fillAll')}
+        <span className="pb-2 text-xs text-slate-400">{t('events.seatGrid.maxSize', { rows: MAX_ROWS, cols: MAX_COLS })}</span>
+        <div className="ms-auto flex items-center gap-1 pb-0.5">
+          <span className="me-1 text-xs text-slate-500">{t('events.seatGrid.zoom')}</span>
+          {(Object.keys(ZOOM) as Zoom[]).map((z) => (
+            <button key={z} type="button" onClick={() => setZoom(z)} className={chip(zoom === z)}>
+              {t(`events.seatGrid.zoom_${z}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-1.5 text-xs font-semibold text-slate-700">{t('events.seatGrid.paintWith')}</p>
+        <div className="flex flex-wrap gap-2">
+          {ticketTypeOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setPaintWith({ kind: 'type', type: option.value })}
+              className={chip(paintWith.kind === 'type' && paintWith.type === option.value)}
+            >
+              <SeatGlyph color={colorIndex.get(option.value) ?? TYPE_COLORS[0]} size={16} />
+              {option.label}
+              {option.accessible && <span aria-hidden>♿</span>}
+              <span className="text-slate-400">{counts.get(option.value) ?? 0}</span>
+            </button>
+          ))}
+          <button type="button" onClick={() => setPaintWith({ kind: 'erase' })} className={chip(paintWith.kind === 'erase')}>
+            <span className="inline-block h-3.5 w-3.5 rounded border border-dashed border-slate-400" />
+            {t('events.seatGrid.aisleTool')}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 rounded-md bg-slate-50 p-2">
+        <span className="text-xs text-slate-500">{t('events.seatGrid.drawAs')}</span>
+        <button type="button" onClick={() => setShape('rect')} className={chip(shape === 'rect')}>
+          ▭ {t('events.seatGrid.shapeRect')}
         </button>
+        <button type="button" onClick={() => setShape('brush')} className={chip(shape === 'brush')}>
+          ✎ {t('events.seatGrid.shapeBrush')}
+        </button>
+        <span className="mx-2 h-5 w-px bg-slate-200" />
+        <span className="text-xs text-slate-500">{t('events.seatGrid.rowsFrom')}</span>
+        <select value={rangeFrom} onChange={(e) => setRangeFrom(Number(e.target.value))} className="rounded-md border border-slate-300 px-2 py-1 text-xs">
+          {rowOptions.map((label, r) => (
+            <option key={r} value={r}>{label}</option>
+          ))}
+        </select>
+        <span className="text-xs text-slate-500">{t('events.seatGrid.rowsTo')}</span>
+        <select value={rangeTo} onChange={(e) => setRangeTo(Number(e.target.value))} className="rounded-md border border-slate-300 px-2 py-1 text-xs">
+          {rowOptions.map((label, r) => (
+            <option key={r} value={r}>{label}</option>
+          ))}
+        </select>
         <button
           type="button"
-          onClick={() => onChange(emptyGrid(grid.rows, grid.cols))}
-          className="rounded-md border border-slate-300 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50"
+          onClick={() => {
+            const [a, b] = [Math.min(rangeFrom, rangeTo), Math.max(rangeFrom, rangeTo)]
+            applyWhere((r) => r >= a && r <= b)
+          }}
+          className={smallButton}
         >
+          {t('events.seatGrid.applyToRows')}
+        </button>
+        <span className="mx-2 h-5 w-px bg-slate-200" />
+        <button type="button" onClick={() => applyWhere(() => true)} className={smallButton}>
+          {t('events.seatGrid.fillAll')}
+        </button>
+        <button type="button" onClick={() => onChange(emptyGrid(grid.rows, grid.cols))} className={`${smallButton} text-red-600`}>
           {t('events.seatGrid.clearAll')}
         </button>
       </div>
 
-      <div className="mb-3 flex flex-wrap gap-2">
-        {ticketTypeOptions.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => setTool({ kind: 'type', type: option.value })}
-            className={toolButton(tool.kind === 'type' && tool.type === option.value)}
-          >
-            <SeatGlyph color={colorOf(option.value)} size={16} />
-            {option.label}
-            {option.accessible && <span aria-hidden>♿</span>}
-            <span className="text-slate-400">{counts.get(option.value) ?? 0}</span>
-          </button>
-        ))}
-        <button type="button" onClick={() => setTool({ kind: 'erase' })} className={toolButton(tool.kind === 'erase')}>
-          <span className="inline-block h-3.5 w-3.5 rounded border border-dashed border-slate-400" />
-          {t('events.seatGrid.aisleTool')}
-        </button>
-      </div>
-      <p className="mb-3 text-xs text-slate-500">{t('events.seatGrid.hint')}</p>
+      <p className="text-xs text-slate-500">{t('events.seatGrid.hint')}</p>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <div className="max-h-[70vh] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
         <div className="mx-auto w-max">
-          <div className="mx-auto mb-5 w-2/3 rounded-b-3xl bg-slate-800 py-1.5 text-center text-[11px] font-semibold uppercase tracking-widest text-white">
+          <div className="mx-auto mb-4 w-2/3 rounded-b-3xl bg-slate-800 py-1.5 text-center text-[11px] font-semibold uppercase tracking-widest text-white">
             {t('events.seatGrid.stage')}
           </div>
-          {grid.cells.map((row, r) => {
-            let number = 0
-            return (
-              <div key={r} className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => paintRow(r)}
-                  title={t('events.seatGrid.paintRow')}
-                  className="w-7 shrink-0 text-center text-[11px] font-semibold text-slate-500 hover:text-orange-600"
-                >
-                  {rowLetter(r)}
-                </button>
-                {row.map((cell, c) => {
-                  if (cell) number += 1
-                  return (
-                    <button
-                      key={c}
-                      type="button"
-                      onMouseDown={(e) => {
-                        e.preventDefault()
-                        startPaint(r, c)
-                      }}
-                      onMouseEnter={() => painting.current && paint(r, c)}
-                      className="relative flex h-8 w-7 flex-col items-center justify-center"
-                      title={cell ? `${rowLetter(r)}-${number}` : ''}
-                    >
-                      {cell ? (
-                        <>
-                          <span className="text-[8px] leading-none text-slate-400">{number}</span>
-                          <SeatGlyph color={colorOf(cell.type)} size={20} />
-                          {isAccessibleType(cell.type) && <span className="absolute -right-0.5 -top-0.5 text-[10px]">♿</span>}
-                        </>
-                      ) : (
-                        <span className="h-4 w-4 rounded border border-dashed border-slate-300" />
-                      )}
-                    </button>
-                  )
-                })}
-                <span className="w-7 shrink-0 text-center text-[11px] font-semibold text-slate-400">{rowLetter(r)}</span>
-              </div>
-            )
-          })}
+
+          <div className="flex items-center">
+            <span className="w-8 shrink-0" />
+            {Array.from({ length: grid.cols }, (_, c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => applyWhere((_r, cc) => cc === c)}
+                title={t('events.seatGrid.paintColumn')}
+                style={{ width: cellSize + 4 }}
+                className="shrink-0 text-center text-[9px] text-slate-400 hover:text-orange-600"
+              >
+                {c + 1}
+              </button>
+            ))}
+          </div>
+
+          {grid.cells.map((row, r) => (
+            <div key={r} className="flex items-center">
+              <button
+                type="button"
+                onClick={() => applyWhere((rr) => rr === r)}
+                title={t('events.seatGrid.paintRow')}
+                className="w-8 shrink-0 text-center text-[11px] font-semibold text-slate-500 hover:text-orange-600"
+              >
+                {rowLetter(r)}
+              </button>
+              {row.map((cell, c) => (
+                <Cell
+                  key={c}
+                  r={r}
+                  c={c}
+                  color={cell ? colorIndex.get(cell.type) ?? '#94A3B8' : null}
+                  accessible={cell ? accessibleTypes.has(cell.type) : false}
+                  highlighted={inDrag(r, c)}
+                  size={cellSize}
+                  onDown={onDown}
+                  onEnter={onEnter}
+                />
+              ))}
+              <span className="w-8 shrink-0 text-center text-[11px] font-semibold text-slate-400">{rowLetter(r)}</span>
+            </div>
+          ))}
         </div>
       </div>
-      <p className="mt-2 text-xs text-slate-500">{t('events.seatGrid.total', { count: total })}</p>
+      <p className="text-xs text-slate-500">{t('events.seatGrid.total', { count: total })}</p>
     </div>
   )
 }

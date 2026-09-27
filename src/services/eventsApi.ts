@@ -57,7 +57,11 @@ function toCreatePayload(values: WithSeatMap) {
     })),
     // Seated events are created with their seat map; blocks point at
     // ticket types by their position in the list above.
-    seatMap: values.seatMap?.map(({ ticketTypeId, ...block }) => ({ ...block, ticketTypeIndex: ticketTypeId })),
+    // One JSON field, not nested form fields: a big hall would pass the
+    // server's 1000-field limit and be cut short.
+    seatMap: values.seatMap
+      ? JSON.stringify(values.seatMap.map(({ ticketTypeId, ...block }) => ({ ...block, ticketTypeIndex: ticketTypeId })))
+      : undefined,
     // No myticketCommission/is_featured/status here — those are the
     // platform's own call. The backend ignores or refuses them from this
     // side (see Organizer\EventService).
@@ -75,7 +79,7 @@ function toUpdatePayload(values: WithSeatMap) {
     sales_end_at: localInputToUtc(values.salesEndAt),
     min_age: values.minAge || undefined,
     seeting_type: values.seatingType,
-    seatMap: values.seatMap,
+    seatMap: values.seatMap ? JSON.stringify(values.seatMap) : undefined,
     translations: toTranslationsArray(values.translations),
   }
 }
