@@ -16,7 +16,7 @@ import {
 } from '@/services/eventsApi'
 import { usePreparedImages } from '@/hooks/usePreparedImages'
 import { apiErrorMessage } from '@/lib/apiError'
-import SeatMapBuilder, { emptyBlock, isSeatMapComplete, toSeatBlocks, type BlockDraft } from '@/components/seatMap/SeatMapBuilder'
+import SeatGridEditor, { emptyGrid, gridToBlocks, seatCountsByType, type SeatGrid } from '@/components/seatMap/SeatGridEditor'
 
 /**
  * Create is reachable only while the organizer has no event yet — the
@@ -42,7 +42,7 @@ export default function EventFormPage() {
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation()
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation()
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [seatBlocks, setSeatBlocks] = useState<BlockDraft[]>([emptyBlock()])
+  const [seatGrid, setSeatGrid] = useState<SeatGrid>(() => emptyGrid())
   const { isPreparingImages, prepareImage } = usePreparedImages()
 
   const eventFormSchema = useMemo(() => buildEventFormSchema(t, isEdit), [t, isEdit])
@@ -98,18 +98,22 @@ export default function EventFormPage() {
   const onSubmit = async (values: EventFormValues) => {
     setSubmitError(null)
     if (needsSeatMap) {
-      if (!isSeatMapComplete(seatBlocks)) {
+      const counts = seatCountsByType(seatGrid)
+      if (counts.size === 0) {
         setSubmitError(t('events.form.seatMapIncomplete'))
         return
       }
-      const covered = new Set(seatBlocks.map((b) => b.ticketTypeId))
-      const missing = seatTicketTypeOptions.find((option) => !covered.has(option.value))
+      if (Array.from(counts.keys()).some((type) => !seatTicketTypeOptions.some((option) => option.value === type))) {
+        setSubmitError(t('events.form.seatMapStaleType'))
+        return
+      }
+      const missing = seatTicketTypeOptions.find((option) => !counts.has(option.value))
       if (missing) {
         setSubmitError(t('events.form.seatMapMissingType', { name: missing.label }))
         return
       }
     }
-    const seatMap = needsSeatMap ? toSeatBlocks(seatBlocks) : undefined
+    const seatMap = needsSeatMap ? gridToBlocks(seatGrid) : undefined
     const coverImage = await prepareImage(values.coverImage)
     const withImages = { ...values, coverImage, seatMap }
     try {
@@ -521,8 +525,7 @@ export default function EventFormPage() {
         {needsSeatMap && (
           <section className="rounded-lg border border-slate-200 bg-white p-5">
             <h2 className="mb-1 text-sm font-semibold text-slate-800">{t('events.form.seatMapTitle')}</h2>
-            <p className="mb-4 text-xs text-slate-500">{t('events.seating.builderHint')}</p>
-            <SeatMapBuilder blocks={seatBlocks} onChange={setSeatBlocks} ticketTypeOptions={seatTicketTypeOptions} />
+            <SeatGridEditor grid={seatGrid} onChange={setSeatGrid} ticketTypeOptions={seatTicketTypeOptions} />
           </section>
         )}
 

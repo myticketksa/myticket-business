@@ -13,14 +13,14 @@ import {
 } from '@/services/seatMapApi'
 import type { EventSeat, SeatStatus } from '@/types/seatMap'
 import { apiErrorMessage } from '@/lib/apiError'
-import SeatMapBuilder, { emptyBlock, isSeatMapComplete, toSeatBlocks, type BlockDraft } from '@/components/seatMap/SeatMapBuilder'
+import SeatGridEditor, { SeatGlyph, emptyGrid, gridToBlocks, seatCountsByType, type SeatGrid } from '@/components/seatMap/SeatGridEditor'
 
-const STATUS_STYLES: Record<SeatStatus, string> = {
-  available: 'bg-white border-slate-300 text-slate-700',
-  held: 'bg-amber-100 border-amber-300 text-amber-800',
-  reserved: 'bg-blue-100 border-blue-300 text-blue-800',
-  sold: 'bg-slate-700 border-slate-700 text-white',
-  blocked: 'bg-red-50 border-red-300 text-red-700 line-through',
+const STATUS_COLORS: Record<SeatStatus, string> = {
+  available: '#C2C2C2',
+  held: '#F59E0B',
+  reserved: '#3B82F6',
+  sold: '#FF8C48',
+  blocked: '#DC2626',
 }
 
 function groupSeats(seats: EventSeat[]) {
@@ -48,7 +48,7 @@ export default function EventSeatMapPage() {
   const [generate, { isLoading: isGenerating }] = useGenerateSeatMapMutation()
   const [clearMap, { isLoading: isClearing }] = useClearSeatMapMutation()
 
-  const [blocks, setBlocks] = useState<BlockDraft[]>([emptyBlock()])
+  const [grid, setGrid] = useState<SeatGrid>(() => emptyGrid())
   const [error, setError] = useState<string | null>(null)
   const [confirmingClear, setConfirmingClear] = useState(false)
   const [setSeatsBlocked, { isLoading: isBlocking }] = useSetSeatsBlockedMutation()
@@ -89,13 +89,13 @@ export default function EventSeatMapPage() {
 
   const handleGenerate = async () => {
     setError(null)
-    if (!isSeatMapComplete(blocks)) {
-      setError(t('events.seating.validationIncomplete'))
+    if (seatCountsByType(grid).size === 0) {
+      setError(t('events.form.seatMapIncomplete'))
       return
     }
     try {
-      await generate({ eventId, blocks: toSeatBlocks(blocks) }).unwrap()
-      setBlocks([emptyBlock()])
+      await generate({ eventId, blocks: gridToBlocks(grid) }).unwrap()
+      setGrid(emptyGrid())
     } catch (err) {
       setError(apiErrorMessage(err, t, 'events.seating.generateError'))
     }
@@ -134,18 +134,16 @@ export default function EventSeatMapPage() {
           </div>
         )}
 
-        {event.ticketTypes.length === 0 ? (
+        {!isLoadingSeats && seatCount === 0 && (event.ticketTypes.length === 0 ? (
           <div className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-500">
             {t('events.seating.noTicketTypes')}
           </div>
         ) : (
           <div className="rounded-lg border border-slate-200 bg-white p-5">
-            <h2 className="mb-1 text-sm font-semibold text-slate-800">{t('events.seating.builderTitle')}</h2>
-            <p className="mb-4 text-xs text-slate-500">{t('events.seating.builderHint')}</p>
-
-            <SeatMapBuilder
-              blocks={blocks}
-              onChange={setBlocks}
+            <h2 className="mb-4 text-sm font-semibold text-slate-800">{t('events.seating.builderTitle')}</h2>
+            <SeatGridEditor
+              grid={grid}
+              onChange={setGrid}
               ticketTypeOptions={event.ticketTypes.map((tt) => ({ value: String(tt.id), label: `${tt.name} (${tt.price})` }))}
             />
 
@@ -162,8 +160,9 @@ export default function EventSeatMapPage() {
 
             {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
           </div>
-        )}
+        ))}
 
+        {(isLoadingSeats || seatCount > 0) && (
         <div className="rounded-lg border border-slate-200 bg-white p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-800">
@@ -202,9 +201,11 @@ export default function EventSeatMapPage() {
                         disabled={!selectable}
                         onClick={() => toggleSeat(seat)}
                         title={`${seat.label ?? seat.number} · ${seat.ticket_type?.name ?? ''} · ${seat.price}${seat.isAccessible ? ` · ${t('events.seating.accessible')}` : ''}`}
-                        className={`flex h-7 w-7 items-center justify-center rounded border text-[10px] font-medium ${STATUS_STYLES[seat.status]} ${seat.isAccessible ? 'ring-2 ring-blue-400' : ''} ${isSelected ? 'outline outline-2 outline-offset-1 outline-orange-500' : ''} ${selectable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                        className={`relative flex h-9 w-7 flex-col items-center justify-center rounded ${isSelected ? 'bg-orange-100 outline outline-2 outline-orange-500' : ''} ${selectable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                       >
-                        {seat.number}
+                        <span className="text-[8px] leading-none text-slate-400">{seat.number}</span>
+                        <SeatGlyph color={STATUS_COLORS[seat.status]} size={20} />
+                        {seat.isAccessible && <span className="absolute -right-0.5 -top-0.5 text-[10px]">♿</span>}
                       </button>
                     )
                   })}
@@ -253,15 +254,16 @@ export default function EventSeatMapPage() {
 
           {seatCount > 0 && (
             <div className="mt-3 flex flex-wrap gap-4 border-t border-slate-100 pt-3">
-              {(Object.keys(STATUS_STYLES) as SeatStatus[]).map((status) => (
+              {(Object.keys(STATUS_COLORS) as SeatStatus[]).map((status) => (
                 <div key={status} className="flex items-center gap-1.5">
-                  <span className={`h-3.5 w-3.5 rounded border ${STATUS_STYLES[status]}`} />
+                  <SeatGlyph color={STATUS_COLORS[status]} size={14} />
                   <span className="text-[11px] text-slate-500">{t(`events.seating.status.${status}`)}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
+        )}
       </div>
 
       {confirmingClear && (

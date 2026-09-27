@@ -231,9 +231,10 @@
       "seatingHint": "Seated: build the seat map below (rows and seats per ticket type); customers pick their seat when booking. General admission: no seat map, just ticket quantities.",
       "seatingHintEdit": "Switching to seated asks for the seat map right here. Seating can only be changed until the first ticket is booked; switching back to general admission deletes the seat map.",
       "seatMapTitle": "Seat map",
-      "seatMapIncomplete": "Finish the seat map: pick a ticket type and fill in every row.",
+      "seatMapIncomplete": "Place at least one seat on the seat map.",
       "seatMapMissingType": "\"{{name}}\" has no seats on the seat map. Every ticket type of a seated event needs seats.",
-      "ticketTypeNumber": "Ticket type {{number}}"
+      "ticketTypeNumber": "Ticket type {{number}}",
+      "seatMapStaleType": "Some seats use a ticket type that was removed. Repaint them with a current ticket type."
     },
     "seating": {
       "manageLink": "Manage seating",
@@ -278,6 +279,18 @@
       "unblockSelected": "Put {{count}} seat(s) back on sale",
       "clearSelection": "Clear selection",
       "blockError": "Could not update these seats. Try again."
+    },
+    "seatGrid": {
+      "rows": "Rows",
+      "seatsPerRow": "Seats per row",
+      "fillAll": "Fill all with selected type",
+      "clearAll": "Clear all",
+      "accessibleTool": "Wheelchair seat",
+      "aisleTool": "Aisle / no seat",
+      "hint": "Pick a ticket type, then click or drag across the grid to place seats. Use \"Aisle / no seat\" to leave gaps, and click a row letter to fill the whole row. Seats are numbered left to right in each row.",
+      "stage": "Stage",
+      "paintRow": "Apply to the whole row",
+      "total": "{{count}} seats in total"
     }
   },
   "applications": {
