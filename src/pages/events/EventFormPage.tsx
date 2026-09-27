@@ -16,6 +16,7 @@ import {
 } from '@/services/eventsApi'
 import { usePreparedImages } from '@/hooks/usePreparedImages'
 import { apiErrorMessage } from '@/lib/apiError'
+import SeatMapBuilder, { emptyBlock, isSeatMapComplete, toSeatBlocks, type BlockDraft } from '@/components/seatMap/SeatMapBuilder'
 
 /**
  * Create is reachable only while the organizer has no event yet — the
@@ -41,6 +42,7 @@ export default function EventFormPage() {
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation()
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation()
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [seatBlocks, setSeatBlocks] = useState<BlockDraft[]>([emptyBlock()])
   const { isPreparingImages, prepareImage } = usePreparedImages()
 
   const eventFormSchema = useMemo(() => buildEventFormSchema(t, isEdit), [t, isEdit])
@@ -60,6 +62,7 @@ export default function EventFormPage() {
 
   const { fields, append, remove } = useFieldArray({ control, name: 'ticketTypes' })
   const seatingType = watch('seatingType')
+  const ticketTypeValues = watch('ticketTypes')
 
   useEffect(() => {
     if (!event) return
@@ -82,20 +85,40 @@ export default function EventFormPage() {
     })
   }, [event, reset])
 
+  // A seated event is created (or switched to seated) together with its seat
+  // map — the server refuses one without it.
+  const needsSeatMap = seatingType === 'assigned' && (!isEdit || event?.seatingType !== 'assigned')
+  const seatTicketTypeOptions = isEdit
+    ? (event?.ticketTypes ?? []).map((tt) => ({ value: String(tt.id), label: `${tt.name} (${tt.price})` }))
+    : (ticketTypeValues ?? []).map((tt, index) => ({
+        value: String(index),
+        label: tt.name ? `${tt.name}${tt.price ? ` (${tt.price})` : ''}` : t('events.form.ticketTypeNumber', { number: index + 1 }),
+      }))
+
   const onSubmit = async (values: EventFormValues) => {
     setSubmitError(null)
+    if (needsSeatMap) {
+      if (!isSeatMapComplete(seatBlocks)) {
+        setSubmitError(t('events.form.seatMapIncomplete'))
+        return
+      }
+      const covered = new Set(seatBlocks.map((b) => b.ticketTypeId))
+      const missing = seatTicketTypeOptions.find((option) => !covered.has(option.value))
+      if (missing) {
+        setSubmitError(t('events.form.seatMapMissingType', { name: missing.label }))
+        return
+      }
+    }
+    const seatMap = needsSeatMap ? toSeatBlocks(seatBlocks) : undefined
     const coverImage = await prepareImage(values.coverImage)
-    const withImages = { ...values, coverImage }
+    const withImages = { ...values, coverImage, seatMap }
     try {
       if (isEdit && eventId) {
         await updateEvent({ id: eventId, values: withImages }).unwrap()
-        // Just switched to seated: the seat map is the next thing it needs.
-        const becameSeated = values.seatingType === 'assigned' && event?.seatingType !== 'assigned'
-        navigate(becameSeated ? `/events/${eventId}/seating` : `/events/${eventId}`)
+        navigate(`/events/${eventId}`)
       } else {
         const created = await createEvent(withImages).unwrap()
-        // A seated event can't sell anything until its seats exist.
-        navigate(values.seatingType === 'assigned' ? `/events/${created.id}/seating` : `/events/${created.id}`)
+        navigate(`/events/${created.id}`)
       }
     } catch (err) {
       setSubmitError(apiErrorMessage(err, t, 'events.form.errorGeneric'))
@@ -492,6 +515,14 @@ export default function EventFormPage() {
                 </div>
               ))}
             </div>
+          </section>
+        )}
+
+        {needsSeatMap && (
+          <section className="rounded-lg border border-slate-200 bg-white p-5">
+            <h2 className="mb-1 text-sm font-semibold text-slate-800">{t('events.form.seatMapTitle')}</h2>
+            <p className="mb-4 text-xs text-slate-500">{t('events.seating.builderHint')}</p>
+            <SeatMapBuilder blocks={seatBlocks} onChange={setSeatBlocks} ticketTypeOptions={seatTicketTypeOptions} />
           </section>
         )}
 

@@ -2,6 +2,7 @@ import { buildFormData } from '@/lib/buildFormData'
 import { localInputToUtc } from '@/lib/datetime'
 import type { EventFormValues } from '@/schemas/event.schema'
 import { api } from '@/services/api'
+import type { SeatBlock } from '@/types/seatMap'
 import type {
   ApiEnvelope,
   EventCategory,
@@ -28,7 +29,9 @@ function toTranslationsArray(translations: EventFormValues['translations']) {
   ]
 }
 
-function toCreatePayload(values: EventFormValues) {
+type WithSeatMap = EventFormValues & { seatMap?: SeatBlock[] }
+
+function toCreatePayload(values: WithSeatMap) {
   return {
     category_id: values.categoryId,
     venue_id: values.venueId,
@@ -52,6 +55,9 @@ function toCreatePayload(values: EventFormValues) {
       entry_time_end: ticketType.entryTimeEnd || undefined,
       quantity_total: ticketType.quantityTotal,
     })),
+    // Seated events are created with their seat map; blocks point at
+    // ticket types by their position in the list above.
+    seatMap: values.seatMap?.map(({ ticketTypeId, ...block }) => ({ ...block, ticketTypeIndex: ticketTypeId })),
     // No myticketCommission/is_featured/status here — those are the
     // platform's own call. The backend ignores or refuses them from this
     // side (see Organizer\EventService).
@@ -61,7 +67,7 @@ function toCreatePayload(values: EventFormValues) {
 // The update endpoint only accepts this subset (see UpdateEventRequest on the backend) —
 // category, venue, seating type, free flag, discounts and ticket types can't be
 // changed after creation, and status is admin-only.
-function toUpdatePayload(values: EventFormValues) {
+function toUpdatePayload(values: WithSeatMap) {
   return {
     starts_at: localInputToUtc(values.startsAt),
     ends_at: localInputToUtc(values.endsAt),
@@ -69,6 +75,7 @@ function toUpdatePayload(values: EventFormValues) {
     sales_end_at: localInputToUtc(values.salesEndAt),
     min_age: values.minAge || undefined,
     seeting_type: values.seatingType,
+    seatMap: values.seatMap,
     translations: toTranslationsArray(values.translations),
   }
 }
@@ -128,7 +135,7 @@ export const eventsApi = api.injectEndpoints({
     // (the backend refuses a second — see EventService::create). Once they
     // have one, this stops being reachable from the UI, though the guard is
     // enforced server-side either way.
-    createEvent: build.mutation<EventDetail, EventFormValues>({
+    createEvent: build.mutation<EventDetail, WithSeatMap>({
       query: (values) => ({
         url: '/organizer/event',
         method: 'POST',
@@ -138,7 +145,7 @@ export const eventsApi = api.injectEndpoints({
       invalidatesTags: [{ type: 'Events', id: 'LIST' }],
     }),
 
-    updateEvent: build.mutation<EventDetail, { id: number; values: EventFormValues }>({
+    updateEvent: build.mutation<EventDetail, { id: number; values: WithSeatMap }>({
       query: ({ id, values }) => ({
         url: `/organizer/event/${id}`,
         method: 'POST',

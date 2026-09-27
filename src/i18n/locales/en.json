@@ -197,7 +197,7 @@
       "shortDescription": "Short description",
       "description": "Description",
       "ticketTypesTitle": "Ticket types",
-      "ticketTypesAssignedHint": "These set the name and price for each seat block. Build the actual seat map from the event's detail page after creating it.",
+      "ticketTypesAssignedHint": "These set the name and price for each seat block. Lay out their seats in the seat map below.",
       "addTicketType": "+ Add ticket type",
       "ticketSpecialNeeds": "Special needs ticket type",
       "ticketVatIncluded": "Price includes VAT",
@@ -228,8 +228,12 @@
       },
       "myticketCommission": "MyTicket commission (%)",
       "myticketCommissionPlaceholder": "e.g. 15",
-      "seatingHint": "Seated: after saving you'll build the seat map (rows and seats), and customers pick their seat when booking. General admission: no seat map, just ticket quantities.",
-      "seatingHintEdit": "Switch to seated to build a seat map. This can only be changed until the first ticket is booked; switching back to general admission deletes the seat map."
+      "seatingHint": "Seated: build the seat map below (rows and seats per ticket type); customers pick their seat when booking. General admission: no seat map, just ticket quantities.",
+      "seatingHintEdit": "Switching to seated asks for the seat map right here. Seating can only be changed until the first ticket is booked; switching back to general admission deletes the seat map.",
+      "seatMapTitle": "Seat map",
+      "seatMapIncomplete": "Finish the seat map: pick a ticket type and fill in every row.",
+      "seatMapMissingType": "\"{{name}}\" has no seats on the seat map. Every ticket type of a seated event needs seats.",
+      "ticketTypeNumber": "Ticket type {{number}}"
     },
     "seating": {
       "manageLink": "Manage seating",
