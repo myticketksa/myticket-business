@@ -227,7 +227,9 @@
         "coverImageRequired": "Cover image is required"
       },
       "myticketCommission": "MyTicket commission (%)",
-      "myticketCommissionPlaceholder": "e.g. 15"
+      "myticketCommissionPlaceholder": "e.g. 15",
+      "seatingHint": "Seated: after saving you'll build the seat map (rows and seats), and customers pick their seat when booking. General admission: no seat map, just ticket quantities.",
+      "seatingHintEdit": "Switch to seated to build a seat map. This can only be changed until the first ticket is booked; switching back to general admission deletes the seat map."
     },
     "seating": {
       "manageLink": "Manage seating",

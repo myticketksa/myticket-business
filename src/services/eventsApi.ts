@@ -68,6 +68,7 @@ function toUpdatePayload(values: EventFormValues) {
     sales_start_at: localInputToUtc(values.salesStartAt),
     sales_end_at: localInputToUtc(values.salesEndAt),
     min_age: values.minAge || undefined,
+    seeting_type: values.seatingType,
     translations: toTranslationsArray(values.translations),
   }
 }

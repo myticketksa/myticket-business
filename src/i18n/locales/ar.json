@@ -227,7 +227,9 @@
         "coverImageRequired": "صورة الغلاف مطلوبة"
       },
       "myticketCommission": "عمولة MyTicket (%)",
-      "myticketCommissionPlaceholder": "مثال: 15"
+      "myticketCommissionPlaceholder": "مثال: 15",
+      "seatingHint": "مقاعد محددة: بعد الحفظ ستبني خريطة المقاعد (صفوف ومقاعد)، ويختار العميل مقعده عند الحجز. دخول عام: بدون خريطة مقاعد، فقط عدد التذاكر.",
+      "seatingHintEdit": "اختر المقاعد المحددة لبناء خريطة المقاعد. يمكن تغيير ذلك فقط قبل حجز أول تذكرة، والعودة إلى الدخول العام تحذف خريطة المقاعد."
     },
     "seating": {
       "manageLink": "إدارة المقاعد",

@@ -66,6 +66,7 @@ export default function EventFormPage() {
     reset({
       ...emptyEventFormValues,
       startsAt: utcToLocalInput(event.startTime),
+      seatingType: event.seatingType,
       translations: {
         en: {
           title: event.title.en ?? '',
@@ -88,7 +89,9 @@ export default function EventFormPage() {
     try {
       if (isEdit && eventId) {
         await updateEvent({ id: eventId, values: withImages }).unwrap()
-        navigate(`/events/${eventId}`)
+        // Just switched to seated: the seat map is the next thing it needs.
+        const becameSeated = values.seatingType === 'assigned' && event?.seatingType !== 'assigned'
+        navigate(becameSeated ? `/events/${eventId}/seating` : `/events/${eventId}`)
       } else {
         const created = await createEvent(withImages).unwrap()
         // A seated event can't sell anything until its seats exist.
@@ -122,6 +125,23 @@ export default function EventFormPage() {
         noValidate
         className="animate-fade-in space-y-6 px-4 pb-12 pane-sm:px-8"
       >
+        {isEdit && (
+          <section className="rounded-lg border border-slate-200 bg-white p-5">
+            <label htmlFor="seatingTypeEdit" className="mb-1 block text-sm font-medium text-slate-700">
+              {t('events.form.seatingType')}
+            </label>
+            <select
+              id="seatingTypeEdit"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm pane-sm:w-1/2"
+              {...register('seatingType')}
+            >
+              <option value="assigned">{t('events.form.seatingAssigned')}</option>
+              <option value="free">{t('events.form.seatingFree')}</option>
+            </select>
+            <p className="mt-1 text-xs text-slate-500">{t('events.form.seatingHintEdit')}</p>
+          </section>
+        )}
+
         {!isEdit && (
           <section className="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-5 pane-sm:grid-cols-2">
             <div>
@@ -174,6 +194,7 @@ export default function EventFormPage() {
                 <option value="assigned">{t('events.form.seatingAssigned')}</option>
                 <option value="free">{t('events.form.seatingFree')}</option>
               </select>
+              <p className="mt-1 text-xs text-slate-500">{t('events.form.seatingHint')}</p>
             </div>
 
             <div className="flex items-end">
