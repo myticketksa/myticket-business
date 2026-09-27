@@ -265,7 +265,12 @@
       "blockSelected": "حجب {{count}} مقعد",
       "unblockSelected": "إعادة {{count}} مقعد للبيع",
       "clearSelection": "إلغاء التحديد",
-      "blockError": "تعذّر تحديث هذه المقاعد. حاول مرة أخرى."
+      "blockError": "تعذّر تحديث هذه المقاعد. حاول مرة أخرى.",
+      "colorBy_type": "حسب نوع التذكرة",
+      "colorBy_status": "حسب الحالة",
+      "seatCount": "{{count}} مقعد",
+      "fadedHint": "المقاعد الباهتة مباعة أو قيد الحجز أو محجوبة.",
+      "viewSeatMap": "عرض خريطة المقاعد"
     },
     "seatGrid": {
       "rows": "عدد الصفوف",

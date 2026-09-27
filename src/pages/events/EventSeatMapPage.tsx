@@ -13,7 +13,7 @@ import {
 } from '@/services/seatMapApi'
 import type { EventSeat, SeatStatus } from '@/types/seatMap'
 import { apiErrorMessage } from '@/lib/apiError'
-import SeatGridEditor, { SeatGlyph, emptyGrid, gridToBlocks, seatCountsByType, type SeatGrid } from '@/components/seatMap/SeatGridEditor'
+import SeatGridEditor, { SeatGlyph, TYPE_COLORS, emptyGrid, gridToBlocks, seatCountsByType, type SeatGrid } from '@/components/seatMap/SeatGridEditor'
 
 const STATUS_COLORS: Record<SeatStatus, string> = {
   available: '#C2C2C2',
@@ -54,6 +54,7 @@ export default function EventSeatMapPage() {
   const [setSeatsBlocked, { isLoading: isBlocking }] = useSetSeatsBlockedMutation()
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [blockError, setBlockError] = useState<string | null>(null)
+  const [colorBy, setColorBy] = useState<'type' | 'status'>('type')
 
   if (isLoadingEvent || !event) {
     return <LoadingSpinner size={160} />
@@ -113,6 +114,14 @@ export default function EventSeatMapPage() {
   }
 
   const groups = groupSeats(seats ?? [])
+  // Same colours as the editor, so a type looks the same when building and viewing.
+  const typeColor = new Map(event.ticketTypes.map((tt, index) => [tt.id, TYPE_COLORS[index % TYPE_COLORS.length]]))
+  const seatsPerType = new Map<number, number>()
+  ;(seats ?? []).forEach((seat) => {
+    if (seat.ticket_type) seatsPerType.set(seat.ticket_type.id, (seatsPerType.get(seat.ticket_type.id) ?? 0) + 1)
+  })
+  const seatColor = (seat: EventSeat) =>
+    colorBy === 'type' ? typeColor.get(seat.ticket_type?.id ?? -1) ?? '#94A3B8' : STATUS_COLORS[seat.status]
   const seatCount = seats?.length ?? 0
 
   return (
@@ -169,6 +178,19 @@ export default function EventSeatMapPage() {
               {t('events.seating.previewTitle', { count: seatCount })}
             </h2>
             {seatCount > 0 && (
+              <div className="flex items-center gap-3">
+              <div className="flex overflow-hidden rounded-md border border-slate-300 text-xs">
+                {(['type', 'status'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setColorBy(mode)}
+                    className={`px-3 py-1 ${colorBy === mode ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50'}`}
+                  >
+                    {t(`events.seating.colorBy_${mode}`)}
+                  </button>
+                ))}
+              </div>
               <button
                 type="button"
                 onClick={() => setConfirmingClear(true)}
@@ -176,6 +198,7 @@ export default function EventSeatMapPage() {
               >
                 {t('events.seating.clearMap')}
               </button>
+              </div>
             )}
           </div>
 
@@ -204,7 +227,9 @@ export default function EventSeatMapPage() {
                         className={`relative flex h-9 w-7 flex-col items-center justify-center rounded ${isSelected ? 'bg-orange-100 outline outline-2 outline-orange-500' : ''} ${selectable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                       >
                         <span className="text-[8px] leading-none text-slate-400">{seat.number}</span>
-                        <SeatGlyph color={STATUS_COLORS[seat.status]} size={20} />
+                        <span style={{ opacity: colorBy === 'type' && seat.status !== 'available' ? 0.3 : 1 }}>
+                          <SeatGlyph color={seatColor(seat)} size={20} />
+                        </span>
                         {seat.isAccessible && <span className="absolute -right-0.5 -top-0.5 text-[10px]">♿</span>}
                       </button>
                     )
@@ -254,12 +279,26 @@ export default function EventSeatMapPage() {
 
           {seatCount > 0 && (
             <div className="mt-3 flex flex-wrap gap-4 border-t border-slate-100 pt-3">
-              {(Object.keys(STATUS_COLORS) as SeatStatus[]).map((status) => (
-                <div key={status} className="flex items-center gap-1.5">
-                  <SeatGlyph color={STATUS_COLORS[status]} size={14} />
-                  <span className="text-[11px] text-slate-500">{t(`events.seating.status.${status}`)}</span>
-                </div>
-              ))}
+              {colorBy === 'type' ? (
+                <>
+                  {event.ticketTypes.map((tt) => (
+                    <div key={tt.id} className="flex items-center gap-1.5">
+                      <SeatGlyph color={typeColor.get(tt.id) ?? '#94A3B8'} size={14} />
+                      <span className="text-[11px] text-slate-600">
+                        {tt.name} · {t('events.seating.seatCount', { count: seatsPerType.get(tt.id) ?? 0 })}
+                      </span>
+                    </div>
+                  ))}
+                  <span className="text-[11px] text-slate-400">{t('events.seating.fadedHint')}</span>
+                </>
+              ) : (
+                (Object.keys(STATUS_COLORS) as SeatStatus[]).map((status) => (
+                  <div key={status} className="flex items-center gap-1.5">
+                    <SeatGlyph color={STATUS_COLORS[status]} size={14} />
+                    <span className="text-[11px] text-slate-500">{t(`events.seating.status.${status}`)}</span>
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>

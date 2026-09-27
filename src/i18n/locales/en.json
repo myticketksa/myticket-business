@@ -265,7 +265,12 @@
       "blockSelected": "Block {{count}} seat(s)",
       "unblockSelected": "Put {{count}} seat(s) back on sale",
       "clearSelection": "Clear selection",
-      "blockError": "Could not update these seats. Try again."
+      "blockError": "Could not update these seats. Try again.",
+      "colorBy_type": "By ticket type",
+      "colorBy_status": "By status",
+      "seatCount": "{{count}} seats",
+      "fadedHint": "Faded seats are sold, being bought or blocked.",
+      "viewSeatMap": "View seat map"
     },
     "seatGrid": {
       "rows": "Rows",

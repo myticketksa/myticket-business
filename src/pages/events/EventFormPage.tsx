@@ -236,6 +236,11 @@ export default function EventFormPage() {
             <p className="mt-1 text-xs text-slate-500">
               {hasBookings ? t('events.form.lockedAfterBooking') : isEdit ? t('events.form.seatingHintEdit') : t('events.form.seatingHint')}
             </p>
+            {isEdit && event?.seatingType === 'assigned' && (
+              <Link to={`/events/${eventId}/seating`} className="mt-1 inline-block text-xs font-medium text-orange-600 hover:text-orange-700">
+                {t('events.seating.viewSeatMap')}
+              </Link>
+            )}
           </div>
 
           <div className="flex items-end">
