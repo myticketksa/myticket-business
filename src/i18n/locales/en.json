@@ -264,8 +264,14 @@
         "available": "Available",
         "held": "Held",
         "reserved": "Reserved",
-        "sold": "Sold"
-      }
+        "sold": "Sold",
+        "blocked": "Blocked (not for sale)"
+      },
+      "selectHint": "Tap seats to select them, then block them to keep them off sale (family, guests…). Blocked seats still show on the map but nobody can book them.",
+      "blockSelected": "Block {{count}} seat(s)",
+      "unblockSelected": "Put {{count}} seat(s) back on sale",
+      "clearSelection": "Clear selection",
+      "blockError": "Could not update these seats. Try again."
     }
   },
   "applications": {

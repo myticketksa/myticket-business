@@ -5,7 +5,12 @@ import ConfirmDialog from '@/components/ConfirmDialog'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import PageHeader from '@/components/PageHeader'
 import { useGetEventQuery } from '@/services/eventsApi'
-import { useClearSeatMapMutation, useGenerateSeatMapMutation, useGetSeatMapQuery } from '@/services/seatMapApi'
+import {
+  useClearSeatMapMutation,
+  useGenerateSeatMapMutation,
+  useGetSeatMapQuery,
+  useSetSeatsBlockedMutation,
+} from '@/services/seatMapApi'
 import type { EventSeat, SeatStatus } from '@/types/seatMap'
 import { apiErrorMessage } from '@/lib/apiError'
 
@@ -46,6 +51,7 @@ const STATUS_STYLES: Record<SeatStatus, string> = {
   held: 'bg-amber-100 border-amber-300 text-amber-800',
   reserved: 'bg-blue-100 border-blue-300 text-blue-800',
   sold: 'bg-slate-700 border-slate-700 text-white',
+  blocked: 'bg-red-50 border-red-300 text-red-700 line-through',
 }
 
 function groupSeats(seats: EventSeat[]) {
@@ -76,6 +82,9 @@ export default function EventSeatMapPage() {
   const [blocks, setBlocks] = useState<BlockDraft[]>([emptyBlock()])
   const [error, setError] = useState<string | null>(null)
   const [confirmingClear, setConfirmingClear] = useState(false)
+  const [setSeatsBlocked, { isLoading: isBlocking }] = useSetSeatsBlockedMutation()
+  const [selected, setSelected] = useState<Set<number>>(new Set())
+  const [blockError, setBlockError] = useState<string | null>(null)
 
   if (isLoadingEvent || !event) {
     return <LoadingSpinner size={160} />
@@ -92,6 +101,32 @@ export default function EventSeatMapPage() {
         i === blockIndex ? { ...b, rows: b.rows.map((r, ri) => (ri === rowIndex ? { ...r, ...patch } : r)) } : b,
       ),
     )
+  }
+
+  // Only free or already-blocked seats can be picked; booked or held seats
+  // aren't the organizer's to take off sale.
+  const toggleSeat = (seat: EventSeat) => {
+    if (seat.status !== 'available' && seat.status !== 'blocked') return
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(seat.id)) next.delete(seat.id)
+      else next.add(seat.id)
+      return next
+    })
+  }
+
+  const selectedSeats = (seats ?? []).filter((seat) => selected.has(seat.id))
+  const toBlock = selectedSeats.filter((seat) => seat.status === 'available').map((seat) => seat.id)
+  const toUnblock = selectedSeats.filter((seat) => seat.status === 'blocked').map((seat) => seat.id)
+
+  const handleSetBlocked = async (seatIds: number[], blocked: boolean) => {
+    setBlockError(null)
+    try {
+      await setSeatsBlocked({ eventId, seatIds, blocked }).unwrap()
+      setSelected(new Set())
+    } catch (err) {
+      setBlockError(apiErrorMessage(err, t, 'events.seating.blockError'))
+    }
   }
 
   const handleGenerate = async () => {
@@ -327,19 +362,64 @@ export default function EventSeatMapPage() {
               {rows.map(([row, rowSeats]) => (
                 <div key={row} className="mb-2 flex flex-wrap items-center gap-1.5">
                   <span className="w-6 shrink-0 text-[11px] text-slate-400">{row}</span>
-                  {rowSeats.map((seat) => (
-                    <span
-                      key={seat.id}
-                      title={`${seat.label ?? seat.number} · ${seat.ticket_type?.name ?? ''} · ${seat.price}${seat.isAccessible ? ` · ${t('events.seating.accessible')}` : ''}`}
-                      className={`flex h-7 w-7 items-center justify-center rounded border text-[10px] font-medium ${STATUS_STYLES[seat.status]} ${seat.isAccessible ? 'ring-2 ring-blue-400' : ''}`}
-                    >
-                      {seat.number}
-                    </span>
-                  ))}
+                  {rowSeats.map((seat) => {
+                    const selectable = seat.status === 'available' || seat.status === 'blocked'
+                    const isSelected = selected.has(seat.id)
+                    return (
+                      <button
+                        key={seat.id}
+                        type="button"
+                        disabled={!selectable}
+                        onClick={() => toggleSeat(seat)}
+                        title={`${seat.label ?? seat.number} · ${seat.ticket_type?.name ?? ''} · ${seat.price}${seat.isAccessible ? ` · ${t('events.seating.accessible')}` : ''}`}
+                        className={`flex h-7 w-7 items-center justify-center rounded border text-[10px] font-medium ${STATUS_STYLES[seat.status]} ${seat.isAccessible ? 'ring-2 ring-blue-400' : ''} ${isSelected ? 'outline outline-2 outline-offset-1 outline-orange-500' : ''} ${selectable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                      >
+                        {seat.number}
+                      </button>
+                    )
+                  })}
                 </div>
               ))}
             </div>
           ))}
+
+          {seatCount > 0 && (
+            <div className="mt-3 border-t border-slate-100 pt-3">
+              <p className="text-xs text-slate-500">{t('events.seating.selectHint')}</p>
+              {selected.size > 0 && (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {toBlock.length > 0 && (
+                    <button
+                      type="button"
+                      disabled={isBlocking}
+                      onClick={() => handleSetBlocked(toBlock, true)}
+                      className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {t('events.seating.blockSelected', { count: toBlock.length })}
+                    </button>
+                  )}
+                  {toUnblock.length > 0 && (
+                    <button
+                      type="button"
+                      disabled={isBlocking}
+                      onClick={() => handleSetBlocked(toUnblock, false)}
+                      className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      {t('events.seating.unblockSelected', { count: toUnblock.length })}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setSelected(new Set())}
+                    className="text-xs text-slate-500 hover:text-slate-700"
+                  >
+                    {t('events.seating.clearSelection')}
+                  </button>
+                </div>
+              )}
+              {blockError && <p className="mt-2 text-xs text-red-600">{blockError}</p>}
+            </div>
+          )}
 
           {seatCount > 0 && (
             <div className="mt-3 flex flex-wrap gap-4 border-t border-slate-100 pt-3">

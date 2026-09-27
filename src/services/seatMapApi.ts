@@ -20,6 +20,20 @@ export const seatMapApi = api.injectEndpoints({
       invalidatesTags: (_result, _error, { eventId }) => [{ type: 'SeatMap' as const, id: eventId }],
     }),
 
+    // Blocked seats stay on the map but can't be booked by anyone.
+    setSeatsBlocked: build.mutation<
+      { changed: number; skipped: number },
+      { eventId: number; seatIds: number[]; blocked: boolean }
+    >({
+      query: ({ eventId, seatIds, blocked }) => ({
+        url: `/organizer/event/${eventId}/seats/block`,
+        method: 'POST',
+        body: { seatIds, blocked },
+      }),
+      transformResponse: (response: ApiEnvelope<{ changed: number; skipped: number }>) => response.data,
+      invalidatesTags: (_result, _error, { eventId }) => [{ type: 'SeatMap' as const, id: eventId }],
+    }),
+
     clearSeatMap: build.mutation<void, number>({
       query: (eventId) => ({
         url: `/organizer/event/${eventId}/seats`,
@@ -30,4 +44,4 @@ export const seatMapApi = api.injectEndpoints({
   }),
 })
 
-export const { useGetSeatMapQuery, useGenerateSeatMapMutation, useClearSeatMapMutation } = seatMapApi
+export const { useGetSeatMapQuery, useGenerateSeatMapMutation, useClearSeatMapMutation, useSetSeatsBlockedMutation } = seatMapApi
