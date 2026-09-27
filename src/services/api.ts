@@ -15,6 +15,6 @@ export const api = createApi({
       return headers
     },
   }),
-  tagTypes: ['EventCategories', 'Venues', 'Events', 'Cashiers', 'Transfers', 'Stats'],
+  tagTypes: ['EventCategories', 'Venues', 'Events', 'Cashiers', 'Transfers', 'Stats', 'SeatMap'],
   endpoints: () => ({}),
 })

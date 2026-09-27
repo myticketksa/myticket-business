@@ -5,6 +5,7 @@ import CashiersListPage from '@/pages/cashiers/CashiersListPage'
 import DashboardPage from '@/pages/DashboardPage'
 import EventDetailPage from '@/pages/events/EventDetailPage'
 import EventFormPage from '@/pages/events/EventFormPage'
+import EventSeatMapPage from '@/pages/events/EventSeatMapPage'
 import EventsListPage from '@/pages/events/EventsListPage'
 import ForgotPasswordPage from '@/pages/ForgotPasswordPage'
 import LoginPage from '@/pages/LoginPage'
@@ -28,6 +29,7 @@ export default function App() {
                   <Route path="/events/new" element={<EventFormPage />} />
                   <Route path="/events/:id" element={<EventDetailPage />} />
                   <Route path="/events/:id/edit" element={<EventFormPage />} />
+                  <Route path="/events/:id/seating" element={<EventSeatMapPage />} />
                   <Route path="/cashiers" element={<CashiersListPage />} />
                   <Route path="/payout" element={<PayoutPage />} />
                   <Route path="/reports" element={<StatsPage />} />

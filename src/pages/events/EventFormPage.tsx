@@ -91,7 +91,8 @@ export default function EventFormPage() {
         navigate(`/events/${eventId}`)
       } else {
         const created = await createEvent(withImages).unwrap()
-        navigate(`/events/${created.id}`)
+        // A seated event can't sell anything until its seats exist.
+        navigate(values.seatingType === 'assigned' ? `/events/${created.id}/seating` : `/events/${created.id}`)
       }
     } catch (err) {
       setSubmitError(apiErrorMessage(err, t, 'events.form.errorGeneric'))
