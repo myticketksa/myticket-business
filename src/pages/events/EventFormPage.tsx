@@ -77,9 +77,6 @@ export default function EventFormPage() {
       isFree: event.isFree,
       startsAt: utcToLocalInput(event.startTime),
       endsAt: utcToLocalInput(manage?.endsAt),
-      salesStartAt: utcToLocalInput(manage?.salesStartAt),
-      salesEndAt: utcToLocalInput(manage?.salesEndAt),
-      minAge: manage?.minAge ?? '',
       discountType: manage?.discountType ?? '',
       discountValue: manage?.discountValue ?? '',
       discountStartsAt: utcToLocalInput(manage?.discountStartsAt),
@@ -298,39 +295,6 @@ export default function EventFormPage() {
             />
           </div>
 
-          <div>
-            <label htmlFor="salesStartAt" className="mb-1 block text-sm font-medium text-slate-700">
-              {t('events.form.salesStart')}
-            </label>
-            <input
-              id="salesStartAt"
-              type="datetime-local"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              {...register('salesStartAt')}
-            />
-          </div>
-          <div>
-            <label htmlFor="salesEndAt" className="mb-1 block text-sm font-medium text-slate-700">
-              {t('events.form.salesEnd')}
-            </label>
-            <input
-              id="salesEndAt"
-              type="datetime-local"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              {...register('salesEndAt')}
-            />
-          </div>
-          <div>
-            <label htmlFor="minAge" className="mb-1 block text-sm font-medium text-slate-700">
-              {t('events.form.minAge')}
-            </label>
-            <input
-              id="minAge"
-              type="text"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              {...register('minAge')}
-            />
-          </div>
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5">

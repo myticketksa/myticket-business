@@ -29,9 +29,6 @@ export interface EventManageFields {
   categoryId: number | null
   venueId: number | null
   endsAt: string | null
-  salesStartAt: string | null
-  salesEndAt: string | null
-  minAge: string | null
   discountType: 'fixed' | 'percentage' | null
   discountValue: string | null
   discountStartsAt: string | null
