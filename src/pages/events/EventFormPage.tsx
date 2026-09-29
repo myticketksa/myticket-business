@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import PageHeader from '@/components/PageHeader'
+import VenueFormModal from '@/components/venues/VenueFormModal'
 import { utcToLocalInput } from '@/lib/datetime'
 import { buildEventFormSchema, emptyEventFormValues, type EventFormValues } from '@/schemas/event.schema'
 import {
@@ -37,6 +38,8 @@ export default function EventFormPage() {
 
   const { data: categories } = useGetEventCategoriesQuery()
   const { data: venues } = useGetVenuesQuery()
+  const [addingVenue, setAddingVenue] = useState(false)
+  const [newVenueName, setNewVenueName] = useState<string | null>(null)
   const { data: event, isLoading: isLoadingEvent } = useGetEventQuery(eventId!, { skip: !isEdit })
 
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation()
@@ -198,9 +201,21 @@ export default function EventFormPage() {
           </div>
 
           <div>
-            <label htmlFor="venueId" className="mb-1 block text-sm font-medium text-slate-700">
-              {t('events.form.venue')}
-            </label>
+            <div className="mb-1 flex items-center justify-between gap-2">
+              <label htmlFor="venueId" className="block text-sm font-medium text-slate-700">
+                {t('events.form.venue')}
+              </label>
+              {/* An event somewhere not yet in the list was a dead end here —
+                * organizers can add the venue without leaving the form, as
+                * admins can. */}
+              <button
+                type="button"
+                onClick={() => setAddingVenue(true)}
+                className="text-xs font-medium text-orange-600 transition-colors hover:text-orange-700"
+              >
+                {t('venues.form.addTitle')}
+              </button>
+            </div>
             <select
               id="venueId"
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
@@ -214,6 +229,11 @@ export default function EventFormPage() {
               ))}
             </select>
             {errors.venueId && <p className="mt-1 text-sm text-red-600">{errors.venueId.message}</p>}
+            {newVenueName && (
+              <p className="animate-fade-in-fast mt-1 text-xs text-green-600">
+                {t('venues.form.created', { name: newVenueName })}
+              </p>
+            )}
           </div>
 
           <div>
@@ -547,6 +567,18 @@ export default function EventFormPage() {
           </Link>
         </div>
       </form>
+      {addingVenue && (
+        <VenueFormModal
+          onClose={() => setAddingVenue(false)}
+          onCreated={(venue) => {
+            // Pick it straight away — the only reason to add one mid-form is
+            // to use it. The list refreshes off the invalidated tag.
+            setValue('venueId', String(venue.id), { shouldValidate: true })
+            setNewVenueName(venue.name)
+            setAddingVenue(false)
+          }}
+        />
+      )}
     </div>
   )
 }

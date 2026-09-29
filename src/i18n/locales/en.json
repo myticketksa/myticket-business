@@ -870,7 +870,12 @@
       "longitude": "Longitude",
       "save": "Add venue",
       "created": "{{name}} added and selected.",
-      "errorGeneric": "Couldn't add the venue. Please try again."
+      "errorGeneric": "Couldn't add the venue. Please try again.",
+      "location": "Location",
+      "locationRequired": "Pick a location on the map."
     }
+  },
+  "locationPicker": {
+    "hint": "Click the map to set the location, or drag the pin once placed."
   }
 }
