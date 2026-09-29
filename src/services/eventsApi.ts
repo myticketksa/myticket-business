@@ -177,6 +177,17 @@ export const eventsApi = api.injectEndpoints({
         { type: 'Events', id: 'LIST' },
       ],
     }),
+
+    // The API refuses once any ticket is paid for
+    // (cannot_delete_event_with_paid_orders) and only lets an organizer
+    // delete their own events.
+    deleteEvent: build.mutation<void, number>({
+      query: (id) => ({ url: `/organizer/event/${id}`, method: 'DELETE' }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: 'Events', id },
+        { type: 'Events', id: 'LIST' },
+      ],
+    }),
   }),
 })
 
@@ -187,4 +198,5 @@ export const {
   useGetEventQuery,
   useCreateEventMutation,
   useUpdateEventMutation,
+  useDeleteEventMutation,
 } = eventsApi

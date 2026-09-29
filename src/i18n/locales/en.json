@@ -295,6 +295,12 @@
       "rowsTo": "to",
       "applyToRows": "Apply to these rows",
       "paintColumn": "Apply to the whole column"
+    },
+    "delete": {
+      "title": "Delete this event?",
+      "message": "“{{name}}” and its ticket types will be removed for good. This can't be undone.",
+      "hasSales": "This event can't be deleted because tickets have already been sold. Contact MyTicket if it needs to be cancelled.",
+      "failed": "Couldn't delete the event. Please try again."
     }
   },
   "applications": {

@@ -1,13 +1,37 @@
-import { Link, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import ConfirmDialog from '@/components/ConfirmDialog'
 import PageHeader from '@/components/PageHeader'
-import { useGetEventQuery } from '@/services/eventsApi'
+import { apiErrorText } from '@/lib/apiError'
+import { useDeleteEventMutation, useGetEventQuery } from '@/services/eventsApi'
 
 export default function EventDetailPage() {
   const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const eventId = Number(id)
   const { data: event, isLoading } = useGetEventQuery(eventId)
+  const navigate = useNavigate()
+  const [deleteEvent, { isLoading: isDeleting }] = useDeleteEventMutation()
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  const handleDelete = async () => {
+    setDeleteError(null)
+    try {
+      await deleteEvent(eventId).unwrap()
+      navigate('/events')
+    } catch (err) {
+      setConfirmingDelete(false)
+      // Once anything is paid the event has to stay — say so plainly
+      // rather than showing the server's code.
+      setDeleteError(
+        apiErrorText(err) === 'cannot_delete_event_with_paid_orders'
+          ? t('events.delete.hasSales')
+          : t('events.delete.failed'),
+      )
+    }
+  }
 
   if (isLoading || !event) {
     return <div className="p-8 text-slate-500">{t('events.detail.loading')}</div>
@@ -40,9 +64,33 @@ export default function EventDetailPage() {
             >
               {t('common.edit')}
             </Link>
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(true)}
+              className="rounded-md border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+            >
+              {t('common.delete')}
+            </button>
           </div>
         }
       />
+
+      {deleteError && (
+        <p className="mx-4 mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 pane-sm:mx-8">
+          {deleteError}
+        </p>
+      )}
+
+      {confirmingDelete && (
+        <ConfirmDialog
+          title={t('events.delete.title')}
+          message={t('events.delete.message', { name: eventTitle })}
+          confirmLabel={t('common.delete')}
+          isBusy={isDeleting}
+          onConfirm={handleDelete}
+          onCancel={() => setConfirmingDelete(false)}
+        />
+      )}
 
       <div className="animate-fade-in grid grid-cols-1 gap-6 px-4 pb-12 pane-sm:px-8 pane-lg:grid-cols-3">
         <div className="space-y-6 pane-lg:col-span-2">
