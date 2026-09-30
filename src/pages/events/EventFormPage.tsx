@@ -7,6 +7,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import PageHeader from '@/components/PageHeader'
 import VenueFormModal from '@/components/venues/VenueFormModal'
+import DatesEditor from '@/components/events/DatesEditor'
 import { utcToLocalInput } from '@/lib/datetime'
 import { buildEventFormSchema, emptyEventFormValues, type EventFormValues } from '@/schemas/event.schema'
 import {
@@ -83,12 +84,21 @@ export default function EventFormPage() {
       venueId: manage?.venueId ? String(manage.venueId) : '',
       isFree: event.isFree,
       refundUntilHours: event.refundUntilHours ? (String(event.refundUntilHours) as '24' | '72' | '168') : '',
-      startsAt: utcToLocalInput(event.startTime),
-      endsAt: utcToLocalInput(manage?.endsAt),
-      discountType: manage?.discountType ?? '',
-      discountValue: manage?.discountValue ?? '',
-      discountStartsAt: utcToLocalInput(manage?.discountStartsAt),
-      discountEndsAt: utcToLocalInput(manage?.discountEndsAt),
+      // A date without its own discount inherits the old event-wide one, so
+      // saving (which moves discounts onto the dates) changes nothing.
+      sessions: (event.sessions?.length
+        ? event.sessions
+        : [{ id: undefined, startsAt: event.startTime, endsAt: manage?.endsAt ?? null, discountType: null, discountValue: null }]
+      ).map((session) => {
+        const own = Boolean(session.discountType)
+        return {
+          id: session.id,
+          startsAt: utcToLocalInput(session.startsAt),
+          endsAt: utcToLocalInput(session.endsAt),
+          discountType: (own ? session.discountType : manage?.discountType) ?? '',
+          discountValue: String((own ? session.discountValue : manage?.discountValue) ?? ''),
+        }
+      }),
       ticketTypes: event.ticketTypes.map((tt) => ({
         id: tt.id,
         sold: (tt.quantity_sold ?? 0) + (tt.quantity_reserved ?? 0),
@@ -147,19 +157,19 @@ export default function EventFormPage() {
     const coverImage = await prepareImage(values.coverImage)
     const withImages = { ...values, coverImage, seatMap }
     let savedId: number
+    let savedDates: number[] = []
     try {
-      if (isEdit && eventId) {
-        await updateEvent({ id: eventId, values: withImages }).unwrap()
-        savedId = eventId
-      } else {
-        savedId = (await createEvent(withImages).unwrap()).id
-      }
+      const saved = isEdit && eventId
+        ? await updateEvent({ id: eventId, values: withImages }).unwrap()
+        : await createEvent(withImages).unwrap()
+      savedId = saved.id
+      savedDates = saved.sessions?.map((session) => session.id) ?? []
     } catch (err) {
       setSubmitError(apiErrorMessage(err, t, 'events.form.errorGeneric'))
       return
     }
     try {
-      if (seatMap) await reserveNewSeats(savedId, reservedSeats(seatGrid))
+      if (seatMap) await reserveNewSeats(savedId, reservedSeats(seatGrid), savedDates.length ? savedDates : undefined)
       navigate(`/events/${savedId}`)
     } catch {
       // The event is saved; only the reserving failed — send them where they can redo it.
@@ -322,65 +332,7 @@ export default function EventFormPage() {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-5 pane-sm:grid-cols-2">
-          <div>
-            <label htmlFor="startsAt" className="mb-1 block text-sm font-medium text-slate-700">
-              {t('events.form.startsAt')}
-            </label>
-            <input
-              id="startsAt"
-              type="datetime-local"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              {...register('startsAt')}
-            />
-            {errors.startsAt && <p className="mt-1 text-sm text-red-600">{errors.startsAt.message}</p>}
-          </div>
-          <div>
-            <label htmlFor="endsAt" className="mb-1 block text-sm font-medium text-slate-700">
-              {t('events.form.endsAt')}
-            </label>
-            <input
-              id="endsAt"
-              type="datetime-local"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              {...register('endsAt')}
-            />
-          </div>
-
-        </section>
-
-        <section className="rounded-lg border border-slate-200 bg-white p-5">
-          <h2 className="mb-3 text-sm font-semibold text-slate-800">{t('events.form.discountTitle')}</h2>
-          <div className="grid grid-cols-1 gap-4 pane-sm:grid-cols-4">
-            <select
-              aria-label={t('events.form.discountTitle')}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-              {...register('discountType')}
-            >
-              <option value="">{t('events.form.discountNone')}</option>
-              <option value="fixed">{t('events.form.discountFixed')}</option>
-              <option value="percentage">{t('events.form.discountPercentage')}</option>
-            </select>
-            <input
-              type="text"
-              placeholder={t('events.form.valuePlaceholder')}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-              {...register('discountValue')}
-            />
-            <input
-              type="datetime-local"
-              aria-label={t('events.form.discountStartsAt')}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-              {...register('discountStartsAt')}
-            />
-            <input
-              type="datetime-local"
-              aria-label={t('events.form.discountEndsAt')}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-              {...register('discountEndsAt')}
-            />
-          </div>
-        </section>
+        <DatesEditor control={control} register={register} errors={errors} />
 
         <section className="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-5 pane-md:grid-cols-2">
           {(['en', 'ar'] as const).map((locale) => (

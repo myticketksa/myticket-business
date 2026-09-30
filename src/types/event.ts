@@ -68,8 +68,17 @@ export interface EventListItem {
   talents?: { id: number; performer: { stageName: string | null } }[]
 }
 
+export interface EventSession {
+  id: number
+  startsAt: string
+  endsAt: string | null
+  discountType: 'fixed' | 'percentage' | null
+  discountValue: number | null
+}
+
 export interface EventDetail extends EventListItem {
   description: LocalizedText
+  sessions?: EventSession[]
   manage?: EventManageFields
 }
 

@@ -23,13 +23,18 @@ export function buildEventFormSchema(t: T, isEdit = false) {
       venueId: z.string().min(1, t('events.form.validation.venueRequired')),
       seatingType: z.enum(['free', 'assigned']),
       isFree: z.boolean(),
-      startsAt: z.string().min(1, t('events.form.validation.startsAtRequired')),
-      endsAt: z.string().optional(),
-
-      discountType: z.enum(['', 'fixed', 'percentage']).optional(),
-      discountValue: z.string().optional(),
-      discountStartsAt: z.string().optional(),
-      discountEndsAt: z.string().optional(),
+      // The dates the event runs on, each with an optional discount of its own.
+      sessions: z
+        .array(
+          z.object({
+            id: z.number().optional(),
+            startsAt: z.string().min(1, t('events.form.validation.startsAtRequired')),
+            endsAt: z.string().optional(),
+            discountType: z.enum(['', 'fixed', 'percentage']),
+            discountValue: z.string().optional(),
+          }),
+        )
+        .min(1, t('events.dates.required')),
       // Hours before the start refunds stay open; '' = no refunds.
       refundUntilHours: z.enum(['', '24', '72', '168']),
 
@@ -66,6 +71,18 @@ export function buildEventFormSchema(t: T, isEdit = false) {
         : z.instanceof(File, { message: t('events.form.validation.coverImageRequired') }),
     })
     .superRefine((values, ctx) => {
+      values.sessions.forEach((session, index) => {
+        if (session.endsAt && session.startsAt && session.endsAt <= session.startsAt) {
+          ctx.addIssue({ code: 'custom', path: ['sessions', index, 'endsAt'], message: t('events.dates.endBeforeStart') })
+        }
+        const value = Number(session.discountValue)
+        if (session.discountType && !(value > 0)) {
+          ctx.addIssue({ code: 'custom', path: ['sessions', index, 'discountValue'], message: t('events.dates.valueRequired') })
+        }
+        if (session.discountType === 'percentage' && value > 100) {
+          ctx.addIssue({ code: 'custom', path: ['sessions', index, 'discountValue'], message: t('events.dates.percentMax') })
+        }
+      })
       values.ticketTypes?.forEach((ticketType, index) => {
         if (ticketType.sold && Number(ticketType.quantityTotal) < ticketType.sold) {
           ctx.addIssue({
@@ -95,12 +112,7 @@ export const emptyEventFormValues: EventFormValues = {
   venueId: '',
   seatingType: 'assigned',
   isFree: false,
-  startsAt: '',
-  endsAt: '',
-  discountType: '',
-  discountValue: '',
-  discountStartsAt: '',
-  discountEndsAt: '',
+  sessions: [{ startsAt: '', endsAt: '', discountType: '', discountValue: '' }],
   refundUntilHours: '',
   translations: {
     en: { title: '', description: '' },

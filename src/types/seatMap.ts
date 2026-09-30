@@ -2,6 +2,7 @@ export type SeatStatus = 'available' | 'held' | 'reserved' | 'sold' | 'blocked'
 
 export interface EventSeat {
   id: number
+  sessionId?: number | null
   ticket_type: { id: number; name: string; price: string } | null
   row: string
   section: string | null

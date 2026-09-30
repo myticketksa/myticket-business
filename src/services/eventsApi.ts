@@ -29,20 +29,29 @@ function toTranslationsArray(translations: EventFormValues['translations']) {
 
 type WithSeatMap = EventFormValues & { seatMap?: SeatBlock[] }
 
+// One JSON field, like the seat map: a long run of dates as separate form
+// fields would pass the server's field limit. Datetime boxes hold local
+// wall time; the API stores UTC (see lib/datetime).
+function toSessionsJson(sessions: EventFormValues['sessions']) {
+  return JSON.stringify(
+    sessions.map((session) => ({
+      id: session.id,
+      starts_at: localInputToUtc(session.startsAt),
+      ends_at: localInputToUtc(session.endsAt) ?? null,
+      discount_type: session.discountType || null,
+      discount_value: session.discountType ? Number(session.discountValue) : null,
+    })),
+  )
+}
+
 function toCreatePayload(values: WithSeatMap) {
   return {
     category_id: values.categoryId,
     venue_id: values.venueId,
     seeting_type: values.seatingType,
     is_free: values.isFree,
-    // Datetime boxes hold local wall time; the API stores UTC. See lib/datetime.
-    starts_at: localInputToUtc(values.startsAt),
-    ends_at: localInputToUtc(values.endsAt),
+    sessions: toSessionsJson(values.sessions),
     cover_image: values.coverImage,
-    discount_type: values.discountType || undefined,
-    discount_value: values.discountValue || undefined,
-    discount_starts_at: localInputToUtc(values.discountStartsAt),
-    discount_ends_at: localInputToUtc(values.discountEndsAt),
     refund_until_hours: values.refundUntilHours || undefined,
     translations: toTranslationsArray(values.translations),
     ticketTypes: values.ticketTypes?.map((ticketType) => ({
@@ -75,12 +84,13 @@ function toUpdatePayload(values: WithSeatMap) {
     venue_id: values.venueId,
     is_free: values.isFree,
     cover_image: values.coverImage,
-    starts_at: localInputToUtc(values.startsAt),
-    ends_at: localInputToUtc(values.endsAt) ?? '',
-    discount_type: values.discountType || '',
-    discount_value: values.discountValue || '',
-    discount_starts_at: localInputToUtc(values.discountStartsAt) ?? '',
-    discount_ends_at: localInputToUtc(values.discountEndsAt) ?? '',
+    sessions: toSessionsJson(values.sessions),
+    // Discounts now live on each date; the old event-wide one is cleared
+    // (the form copied it onto the dates when it opened).
+    discount_type: '',
+    discount_value: '',
+    discount_starts_at: '',
+    discount_ends_at: '',
     refund_until_hours: values.refundUntilHours,
     seeting_type: values.seatingType,
     seatMap: values.seatMap ? JSON.stringify(values.seatMap) : undefined,

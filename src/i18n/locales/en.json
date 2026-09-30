@@ -275,7 +275,9 @@
       "seatCount": "{{count}} seats",
       "fadedHint": "Faded seats are sold, being bought or reserved.",
       "viewSeatMap": "View seat map",
-      "reserveAfterSaveError": "The seats were created, but the reserved ones could not be taken off sale. Select them below and reserve them again."
+      "reserveAfterSaveError": "The seats were created, but the reserved ones could not be taken off sale. Select them below and reserve them again.",
+      "forDate": "Date",
+      "perDateHint": "Seats on the map are sold separately on each date. Reserving applies to the date shown."
     },
     "seatGrid": {
       "rows": "Rows",
@@ -320,6 +322,30 @@
       "message": "“{{name}}” and its ticket types will be removed for good. This can't be undone.",
       "hasSales": "This event can't be deleted because tickets have already been sold. Contact MyTicket if it needs to be cancelled.",
       "failed": "Couldn't delete the event. Please try again."
+    },
+    "dates": {
+      "title": "Dates",
+      "hint": "Each date sells its own tickets: a ticket type's quantity is how many can be sold for each date, and a seated event's seats are sold separately on each date. A date's discount applies to every ticket on that date.",
+      "addOne": "+ Add a date",
+      "addSeveral": "+ Add several dates",
+      "from": "From",
+      "to": "To",
+      "startTime": "Starts at",
+      "endTime": "Ends at (optional)",
+      "onDays": "On",
+      "discount": "Discount",
+      "addThese": "Add these dates",
+      "repeatIncomplete": "Pick the first and last day, a start time and at least one weekday.",
+      "repeatNone": "No days in that range fall on the chosen weekdays.",
+      "tooMany": "An event can have up to {{max}} dates.",
+      "empty": "No dates yet.",
+      "start": "Starts",
+      "end": "Ends (optional)",
+      "remove": "Remove this date",
+      "required": "Add at least one date.",
+      "endBeforeStart": "Must be after the start.",
+      "valueRequired": "Enter the discount amount.",
+      "percentMax": "A percentage can't be over 100."
     }
   },
   "applications": {

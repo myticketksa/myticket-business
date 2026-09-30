@@ -47,7 +47,9 @@ export default function EventSeatMapPage() {
   const eventId = Number(id)
 
   const { data: event, isLoading: isLoadingEvent } = useGetEventQuery(eventId)
-  const { data: seats, isLoading: isLoadingSeats } = useGetSeatMapQuery(eventId)
+  // Every date has the same layout but its own seats: look at one at a time.
+  const [sessionId, setSessionId] = useState<number | undefined>(undefined)
+  const { data: seats, isLoading: isLoadingSeats } = useGetSeatMapQuery({ eventId, sessionId })
   const [generate, { isLoading: isGenerating }] = useGenerateSeatMapMutation()
   const [clearMap, { isLoading: isClearing }] = useClearSeatMapMutation()
 
@@ -107,7 +109,7 @@ export default function EventSeatMapPage() {
     const toReserve = reservedSeats(grid)
     setGrid(emptyGrid())
     try {
-      await reserveNewSeats(eventId, toReserve)
+      await reserveNewSeats(eventId, toReserve, event.sessions?.length ? event.sessions.map((s) => s.id) : undefined)
     } catch {
       setBlockError(t('events.seating.reserveAfterSaveError'))
     }
@@ -185,9 +187,30 @@ export default function EventSeatMapPage() {
         {(isLoadingSeats || seatCount > 0) && (
         <div className="rounded-lg border border-slate-200 bg-white p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-800">
-              {t('events.seating.previewTitle', { count: seatCount })}
-            </h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-sm font-semibold text-slate-800">
+                {t('events.seating.previewTitle', { count: seatCount })}
+              </h2>
+              {(event.sessions?.length ?? 0) > 1 && (
+                <label className="flex items-center gap-2 text-xs text-slate-600">
+                  {t('events.seating.forDate')}
+                  <select
+                    value={sessionId ?? seats?.[0]?.sessionId ?? ''}
+                    onChange={(e) => {
+                      setSessionId(Number(e.target.value))
+                      setSelected(new Set())
+                    }}
+                    className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+                  >
+                    {event.sessions!.map((session) => (
+                      <option key={session.id} value={session.id}>
+                        {new Date(session.startsAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+            </div>
             {seatCount > 0 && (
               <div className="flex items-center gap-3">
               <div className="flex overflow-hidden rounded-md border border-slate-300 text-xs">
@@ -252,7 +275,10 @@ export default function EventSeatMapPage() {
 
           {seatCount > 0 && (
             <div className="mt-3 border-t border-slate-100 pt-3">
-              <p className="text-xs text-slate-500">{t('events.seating.selectHint')}</p>
+              <p className="text-xs text-slate-500">
+                {t('events.seating.selectHint')}
+                {(event.sessions?.length ?? 0) > 1 && ` ${t('events.seating.perDateHint')}`}
+              </p>
               {selected.size > 0 && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {toBlock.length > 0 && (

@@ -162,9 +162,15 @@ export default function EventDetailPage() {
                 <dt className="text-slate-500">{t('events.detail.venue')}</dt>
                 <dd className="text-slate-800">{event.place}</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">{t('events.detail.starts')}</dt>
-                <dd className="text-slate-800">{new Date(event.startTime).toLocaleString()}</dd>
+              <div className="flex justify-between gap-4">
+                <dt className="shrink-0 text-slate-500">
+                  {(event.sessions?.length ?? 0) > 1 ? t('events.dates.title') : t('events.detail.starts')}
+                </dt>
+                <dd className="space-y-0.5 text-end text-slate-800">
+                  {(event.sessions?.length ? event.sessions.map((session) => session.startsAt) : [event.startTime]).map((startsAt) => (
+                    <div key={startsAt}>{new Date(startsAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                  ))}
+                </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-slate-500">{t('events.detail.seating')}</dt>
