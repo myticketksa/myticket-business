@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocalized } from '@/lib/localized'
 import { Link } from 'react-router-dom'
 import PageHeader from '@/components/PageHeader'
 import SearchInput from '@/components/SearchInput'
@@ -17,6 +18,7 @@ function formatDateTime(value: string) {
 
 export default function EventsListPage() {
   const { t } = useTranslation()
+  const localized = useLocalized()
   const [page, setPage] = useState(1)
   const [searchInput, setSearchInput] = useState('')
   const [status, setStatus] = useState('')
@@ -70,7 +72,7 @@ export default function EventsListPage() {
             <option value="">{t('common.allCategories')}</option>
             {categories?.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name.en || c.name.ar}
+                {localized(c.name)}
               </option>
             ))}
           </select>
@@ -141,7 +143,7 @@ export default function EventsListPage() {
               >
                 <div>
                   <h2 className="text-sm font-semibold text-slate-900">
-                    {event.title.en || event.title.ar || '—'}
+                    {localized(event.title) || '—'}
                   </h2>
                   <dl className="mt-3 space-y-1.5 text-sm">
                     <div className="flex justify-between gap-4">

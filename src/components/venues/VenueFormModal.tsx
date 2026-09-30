@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { useLocalized } from '@/lib/localized'
 import FieldError from '@/components/FieldError'
 import LocationPicker from '@/components/LocationPicker'
 import { useEscapeKey } from '@/hooks/useEscapeKey'
@@ -35,6 +36,7 @@ export default function VenueFormModal({
   onCreated: (venue: Venue) => void
 }) {
   const { t } = useTranslation()
+  const localized = useLocalized()
   const { errors, validate, clearError } = useInlineValidation()
   useEscapeKey(onClose)
 
@@ -110,7 +112,7 @@ export default function VenueFormModal({
               <option value="">{t('venues.form.selectCity')}</option>
               {cities?.map((city) => (
                 <option key={city.id} value={city.id}>
-                  {city.name.en || city.name.ar}
+                  {localized(city.name)}
                 </option>
               ))}
             </select>

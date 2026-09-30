@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useLocalized } from '@/lib/localized'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import PageHeader from '@/components/PageHeader'
 import { apiErrorText } from '@/lib/apiError'
@@ -8,6 +9,7 @@ import { useDeleteEventMutation, useGetEventQuery } from '@/services/eventsApi'
 
 export default function EventDetailPage() {
   const { t } = useTranslation()
+  const localized = useLocalized()
   const { id } = useParams<{ id: string }>()
   const eventId = Number(id)
   const { data: event, isLoading } = useGetEventQuery(eventId)
@@ -37,7 +39,7 @@ export default function EventDetailPage() {
     return <div className="p-8 text-slate-500">{t('events.detail.loading')}</div>
   }
 
-  const eventTitle = event.title.en || event.title.ar || t('events.detail.fallbackTitle')
+  const eventTitle = localized(event.title) || t('events.detail.fallbackTitle')
 
   return (
     <div>

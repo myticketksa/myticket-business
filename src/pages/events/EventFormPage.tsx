@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useLocalized } from '@/lib/localized'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import PageHeader from '@/components/PageHeader'
@@ -15,9 +16,10 @@ import {
   useGetVenuesQuery,
   useUpdateEventMutation,
 } from '@/services/eventsApi'
+import { useReserveNewSeats } from '@/services/seatMapApi'
 import { usePreparedImages } from '@/hooks/usePreparedImages'
 import { apiErrorMessage } from '@/lib/apiError'
-import SeatGridEditor, { emptyGrid, gridToBlocks, seatCountsByType, type SeatGrid } from '@/components/seatMap/SeatGridEditor'
+import SeatGridEditor, { emptyGrid, gridToBlocks, reservedSeats, seatCountsByType, type SeatGrid } from '@/components/seatMap/SeatGridEditor'
 
 /**
  * Create is reachable only while the organizer has no event yet — the
@@ -31,6 +33,7 @@ import SeatGridEditor, { emptyGrid, gridToBlocks, seatCountsByType, type SeatGri
  */
 export default function EventFormPage() {
   const { t } = useTranslation()
+  const localized = useLocalized()
   const { id } = useParams<{ id: string }>()
   const isEdit = Boolean(id)
   const eventId = id ? Number(id) : undefined
@@ -46,6 +49,7 @@ export default function EventFormPage() {
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation()
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [seatGrid, setSeatGrid] = useState<SeatGrid>(() => emptyGrid())
+  const reserveNewSeats = useReserveNewSeats()
   const { isPreparingImages, prepareImage } = usePreparedImages()
 
   const eventFormSchema = useMemo(() => buildEventFormSchema(t, isEdit), [t, isEdit])
@@ -99,12 +103,10 @@ export default function EventFormPage() {
       translations: {
         en: {
           title: event.title.en ?? '',
-          shortDescription: event.short_description.en ?? '',
           description: event.description.en ?? '',
         },
         ar: {
           title: event.title.ar ?? '',
-          shortDescription: event.short_description.ar ?? '',
           description: event.description.ar ?? '',
         },
       },
@@ -143,16 +145,24 @@ export default function EventFormPage() {
     const seatMap = needsSeatMap ? gridToBlocks(seatGrid) : undefined
     const coverImage = await prepareImage(values.coverImage)
     const withImages = { ...values, coverImage, seatMap }
+    let savedId: number
     try {
       if (isEdit && eventId) {
         await updateEvent({ id: eventId, values: withImages }).unwrap()
-        navigate(`/events/${eventId}`)
+        savedId = eventId
       } else {
-        const created = await createEvent(withImages).unwrap()
-        navigate(`/events/${created.id}`)
+        savedId = (await createEvent(withImages).unwrap()).id
       }
     } catch (err) {
       setSubmitError(apiErrorMessage(err, t, 'events.form.errorGeneric'))
+      return
+    }
+    try {
+      if (seatMap) await reserveNewSeats(savedId, reservedSeats(seatGrid))
+      navigate(`/events/${savedId}`)
+    } catch {
+      // The event is saved; only the reserving failed — send them where they can redo it.
+      navigate(`/events/${savedId}/seating`)
     }
   }
 
@@ -193,7 +203,7 @@ export default function EventFormPage() {
               <option value="">{t('events.form.selectCategory')}</option>
               {categories?.map((category) => (
                 <option key={category.id} value={category.id}>
-                  {category.name.en || category.name.ar}
+                  {localized(category.name)}
                 </option>
               ))}
             </select>
@@ -378,21 +388,6 @@ export default function EventFormPage() {
                 {errors.translations?.[locale]?.title && (
                   <p className="mt-1 text-sm text-red-600">{errors.translations[locale]?.title?.message}</p>
                 )}
-              </div>
-              <div>
-                <label
-                  htmlFor={`shortDescription-${locale}`}
-                  className="mb-1 block text-sm font-medium text-slate-700"
-                >
-                  {t('events.form.shortDescription')}
-                </label>
-                <input
-                  id={`shortDescription-${locale}`}
-                  type="text"
-                  dir={locale === 'ar' ? 'rtl' : 'ltr'}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  {...register(`translations.${locale}.shortDescription`)}
-                />
               </div>
               <div>
                 <label

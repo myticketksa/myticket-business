@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocalized } from '@/lib/localized'
 import PageHeader from '@/components/PageHeader'
 import { useGetMyBalanceQuery, useGetSettlementHistoryQuery, useLazyGetSettlementReceiptQuery } from '@/services/payoutApi'
 import type { Settlement } from '@/types/payout'
@@ -21,6 +22,7 @@ async function downloadReceipt(blob: Blob, settlementId: number) {
 
 export default function PayoutPage() {
   const { t } = useTranslation()
+  const localized = useLocalized()
   const { data: balance, isLoading: isLoadingBalance } = useGetMyBalanceQuery()
 
   const [page, setPage] = useState(1)
@@ -111,7 +113,7 @@ export default function PayoutPage() {
                   {data?.data.map((settlement) => (
                     <tr key={settlement.id} className="transition-colors hover:bg-slate-50">
                       <td className="px-4 py-3 text-slate-600">
-                        {settlement.eventTitle ?? `#${settlement.eventId}`}
+                        {localized(settlement.eventTitles) || settlement.eventTitle || `#${settlement.eventId}`}
                         {settlement.isMigrated && (
                           <span className="ms-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
                             {t('payout.migrated')}

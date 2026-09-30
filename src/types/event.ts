@@ -46,7 +46,6 @@ export interface OrganizerSummary {
 export interface EventListItem {
   id: number
   title: LocalizedText
-  short_description: LocalizedText
   slug: string
   startTime: string
   raters: number

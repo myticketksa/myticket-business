@@ -16,8 +16,10 @@ export function SeatGlyph({ color, size = 22 }: { color: string; size?: number }
 
 export const TYPE_COLORS = ['#E0451A', '#2563EB', '#16A34A', '#9333EA', '#D97706', '#DB2777', '#0891B2', '#65A30D']
 
+/** `reserved`: kept off sale (family, guests…) — becomes a blocked seat once the map is saved. */
 export interface GridCell {
   type: string
+  reserved?: boolean
 }
 
 /** `accessible`: the ticket type for guests with disabilities — its seats are the accessible ones. */
@@ -27,10 +29,16 @@ export interface TicketTypeOption {
   accessible?: boolean
 }
 
+/**
+ * `corridorRows` / `corridorCols`: grid lines that are walkways. They never
+ * hold seats and don't use up a row letter.
+ */
 export interface SeatGrid {
   rows: number
   cols: number
   cells: (GridCell | null)[][]
+  corridorRows: number[]
+  corridorCols: number[]
 }
 
 const MAX_ROWS = 100
@@ -50,15 +58,115 @@ export function rowLetter(index: number): string {
 }
 
 export function emptyGrid(rows = 10, cols = 20): SeatGrid {
-  return { rows, cols, cells: Array.from({ length: rows }, () => Array.from({ length: cols }, () => null)) }
+  return {
+    rows,
+    cols,
+    cells: Array.from({ length: rows }, () => Array.from({ length: cols }, () => null)),
+    corridorRows: [],
+    corridorCols: [],
+  }
 }
 
-function resize(grid: SeatGrid, rows: number, cols: number): SeatGrid {
+/** Grid lines needed for `seatLines` seat lines, counting the corridors that fall among them. */
+function linesFor(seatLines: number, corridors: number[]): number {
+  const set = new Set(corridors)
+  let total = 0
+  let seats = 0
+  while (seats < seatLines) {
+    if (!set.has(total)) seats += 1
+    total += 1
+  }
+  return total
+}
+
+/** Resizes by seat rows and seats per row; corridors inside the new size stay. */
+function resize(grid: SeatGrid, seatRows: number, seatCols: number): SeatGrid {
+  const rows = linesFor(seatRows, grid.corridorRows)
+  const cols = linesFor(seatCols, grid.corridorCols)
   return {
     rows,
     cols,
     cells: Array.from({ length: rows }, (_, r) => Array.from({ length: cols }, (_, c) => grid.cells[r]?.[c] ?? null)),
+    corridorRows: grid.corridorRows.filter((r) => r < rows),
+    corridorCols: grid.corridorCols.filter((c) => c < cols),
   }
+}
+
+/** Inserts an empty walkway line at `index`, pushing everything after it along. */
+function addCorridor(grid: SeatGrid, kind: 'row' | 'col', index: number): SeatGrid {
+  const shift = (list: number[]) => [...list.map((i) => (i >= index ? i + 1 : i)), index]
+  if (kind === 'row') {
+    const cells = [...grid.cells]
+    cells.splice(index, 0, Array.from({ length: grid.cols }, () => null))
+    return { ...grid, rows: grid.rows + 1, cells, corridorRows: shift(grid.corridorRows) }
+  }
+  return {
+    ...grid,
+    cols: grid.cols + 1,
+    cells: grid.cells.map((row) => {
+      const next = [...row]
+      next.splice(index, 0, null)
+      return next
+    }),
+    corridorCols: shift(grid.corridorCols),
+  }
+}
+
+/** Takes the walkway line out again, closing the gap. */
+function removeCorridor(grid: SeatGrid, kind: 'row' | 'col', index: number): SeatGrid {
+  const shift = (list: number[]) => list.filter((i) => i !== index).map((i) => (i > index ? i - 1 : i))
+  if (kind === 'row') {
+    return {
+      ...grid,
+      rows: grid.rows - 1,
+      cells: grid.cells.filter((_, r) => r !== index),
+      corridorRows: shift(grid.corridorRows),
+    }
+  }
+  return {
+    ...grid,
+    cols: grid.cols - 1,
+    cells: grid.cells.map((row) => row.filter((_, c) => c !== index)),
+    corridorCols: shift(grid.corridorCols),
+  }
+}
+
+/** Row letter for each grid row, or null for a corridor — corridors don't use up a letter. */
+export function rowLabels(grid: SeatGrid): (string | null)[] {
+  const corridors = new Set(grid.corridorRows)
+  let seatRow = 0
+  return Array.from({ length: grid.rows }, (_, r) => (corridors.has(r) ? null : rowLetter(seatRow++)))
+}
+
+/** Column position for each grid column (1, 2, …), or null for a corridor. */
+function columnNumbers(grid: SeatGrid): (number | null)[] {
+  const corridors = new Set(grid.corridorCols)
+  let seatCol = 0
+  return Array.from({ length: grid.cols }, (_, c) => (corridors.has(c) ? null : ++seatCol))
+}
+
+/** Every seat with the row letter and number the server will give it. */
+function numberedSeats(grid: SeatGrid) {
+  const labels = rowLabels(grid)
+  const seats: { r: number; c: number; row: string; number: number; cell: GridCell }[] = []
+  grid.cells.forEach((cells, r) => {
+    const row = labels[r]
+    if (!row) return
+    let number = 0
+    cells.forEach((cell, c) => {
+      if (!cell) return
+      number += 1
+      seats.push({ r, c, row, number, cell })
+    })
+  })
+  return seats
+}
+
+/** Where the reserved seats will be once saved, to take them off sale then. */
+export function reservedSeats(grid: SeatGrid): { row: string; number: number }[] {
+  return numberedSeats(grid)
+    .filter((seat) => seat.cell.reserved)
+    .map(({ row, number }) => ({ row, number }))
 }
 
 export function seatCountsByType(grid: SeatGrid): Map<string, number> {
@@ -70,45 +178,36 @@ export function seatCountsByType(grid: SeatGrid): Map<string, number> {
 }
 
 /**
- * Seats are numbered left to right within each row, skipping gaps (aisles),
- * then grouped into the blocks the server takes: one per ticket type, with a
- * row entry for each unbroken run of that type.
+ * Seats are numbered left to right within each row, skipping gaps and
+ * corridors, then grouped into the blocks the server takes: one per ticket
+ * type, with a row entry for each unbroken run of that type.
  */
 export function gridToBlocks(grid: SeatGrid): SeatBlock[] {
   const blocks = new Map<string, SeatBlock>()
+  let run: { type: string; row: string; r: number; lastC: number; start: number; count: number } | null = null
 
-  grid.cells.forEach((cells, r) => {
-    const row = rowLetter(r)
-    let number = 0
-    let run: { type: string; start: number; count: number } | null = null
+  const flush = () => {
+    if (!run) return
+    const block = blocks.get(run.type) ?? { ticketTypeId: Number(run.type), rows: [] }
+    block.rows.push({ row: run.row, seatCount: run.count, startNumber: run.start })
+    blocks.set(run.type, block)
+    run = null
+  }
 
-    const flush = () => {
-      if (!run) return
-      const block = blocks.get(run.type) ?? { ticketTypeId: Number(run.type), rows: [] }
-      block.rows.push({ row, seatCount: run.count, startNumber: run.start })
-      blocks.set(run.type, block)
-      run = null
+  numberedSeats(grid).forEach(({ r, c, row, number, cell }) => {
+    if (!run || run.r !== r || run.lastC !== c - 1 || run.type !== cell.type) {
+      flush()
+      run = { type: cell.type, row, r, lastC: c, start: number, count: 0 }
     }
-
-    cells.forEach((cell) => {
-      if (!cell) {
-        flush()
-        return
-      }
-      number += 1
-      if (!run || run.type !== cell.type) {
-        flush()
-        run = { type: cell.type, start: number, count: 0 }
-      }
-      run.count += 1
-    })
-    flush()
+    run.lastC = c
+    run.count += 1
   })
+  flush()
 
   return Array.from(blocks.values())
 }
 
-type Paint = { kind: 'type'; type: string } | { kind: 'erase' }
+type Paint = { kind: 'type'; type: string } | { kind: 'erase' } | { kind: 'reserve' } | { kind: 'unreserve' }
 type Shape = 'rect' | 'brush'
 type Point = { r: number; c: number }
 
@@ -117,6 +216,8 @@ const Cell = memo(function Cell({
   c,
   color,
   accessible,
+  reserved,
+  corridor,
   highlighted,
   size,
   onDown,
@@ -126,11 +227,16 @@ const Cell = memo(function Cell({
   c: number
   color: string | null
   accessible: boolean
+  reserved: boolean
+  corridor: boolean
   highlighted: boolean
   size: number
   onDown: (r: number, c: number) => void
   onEnter: (r: number, c: number) => void
 }) {
+  if (corridor) {
+    return <div style={{ width: size + 4, height: size + 4 }} className="shrink-0 bg-sky-100" />
+  }
   return (
     <div
       onMouseDown={(e) => {
@@ -143,7 +249,14 @@ const Cell = memo(function Cell({
     >
       {color ? (
         <>
-          <SeatGlyph color={color} size={size} />
+          <span style={{ opacity: reserved ? 0.35 : 1 }}>
+            <SeatGlyph color={color} size={size} />
+          </span>
+          {reserved && (
+            <span className="absolute inset-0 flex items-center justify-center" style={{ fontSize: Math.max(size * 0.55, 8) }}>
+              🔒
+            </span>
+          )}
           {accessible && size >= ZOOM.medium && <span className="absolute -right-0.5 -top-1 text-[9px]">♿</span>}
         </>
       ) : (
@@ -169,7 +282,11 @@ export default function SeatGridEditor({
   const [drag, setDrag] = useState<{ from: Point; to: Point } | null>(null)
   const [rangeFrom, setRangeFrom] = useState(0)
   const [rangeTo, setRangeTo] = useState(0)
-  const [sizeDraft, setSizeDraft] = useState({ rows: String(grid.rows), cols: String(grid.cols) })
+  const seatRowCount = grid.rows - grid.corridorRows.length
+  const seatColCount = grid.cols - grid.corridorCols.length
+  const [sizeDraft, setSizeDraft] = useState({ rows: String(seatRowCount), cols: String(seatColCount) })
+  const [corridorAfterCol, setCorridorAfterCol] = useState(0)
+  const [corridorAfterRow, setCorridorAfterRow] = useState(0)
 
   // Refs so the window-level mouseup (and memoised cells) see current values.
   const latest = useRef({ grid, onChange, paintWith, shape, drag })
@@ -187,17 +304,35 @@ export default function SeatGridEditor({
     }
   }, [ticketTypeOptions, paintWith])
 
-  useEffect(() => setSizeDraft({ rows: String(grid.rows), cols: String(grid.cols) }), [grid.rows, grid.cols])
+  useEffect(() => setSizeDraft({ rows: String(seatRowCount), cols: String(seatColCount) }), [seatRowCount, seatColCount])
 
-  const canPaint = (p: Paint) => p.kind === 'erase' || Boolean(p.type)
-  const valueFor = (p: Paint): GridCell | null => (p.kind === 'erase' ? null : { type: p.type })
+  const canPaint = (p: Paint) => p.kind !== 'type' || Boolean(p.type)
+  const paintCell = (p: Paint, cell: GridCell | null): GridCell | null => {
+    switch (p.kind) {
+      case 'erase':
+        return null
+      case 'type':
+        return { type: p.type }
+      // Reserving only marks seats that are already there.
+      case 'reserve':
+        return cell ? { ...cell, reserved: true } : null
+      case 'unreserve':
+        return cell ? { type: cell.type } : null
+    }
+  }
 
-  /** Applies the current paint to every cell `inside` accepts. */
+  /** Applies the current paint to every cell `inside` accepts; corridors are left alone. */
   const applyWhere = (inside: (r: number, c: number) => boolean) => {
     const { grid: g, onChange: change, paintWith: p } = latest.current
     if (!canPaint(p)) return
-    const value = valueFor(p)
-    change({ ...g, cells: g.cells.map((row, r) => row.map((cell, c) => (inside(r, c) ? value : cell))) })
+    const corridorRows = new Set(g.corridorRows)
+    const corridorCols = new Set(g.corridorCols)
+    change({
+      ...g,
+      cells: g.cells.map((row, r) =>
+        row.map((cell, c) => (inside(r, c) && !corridorRows.has(r) && !corridorCols.has(c) ? paintCell(p, cell) : cell)),
+      ),
+    })
   }
 
   useEffect(() => {
@@ -243,14 +378,36 @@ export default function SeatGridEditor({
   const commitSize = () => {
     const rows = Math.min(Math.max(Number(sizeDraft.rows) || 1, 1), MAX_ROWS)
     const cols = Math.min(Math.max(Number(sizeDraft.cols) || 1, 1), MAX_COLS)
-    setRangeFrom((v) => Math.min(v, rows - 1))
-    setRangeTo((v) => Math.min(v, rows - 1))
-    onChange(resize(grid, rows, cols))
+    const next = resize(grid, rows, cols)
+    setRangeFrom((v) => Math.min(v, next.rows - 1))
+    setRangeTo((v) => Math.min(v, next.rows - 1))
+    onChange(next)
   }
 
   const counts = seatCountsByType(grid)
   const total = Array.from(counts.values()).reduce((sum, n) => sum + n, 0)
-  const rowOptions = Array.from({ length: grid.rows }, (_, r) => rowLetter(r))
+  const reservedCount = grid.cells.flat().filter((cell) => cell?.reserved).length
+  const labels = rowLabels(grid)
+  const colNumbers = columnNumbers(grid)
+  const corridorRowSet = new Set(grid.corridorRows)
+  const corridorColSet = new Set(grid.corridorCols)
+  const rowOptions = labels.flatMap((label, r) => (label ? [{ r, label }] : []))
+  const colOptions = colNumbers.flatMap((n, c) => (n !== null ? [{ c, n }] : []))
+
+  // Corridors go between two seat lines, so the last row/column isn't offered.
+  const corridorColChoices = colOptions.slice(0, -1)
+  const corridorRowChoices = rowOptions.slice(0, -1)
+  const addColCorridor = () => {
+    const after = corridorColChoices[Math.min(corridorAfterCol, corridorColChoices.length - 1)]
+    if (after) onChange(addCorridor(grid, 'col', after.c + 1))
+  }
+  const addRowCorridor = () => {
+    const after = corridorRowChoices[Math.min(corridorAfterRow, corridorRowChoices.length - 1)]
+    if (after) onChange(addCorridor(grid, 'row', after.r + 1))
+  }
+  // Describe a corridor by the seat line in front of it.
+  const colCorridorLabel = (c: number) => colNumbers.slice(0, c).filter((n) => n !== null).pop() ?? 0
+  const rowCorridorLabel = (r: number) => labels.slice(0, r).filter(Boolean).pop() ?? ''
 
   const chip = (active: boolean) =>
     `flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
@@ -321,6 +478,80 @@ export default function SeatGridEditor({
         </div>
       </div>
 
+      <div>
+        <p className="mb-1.5 text-xs font-semibold text-slate-700">{t('events.seatGrid.reservedTitle')}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => setPaintWith({ kind: 'reserve' })} className={chip(paintWith.kind === 'reserve')}>
+            <span aria-hidden>🔒</span>
+            {t('events.seatGrid.reserveTool')}
+            <span className="text-slate-400">{reservedCount}</span>
+          </button>
+          <button type="button" onClick={() => setPaintWith({ kind: 'unreserve' })} className={chip(paintWith.kind === 'unreserve')}>
+            {t('events.seatGrid.unreserveTool')}
+          </button>
+          <span className="text-xs text-slate-500">{t('events.seatGrid.reservedHint')}</span>
+        </div>
+      </div>
+
+      <div className="rounded-md border border-sky-200 bg-sky-50/60 p-3">
+        <p className="text-xs font-semibold text-slate-700">{t('events.seatGrid.corridorsTitle')}</p>
+        <p className="mb-2 text-xs text-slate-500">{t('events.seatGrid.corridorsHint')}</p>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-700">↕ {t('events.seatGrid.corridorAfterSeat')}</span>
+            <select
+              value={Math.min(corridorAfterCol, Math.max(corridorColChoices.length - 1, 0))}
+              onChange={(e) => setCorridorAfterCol(Number(e.target.value))}
+              disabled={corridorColChoices.length === 0}
+              className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
+            >
+              {corridorColChoices.map(({ n }, i) => (
+                <option key={n} value={i}>{n}</option>
+              ))}
+            </select>
+            <button type="button" onClick={addColCorridor} disabled={corridorColChoices.length === 0} className={smallButton}>
+              {t('events.seatGrid.addCorridor')}
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-700">↔ {t('events.seatGrid.corridorAfterRow')}</span>
+            <select
+              value={Math.min(corridorAfterRow, Math.max(corridorRowChoices.length - 1, 0))}
+              onChange={(e) => setCorridorAfterRow(Number(e.target.value))}
+              disabled={corridorRowChoices.length === 0}
+              className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
+            >
+              {corridorRowChoices.map(({ label }, i) => (
+                <option key={label} value={i}>{label}</option>
+              ))}
+            </select>
+            <button type="button" onClick={addRowCorridor} disabled={corridorRowChoices.length === 0} className={smallButton}>
+              {t('events.seatGrid.addCorridor')}
+            </button>
+          </div>
+        </div>
+        {(grid.corridorCols.length > 0 || grid.corridorRows.length > 0) && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {[...grid.corridorCols].sort((a, b) => a - b).map((c) => (
+              <span key={`c${c}`} className="flex items-center gap-1.5 rounded-full border border-sky-300 bg-white px-2.5 py-1 text-xs text-slate-700">
+                ↕ {t('events.seatGrid.corridorAfterSeatChip', { seat: colCorridorLabel(c) })}
+                <button type="button" onClick={() => onChange(removeCorridor(grid, 'col', c))} aria-label={t('events.seatGrid.removeCorridor')} className="text-slate-400 hover:text-red-600">
+                  ✕
+                </button>
+              </span>
+            ))}
+            {[...grid.corridorRows].sort((a, b) => a - b).map((r) => (
+              <span key={`r${r}`} className="flex items-center gap-1.5 rounded-full border border-sky-300 bg-white px-2.5 py-1 text-xs text-slate-700">
+                ↔ {t('events.seatGrid.corridorAfterRowChip', { row: rowCorridorLabel(r) })}
+                <button type="button" onClick={() => onChange(removeCorridor(grid, 'row', r))} aria-label={t('events.seatGrid.removeCorridor')} className="text-slate-400 hover:text-red-600">
+                  ✕
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="flex flex-wrap items-center gap-2 rounded-md bg-slate-50 p-2">
         <span className="text-xs text-slate-500">{t('events.seatGrid.drawAs')}</span>
         <button type="button" onClick={() => setShape('rect')} className={chip(shape === 'rect')}>
@@ -332,13 +563,13 @@ export default function SeatGridEditor({
         <span className="mx-2 h-5 w-px bg-slate-200" />
         <span className="text-xs text-slate-500">{t('events.seatGrid.rowsFrom')}</span>
         <select value={rangeFrom} onChange={(e) => setRangeFrom(Number(e.target.value))} className="rounded-md border border-slate-300 px-2 py-1 text-xs">
-          {rowOptions.map((label, r) => (
+          {rowOptions.map(({ r, label }) => (
             <option key={r} value={r}>{label}</option>
           ))}
         </select>
         <span className="text-xs text-slate-500">{t('events.seatGrid.rowsTo')}</span>
         <select value={rangeTo} onChange={(e) => setRangeTo(Number(e.target.value))} className="rounded-md border border-slate-300 px-2 py-1 text-xs">
-          {rowOptions.map((label, r) => (
+          {rowOptions.map(({ r, label }) => (
             <option key={r} value={r}>{label}</option>
           ))}
         </select>
@@ -356,7 +587,11 @@ export default function SeatGridEditor({
         <button type="button" onClick={() => applyWhere(() => true)} className={smallButton}>
           {t('events.seatGrid.fillAll')}
         </button>
-        <button type="button" onClick={() => onChange(emptyGrid(grid.rows, grid.cols))} className={`${smallButton} text-red-600`}>
+        <button
+          type="button"
+          onClick={() => onChange({ ...grid, cells: grid.cells.map((row) => row.map(() => null)) })}
+          className={`${smallButton} text-red-600`}
+        >
           {t('events.seatGrid.clearAll')}
         </button>
       </div>
@@ -371,49 +606,87 @@ export default function SeatGridEditor({
 
           <div className="flex items-center">
             <span className="w-8 shrink-0" />
-            {Array.from({ length: grid.cols }, (_, c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => applyWhere((_r, cc) => cc === c)}
-                title={t('events.seatGrid.paintColumn')}
-                style={{ width: cellSize + 4 }}
-                className="shrink-0 text-center text-[9px] text-slate-400 hover:text-orange-600"
-              >
-                {c + 1}
-              </button>
-            ))}
+            {colNumbers.map((n, c) =>
+              n === null ? (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => onChange(removeCorridor(grid, 'col', c))}
+                  title={t('events.seatGrid.removeCorridor')}
+                  style={{ width: cellSize + 4 }}
+                  className="shrink-0 bg-sky-100 text-center text-[9px] text-sky-500 hover:text-red-600"
+                >
+                  ✕
+                </button>
+              ) : (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => applyWhere((_r, cc) => cc === c)}
+                  title={t('events.seatGrid.paintColumn')}
+                  style={{ width: cellSize + 4 }}
+                  className="shrink-0 text-center text-[9px] text-slate-400 hover:text-orange-600"
+                >
+                  {n}
+                </button>
+              ),
+            )}
           </div>
 
-          {grid.cells.map((row, r) => (
-            <div key={r} className="flex items-center">
-              <button
-                type="button"
-                onClick={() => applyWhere((rr) => rr === r)}
-                title={t('events.seatGrid.paintRow')}
-                className="w-8 shrink-0 text-center text-[11px] font-semibold text-slate-500 hover:text-orange-600"
-              >
-                {rowLetter(r)}
-              </button>
-              {row.map((cell, c) => (
-                <Cell
-                  key={c}
-                  r={r}
-                  c={c}
-                  color={cell ? colorIndex.get(cell.type) ?? '#94A3B8' : null}
-                  accessible={cell ? accessibleTypes.has(cell.type) : false}
-                  highlighted={inDrag(r, c)}
-                  size={cellSize}
-                  onDown={onDown}
-                  onEnter={onEnter}
-                />
-              ))}
-              <span className="w-8 shrink-0 text-center text-[11px] font-semibold text-slate-400">{rowLetter(r)}</span>
-            </div>
-          ))}
+          {grid.cells.map((row, r) =>
+            corridorRowSet.has(r) ? (
+              <div key={r} className="flex items-center">
+                <button
+                  type="button"
+                  onClick={() => onChange(removeCorridor(grid, 'row', r))}
+                  title={t('events.seatGrid.removeCorridor')}
+                  className="w-8 shrink-0 text-center text-[11px] text-sky-500 hover:text-red-600"
+                >
+                  ✕
+                </button>
+                <div
+                  style={{ width: grid.cols * (cellSize + 4), height: cellSize + 4 }}
+                  className="flex shrink-0 items-center justify-center bg-sky-100 text-[10px] font-medium uppercase tracking-widest text-sky-600"
+                >
+                  {t('events.seatGrid.corridor')}
+                </div>
+                <span className="w-8 shrink-0" />
+              </div>
+            ) : (
+              <div key={r} className="flex items-center">
+                <button
+                  type="button"
+                  onClick={() => applyWhere((rr) => rr === r)}
+                  title={t('events.seatGrid.paintRow')}
+                  className="w-8 shrink-0 text-center text-[11px] font-semibold text-slate-500 hover:text-orange-600"
+                >
+                  {labels[r]}
+                </button>
+                {row.map((cell, c) => (
+                  <Cell
+                    key={c}
+                    r={r}
+                    c={c}
+                    color={cell ? colorIndex.get(cell.type) ?? '#94A3B8' : null}
+                    accessible={cell ? accessibleTypes.has(cell.type) : false}
+                    reserved={Boolean(cell?.reserved)}
+                    corridor={corridorColSet.has(c)}
+                    highlighted={inDrag(r, c)}
+                    size={cellSize}
+                    onDown={onDown}
+                    onEnter={onEnter}
+                  />
+                ))}
+                <span className="w-8 shrink-0 text-center text-[11px] font-semibold text-slate-400">{labels[r]}</span>
+              </div>
+            ),
+          )}
         </div>
       </div>
-      <p className="text-xs text-slate-500">{t('events.seatGrid.total', { count: total })}</p>
+      <p className="text-xs text-slate-500">
+        {t('events.seatGrid.total', { count: total })}
+        {reservedCount > 0 && ` · ${t('events.seatGrid.reservedCount', { count: reservedCount })}`}
+      </p>
     </div>
   )
 }

@@ -12,6 +12,7 @@ export interface Settlement {
   id: number
   eventId: number
   eventTitle: string | null
+  eventTitles?: { en: string | null; ar: string | null }
   organizerId: number
   status: SettlementStatus
   scopeType: 'all_pending' | 'ticket_numbers' | 'cutoff_date' | 'migrated'

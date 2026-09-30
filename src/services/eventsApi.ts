@@ -17,13 +17,11 @@ function toTranslationsArray(translations: EventFormValues['translations']) {
     {
       locale: 'en',
       title: translations.en.title,
-      short_description: translations.en.shortDescription || undefined,
       description: translations.en.description,
     },
     {
       locale: 'ar',
       title: translations.ar.title,
-      short_description: translations.ar.shortDescription || undefined,
       description: translations.ar.description,
     },
   ]

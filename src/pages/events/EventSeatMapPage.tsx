@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useLocalized } from '@/lib/localized'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import PageHeader from '@/components/PageHeader'
@@ -9,11 +10,12 @@ import {
   useClearSeatMapMutation,
   useGenerateSeatMapMutation,
   useGetSeatMapQuery,
+  useReserveNewSeats,
   useSetSeatsBlockedMutation,
 } from '@/services/seatMapApi'
 import type { EventSeat, SeatStatus } from '@/types/seatMap'
 import { apiErrorMessage } from '@/lib/apiError'
-import SeatGridEditor, { SeatGlyph, TYPE_COLORS, emptyGrid, gridToBlocks, seatCountsByType, type SeatGrid } from '@/components/seatMap/SeatGridEditor'
+import SeatGridEditor, { SeatGlyph, TYPE_COLORS, emptyGrid, gridToBlocks, reservedSeats, seatCountsByType, type SeatGrid } from '@/components/seatMap/SeatGridEditor'
 
 const STATUS_COLORS: Record<SeatStatus, string> = {
   available: '#C2C2C2',
@@ -40,6 +42,7 @@ function groupSeats(seats: EventSeat[]) {
 
 export default function EventSeatMapPage() {
   const { t } = useTranslation()
+  const localized = useLocalized()
   const { id } = useParams<{ id: string }>()
   const eventId = Number(id)
 
@@ -55,12 +58,13 @@ export default function EventSeatMapPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [blockError, setBlockError] = useState<string | null>(null)
   const [colorBy, setColorBy] = useState<'type' | 'status'>('type')
+  const reserveNewSeats = useReserveNewSeats()
 
   if (isLoadingEvent || !event) {
     return <LoadingSpinner size={160} />
   }
 
-  const eventTitle = event.title.en || event.title.ar || t('events.detail.fallbackTitle')
+  const eventTitle = localized(event.title) || t('events.detail.fallbackTitle')
 
   // Only free or already-blocked seats can be picked; booked or held seats
   // aren't the organizer's to take off sale.
@@ -96,9 +100,16 @@ export default function EventSeatMapPage() {
     }
     try {
       await generate({ eventId, blocks: gridToBlocks(grid) }).unwrap()
-      setGrid(emptyGrid())
     } catch (err) {
       setError(apiErrorMessage(err, t, 'events.seating.generateError'))
+      return
+    }
+    const toReserve = reservedSeats(grid)
+    setGrid(emptyGrid())
+    try {
+      await reserveNewSeats(eventId, toReserve)
+    } catch {
+      setBlockError(t('events.seating.reserveAfterSaveError'))
     }
   }
 

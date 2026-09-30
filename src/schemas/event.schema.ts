@@ -5,7 +5,6 @@ type T = (key: string) => string
 function buildTranslationSchema(t: T) {
   return z.object({
     title: z.string().min(1, t('events.form.validation.titleRequired')),
-    shortDescription: z.string().max(500).optional(),
     description: z.string().min(1, t('events.form.validation.descriptionRequired')),
   })
 }
@@ -101,8 +100,8 @@ export const emptyEventFormValues: EventFormValues = {
   discountStartsAt: '',
   discountEndsAt: '',
   translations: {
-    en: { title: '', shortDescription: '', description: '' },
-    ar: { title: '', shortDescription: '', description: '' },
+    en: { title: '', description: '' },
+    ar: { title: '', description: '' },
   },
   ticketTypes: [],
   coverImage: undefined,
