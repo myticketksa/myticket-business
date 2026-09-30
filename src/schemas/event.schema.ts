@@ -30,6 +30,8 @@ export function buildEventFormSchema(t: T, isEdit = false) {
       discountValue: z.string().optional(),
       discountStartsAt: z.string().optional(),
       discountEndsAt: z.string().optional(),
+      // Hours before the start refunds stay open; '' = no refunds.
+      refundUntilHours: z.enum(['', '24', '72', '168']),
 
       translations: z.object({
         en: translationSchema,
@@ -99,6 +101,7 @@ export const emptyEventFormValues: EventFormValues = {
   discountValue: '',
   discountStartsAt: '',
   discountEndsAt: '',
+  refundUntilHours: '',
   translations: {
     en: { title: '', description: '' },
     ar: { title: '', description: '' },

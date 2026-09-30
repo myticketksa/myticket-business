@@ -60,6 +60,8 @@ export interface EventListItem {
   cover: string | null
   isFeatured: boolean
   isFree: boolean
+  /** Hours before the start refunds stay open; null = no refunds. */
+  refundUntilHours?: number | null
   created_at: string
   organizer?: OrganizerSummary | null
   adminEvent?: boolean

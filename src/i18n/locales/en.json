@@ -236,7 +236,12 @@
       "lockedAfterBooking": "Can't be changed: tickets for this event have already been booked.",
       "ticketTypeSold": "{{count}} already sold or being bought. The quantity can't go below that, and this type can't be removed. A new price only applies to future sales.",
       "cantRemoveSold": "This ticket type has sales, so it can't be removed.",
-      "noNewTypeSeated": "A seated event can't get a new ticket type after its seat map is built."
+      "noNewTypeSeated": "A seated event can't get a new ticket type after its seat map is built.",
+      "refundPolicy": "Refunds",
+      "refundNone": "No refunds",
+      "refundUntil7Days": "Until 7 days before the event",
+      "refundUntil3Days": "Until 3 days before the event",
+      "refundUntil24Hours": "Until 24 hours before the event"
     },
     "seating": {
       "manageLink": "Manage seating",

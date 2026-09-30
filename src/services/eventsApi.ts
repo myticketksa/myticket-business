@@ -43,6 +43,7 @@ function toCreatePayload(values: WithSeatMap) {
     discount_value: values.discountValue || undefined,
     discount_starts_at: localInputToUtc(values.discountStartsAt),
     discount_ends_at: localInputToUtc(values.discountEndsAt),
+    refund_until_hours: values.refundUntilHours || undefined,
     translations: toTranslationsArray(values.translations),
     ticketTypes: values.ticketTypes?.map((ticketType) => ({
       name: ticketType.name,
@@ -80,6 +81,7 @@ function toUpdatePayload(values: WithSeatMap) {
     discount_value: values.discountValue || '',
     discount_starts_at: localInputToUtc(values.discountStartsAt) ?? '',
     discount_ends_at: localInputToUtc(values.discountEndsAt) ?? '',
+    refund_until_hours: values.refundUntilHours,
     seeting_type: values.seatingType,
     seatMap: values.seatMap ? JSON.stringify(values.seatMap) : undefined,
     translations: toTranslationsArray(values.translations),

@@ -82,6 +82,7 @@ export default function EventFormPage() {
       categoryId: manage?.categoryId ? String(manage.categoryId) : '',
       venueId: manage?.venueId ? String(manage.venueId) : '',
       isFree: event.isFree,
+      refundUntilHours: event.refundUntilHours ? (String(event.refundUntilHours) as '24' | '72' | '168') : '',
       startsAt: utcToLocalInput(event.startTime),
       endsAt: utcToLocalInput(manage?.endsAt),
       discountType: manage?.discountType ?? '',
@@ -285,6 +286,22 @@ export default function EventFormPage() {
               />{' '}
               {t('events.form.freeEventCheckbox')}
             </label>
+          </div>
+
+          <div>
+            <label htmlFor="refundUntilHours" className="mb-1 block text-sm font-medium text-slate-700">
+              {t('events.form.refundPolicy')}
+            </label>
+            <select
+              id="refundUntilHours"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              {...register('refundUntilHours')}
+            >
+              <option value="">{t('events.form.refundNone')}</option>
+              <option value="168">{t('events.form.refundUntil7Days')}</option>
+              <option value="72">{t('events.form.refundUntil3Days')}</option>
+              <option value="24">{t('events.form.refundUntil24Hours')}</option>
+            </select>
           </div>
 
           <div>
