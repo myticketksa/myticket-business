@@ -4,7 +4,7 @@
     "events": "الفعاليات",
     "supportChat": "محادثة الدعم",
     "experiences": "التجارب والوجهات",
-    "cashiers": "أمناء الصندوق",
+    "cashiers": "الكاشير",
     "promoCodes": "أكواد الخصم",
     "advertisements": "الإعلانات",
     "signOut": "تسجيل الخروج",
@@ -93,7 +93,7 @@
     "fullReports": "التقارير الكاملة",
     "actions": {
       "viewEvents": "متابعة فعالياتك",
-      "manageCashiers": "إدارة أمناء الصندوق",
+      "manageCashiers": "إدارة الكاشير",
       "viewPayout": "الاطلاع على رصيدك",
       "viewReports": "عرض التقارير"
     }
@@ -529,22 +529,22 @@
     }
   },
   "cashiers": {
-    "pageTitle": "أمناء الصندوق",
-    "addCashier": "+ إضافة أمين صندوق",
+    "pageTitle": "الكاشير",
+    "addCashier": "+ إضافة كاشير",
     "colName": "الاسم",
     "colEmail": "البريد الإلكتروني",
     "colCreated": "تاريخ الإنشاء",
-    "noCashiers": "لا يوجد أمناء صندوق حتى الآن.",
-    "deleteTitle": "حذف أمين الصندوق",
+    "noCashiers": "لا يوجد كاشير حتى الآن.",
+    "deleteTitle": "حذف الكاشير",
     "deleteMessage": "هل أنت متأكد من حذف \"{{name}}\"؟",
     "form": {
-      "addTitle": "إضافة أمين صندوق",
-      "editTitle": "تعديل أمين الصندوق",
+      "addTitle": "إضافة كاشير",
+      "editTitle": "تعديل الكاشير",
       "name": "الاسم",
       "email": "البريد الإلكتروني",
       "password": "كلمة المرور",
       "passwordOptional": "كلمة المرور (اتركها فارغة للإبقاء عليها كما هي)",
-      "errorGeneric": "تعذر حفظ أمين الصندوق. تحقق من الحقول وحاول مرة أخرى."
+      "errorGeneric": "تعذر حفظ الكاشير. تحقق من الحقول وحاول مرة أخرى."
     }
   },
   "promoCodes": {
