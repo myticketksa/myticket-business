@@ -72,6 +72,15 @@ export function buildEventFormSchema(t: T, isEdit = false) {
     })
     .superRefine((values, ctx) => {
       values.sessions.forEach((session, index) => {
+        // Every date ends at a set time, so it leaves the lists and stops
+        // selling when it's actually over. Past dates kept on edit are spared.
+        const upcoming = !session.id || new Date(session.startsAt).getTime() >= Date.now()
+        if (!session.endsAt && upcoming) {
+          ctx.addIssue({ code: 'custom', path: ['sessions', index, 'endsAt'], message: t('events.dates.endRequired') })
+        }
+        if (!session.id && session.startsAt && new Date(session.startsAt).getTime() < Date.now()) {
+          ctx.addIssue({ code: 'custom', path: ['sessions', index, 'startsAt'], message: t('events.dates.startInPast') })
+        }
         if (session.endsAt && session.startsAt && session.endsAt <= session.startsAt) {
           ctx.addIssue({ code: 'custom', path: ['sessions', index, 'endsAt'], message: t('events.dates.endBeforeStart') })
         }
@@ -112,7 +121,7 @@ export const emptyEventFormValues: EventFormValues = {
   venueId: '',
   seatingType: 'assigned',
   isFree: false,
-  sessions: [{ startsAt: '', endsAt: '', discountType: '', discountValue: '' }],
+  sessions: [],
   refundUntilHours: '',
   translations: {
     en: { title: '', description: '' },

@@ -74,6 +74,8 @@ export interface EventSession {
   endsAt: string | null
   discountType: 'fixed' | 'percentage' | null
   discountValue: number | null
+  /** Each ticket type on this date and how many are left. */
+  tickets?: { ticketTypeId: number; remaining: number }[]
 }
 
 export interface EventDetail extends EventListItem {

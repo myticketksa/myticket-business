@@ -126,6 +126,16 @@ export default function EventFormPage() {
 
   // A seated event is created (or switched to seated) together with its seat
   // map — the server refuses one without it.
+  // Tickets taken on each saved date (each type's total less what's left).
+  const bookedBySession = Object.fromEntries(
+    (event?.sessions ?? []).map((session) => [
+      session.id,
+      (session.tickets ?? []).reduce((sum, row) => {
+        const total = event?.ticketTypes?.find((type) => type.id === row.ticketTypeId)?.quantity_total
+        return sum + (total != null ? Math.max(0, Number(total) - row.remaining) : 0)
+      }, 0),
+    ]),
+  )
   const needsSeatMap = seatingType === 'assigned' && (!isEdit || event?.seatingType !== 'assigned')
   const seatTicketTypeOptions = isEdit
     ? (event?.ticketTypes ?? []).map((tt) => ({ value: String(tt.id), label: `${tt.name} (${tt.price})`, accessible: tt.isSpecialNeeds }))
@@ -332,7 +342,7 @@ export default function EventFormPage() {
           </div>
         </section>
 
-        <DatesEditor control={control} register={register} errors={errors} />
+        <DatesEditor control={control} register={register} errors={errors} bookedBySession={bookedBySession} />
 
         <section className="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-5 pane-md:grid-cols-2">
           {(['en', 'ar'] as const).map((locale) => (
