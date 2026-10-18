@@ -78,7 +78,7 @@ export function buildEventFormSchema(t: T, isEdit = false) {
         if (!session.endsAt && upcoming) {
           ctx.addIssue({ code: 'custom', path: ['sessions', index, 'endsAt'], message: t('events.dates.endRequired') })
         }
-        if (!session.id && session.startsAt && new Date(session.startsAt).getTime() < Date.now()) {
+        if (!session.id && session.startsAt && new Date(session.endsAt || session.startsAt).getTime() < Date.now()) {
           ctx.addIssue({ code: 'custom', path: ['sessions', index, 'startsAt'], message: t('events.dates.startInPast') })
         }
         if (session.endsAt && session.startsAt && session.endsAt <= session.startsAt) {

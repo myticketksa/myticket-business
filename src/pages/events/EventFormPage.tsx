@@ -342,7 +342,7 @@ export default function EventFormPage() {
           </div>
         </section>
 
-        <DatesEditor control={control} register={register} errors={errors} bookedBySession={bookedBySession} />
+        <DatesEditor control={control} errors={errors} bookedBySession={bookedBySession} />
 
         <section className="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-5 pane-md:grid-cols-2">
           {(['en', 'ar'] as const).map((locale) => (
