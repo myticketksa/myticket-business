@@ -486,7 +486,10 @@
       "typeName": "نوع التذكرة {{number}} بلا اسم",
       "typePrice": "{{name}} بلا سعر",
       "typeQuantity": "{{name}} بلا كمية",
-      "discountHint": "يُطبّق على كل الأيام القادمة."
+      "discountHint": "يُطبّق على كل الأيام القادمة.",
+      "oneLanguageIntro": "مكتوب بلغة واحدة فقط — سيراه من يقرأ باللغة الأخرى دون ترجمة:",
+      "nameOneLanguage": "{{name}}: الاسم بلا نسخة {{language}}",
+      "descriptionOneLanguage": "{{name}}: الوصف بلا نسخة {{language}}"
     }
   },
   "applications": {

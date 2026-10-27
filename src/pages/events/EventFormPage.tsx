@@ -266,6 +266,33 @@ export default function EventFormPage() {
     })
   }
 
+  // Filled in one language only: customers reading the other see it in the
+  // wrong language. Not blocking — a note under Review.
+  const oneLanguage: { text: string; go: () => void }[] = []
+  const halfFilled = (en?: string, ar?: string) => Boolean(en?.trim()) !== Boolean(ar?.trim())
+  const missingSide = (en?: string) => (en?.trim() ? t('events.form.arabic') : t('events.form.english'))
+  if (usesActivities) {
+    activityValues.forEach((activity, index) => {
+      const name = typeName(activity) || t('events.activities.activityNumber', { number: index + 1 })
+      const open = () => {
+        scrollTo('booking')
+        setEditingActivity(index)
+      }
+      if (halfFilled(activity.nameEn, activity.nameAr))
+        oneLanguage.push({ text: t('events.review.nameOneLanguage', { name, language: missingSide(activity.nameEn) }), go: open })
+      if (halfFilled(activity.descriptionEn, activity.descriptionAr))
+        oneLanguage.push({ text: t('events.review.descriptionOneLanguage', { name, language: missingSide(activity.descriptionEn) }), go: open })
+    })
+  }
+  ;(ticketTypeValues ?? []).forEach((type, index) => {
+    const name = typeName(type) || t('events.form.ticketTypeNumber', { number: index + 1 })
+    const activityIndex = usesActivities ? activityValues.findIndex((a) => a.key === type.activityKey) : -1
+    const go = activityIndex >= 0 ? () => { scrollTo('booking'); setEditingActivity(activityIndex) } : toSection('booking')
+    if (halfFilled(type.nameEn, type.nameAr)) oneLanguage.push({ text: t('events.review.nameOneLanguage', { name, language: missingSide(type.nameEn) }), go })
+    if (halfFilled(type.descriptionEn, type.descriptionAr))
+      oneLanguage.push({ text: t('events.review.descriptionOneLanguage', { name, language: missingSide(type.descriptionEn) }), go })
+  })
+
   // Which sections have errors after a save attempt (a dot in the navigation).
   const sectionHasErrors: Record<SectionId, boolean> = {
     overview: Boolean(errors.translations || errors.categoryId || errors.venueId || errors.coverImage),
@@ -672,6 +699,21 @@ export default function EventFormPage() {
               </>
             )}
           </section>
+
+          {oneLanguage.length > 0 && (
+            <section className="rounded-lg border border-amber-200 bg-amber-50 p-5">
+              <p className="mb-2 text-sm text-amber-900">{t('events.review.oneLanguageIntro')}</p>
+              <ul className="space-y-1">
+                {oneLanguage.map((item, index) => (
+                  <li key={index}>
+                    <button type="button" onClick={item.go} className="text-start text-sm text-amber-800 hover:underline">
+                      {item.text}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {submitError && <p className="text-sm text-red-600">{submitError}</p>}
 

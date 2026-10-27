@@ -485,7 +485,10 @@
       "typeName": "Ticket type {{number}} has no name",
       "typePrice": "{{name}} has no price",
       "typeQuantity": "{{name}} has no quantity",
-      "discountHint": "Applies to every date still to come."
+      "discountHint": "Applies to every date still to come.",
+      "oneLanguageIntro": "Written in one language only — customers reading the other will see it untranslated:",
+      "nameOneLanguage": "{{name}}: the name has no {{language}} version",
+      "descriptionOneLanguage": "{{name}}: the description has no {{language}} version"
     }
   },
   "applications": {
