@@ -11,7 +11,15 @@ export interface City {
 
 export interface TicketType {
   id: number
+  /** In the panel's language; the two below are what the form edits. */
   name: string
+  nameEn?: string | null
+  nameAr?: string | null
+  /** Optional: what this ticket type includes. */
+  descriptionEn?: string | null
+  descriptionAr?: string | null
+  /** The activity it books (every type has one; an ordinary event's is hidden). */
+  activityId?: number | null
   price: string
   isSpecialNeeds?: boolean
   isVatIncluded?: boolean
@@ -22,6 +30,24 @@ export interface TicketType {
   quantity_total?: number | null
   quantity_sold?: number | null
   quantity_reserved?: number | null
+}
+
+/** One thing to book inside an event, on its own days and times. */
+export interface EventActivity {
+  id: number
+  name: string | null
+  nameEn: string | null
+  nameAr: string | null
+  descriptionEn: string | null
+  descriptionAr: string | null
+  /** 0 = Sunday … 6 = Saturday; null = every day the event has a date. */
+  weekdays: number[] | null
+  /** "HH:MM"; empty = the whole day. */
+  startTimes: string[]
+  durationMinutes: number | null
+  /** Places per time, all its ticket types together; null = no limit. */
+  capacity: number | null
+  ticketTypeIds: number[]
 }
 
 /** Only for the event's own organizer (and admins): what the edit form pre-fills from. */
@@ -58,6 +84,8 @@ export interface EventListItem {
   seatingType: 'free' | 'assigned'
   ticketTypes: TicketType[]
   cover: string | null
+  /** More photos after the cover, in order. */
+  gallery?: string[]
   isFeatured: boolean
   isFree: boolean
   /** Hours before the start refunds stay open; null = no refunds. */
@@ -75,12 +103,14 @@ export interface EventSession {
   discountType: 'fixed' | 'percentage' | null
   discountValue: number | null
   /** Each ticket type on this date and how many are left. */
-  tickets?: { ticketTypeId: number; remaining: number }[]
+  /** `remaining` is null for a type with no limit of its own (its activity's places limit it). */
+  tickets?: { ticketTypeId: number; remaining: number | null }[]
 }
 
 export interface EventDetail extends EventListItem {
   description: LocalizedText
   sessions?: EventSession[]
+  activities?: EventActivity[]
   manage?: EventManageFields
 }
 

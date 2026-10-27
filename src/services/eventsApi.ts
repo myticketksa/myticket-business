@@ -27,7 +27,32 @@ function toTranslationsArray(translations: EventFormValues['translations']) {
   ]
 }
 
-type WithSeatMap = EventFormValues & { seatMap?: SeatBlock[] }
+/** The form's values plus what lives outside it: the seat map and the photos. */
+type WithSeatMap = EventFormValues & {
+  seatMap?: SeatBlock[]
+  /** New photos for the gallery (already shrunk). */
+  gallery?: File[]
+  /** Photos already in the gallery to keep, in order (their URLs). */
+  galleryKeep?: string[]
+}
+
+// One JSON field, like the dates. Ticket types point at an activity by its key.
+function toActivitiesJson(activities: EventFormValues['activities']) {
+  return JSON.stringify(
+    activities.map((activity) => ({
+      id: activity.id,
+      key: activity.key,
+      name_en: activity.nameEn.trim() || null,
+      name_ar: activity.nameAr.trim() || null,
+      description_en: (activity.descriptionEn ?? '').trim() || null,
+      description_ar: (activity.descriptionAr ?? '').trim() || null,
+      weekdays: activity.weekdays,
+      start_times: [...new Set(activity.startTimes.filter(Boolean))].sort(),
+      duration_minutes: activity.durationMinutes?.trim() ? Number(activity.durationMinutes) : null,
+      capacity: activity.capacity?.trim() ? Number(activity.capacity) : null,
+    })),
+  )
+}
 
 // One JSON field, like the seat map: a long run of dates as separate form
 // fields would pass the server's field limit. Datetime boxes hold local
@@ -44,6 +69,35 @@ function toSessionsJson(sessions: EventFormValues['sessions']) {
   )
 }
 
+// Both names, and the old single one for anything that still reads it; plus
+// the optional description in each language ('' clears it).
+function ticketTypeNames(type: { nameEn: string; nameAr: string; descriptionEn?: string; descriptionAr?: string }) {
+  const en = type.nameEn.trim()
+  const ar = type.nameAr.trim()
+  return {
+    name: en || ar,
+    name_en: en,
+    name_ar: ar,
+    description_en: (type.descriptionEn ?? '').trim(),
+    description_ar: (type.descriptionAr ?? '').trim(),
+  }
+}
+
+function ticketTypeRows(values: WithSeatMap, withIds: boolean) {
+  return values.ticketTypes?.map((ticketType) => ({
+    ...(withIds ? { id: ticketType.id } : {}),
+    ...ticketTypeNames(ticketType),
+    is_special_needs: ticketType.isSpecialNeeds ?? false,
+    price: ticketType.price,
+    is_vat_inclusive: ticketType.isVatIncluded ?? true,
+    entry_time_start: ticketType.entryTimeStart || undefined,
+    entry_time_end: ticketType.entryTimeEnd || undefined,
+    // Empty: no limit of its own — its activity's places limit it.
+    quantity_total: ticketType.quantityTotal ?? '',
+    activity_key: values.activities.length ? (ticketType.activityKey ?? '') : '',
+  }))
+}
+
 function toCreatePayload(values: WithSeatMap) {
   return {
     category_id: values.categoryId,
@@ -52,17 +106,11 @@ function toCreatePayload(values: WithSeatMap) {
     is_free: values.isFree,
     sessions: toSessionsJson(values.sessions),
     cover_image: values.coverImage,
+    gallery: values.gallery?.length ? values.gallery : undefined,
     refund_until_hours: values.refundUntilHours || undefined,
     translations: toTranslationsArray(values.translations),
-    ticketTypes: values.ticketTypes?.map((ticketType) => ({
-      name: ticketType.name,
-      is_special_needs: ticketType.isSpecialNeeds ?? false,
-      price: ticketType.price,
-      is_vat_inclusive: ticketType.isVatIncluded ?? true,
-      entry_time_start: ticketType.entryTimeStart || undefined,
-      entry_time_end: ticketType.entryTimeEnd || undefined,
-      quantity_total: ticketType.quantityTotal,
-    })),
+    activities: values.seatingType === 'free' ? toActivitiesJson(values.activities) : undefined,
+    ticketTypes: ticketTypeRows(values, false),
     // Seated events are created with their seat map; blocks point at
     // ticket types by their position in the list above.
     // One JSON field, not nested form fields: a big hall would pass the
@@ -84,6 +132,10 @@ function toUpdatePayload(values: WithSeatMap) {
     venue_id: values.venueId,
     is_free: values.isFree,
     cover_image: values.coverImage,
+    // The whole gallery: those kept, in order (one JSON field so an empty
+    // list can be sent), then the new ones.
+    gallery_keep: values.galleryKeep ? JSON.stringify(values.galleryKeep) : undefined,
+    gallery: values.gallery?.length ? values.gallery : undefined,
     sessions: toSessionsJson(values.sessions),
     // Discounts now live on each date; the old event-wide one is cleared
     // (the form copied it onto the dates when it opened).
@@ -95,18 +147,11 @@ function toUpdatePayload(values: WithSeatMap) {
     seeting_type: values.seatingType,
     seatMap: values.seatMap ? JSON.stringify(values.seatMap) : undefined,
     translations: toTranslationsArray(values.translations),
+    // Seated events can't have activities; their list is left alone.
+    activities: values.seatingType === 'free' ? toActivitiesJson(values.activities) : undefined,
     // The full list: rows with an id are updated, new rows added, and ones
     // left out removed (the server refuses removing one with sales).
-    ticketTypes: values.ticketTypes?.map((ticketType) => ({
-      id: ticketType.id,
-      name: ticketType.name,
-      is_special_needs: ticketType.isSpecialNeeds ?? false,
-      price: ticketType.price,
-      is_vat_inclusive: ticketType.isVatIncluded ?? true,
-      entry_time_start: ticketType.entryTimeStart || undefined,
-      entry_time_end: ticketType.entryTimeEnd || undefined,
-      quantity_total: ticketType.quantityTotal,
-    })),
+    ticketTypes: ticketTypeRows(values, true),
   }
 }
 

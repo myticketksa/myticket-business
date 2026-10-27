@@ -50,11 +50,17 @@ export default function DatesEditor({
   control,
   errors,
   bookedBySession = {},
+  discount: eventDiscount,
+  hint,
 }: {
   control: Control<EventFormValues>
   errors: FieldErrors<EventFormValues>
   /** Tickets taken on each saved date; a date with any is never dropped. */
   bookedBySession?: Record<number, number>
+  /** The discount set under Rules: new dates get it too. */
+  discount?: { discountType: DateRow['discountType']; discountValue: string }
+  /** A line under the title (with activities: they run on their own days within these). */
+  hint?: string
 }) {
   const { t, i18n } = useTranslation()
   const { fields, replace } = useFieldArray({ control, name: 'sessions', keyName: 'key' })
@@ -81,14 +87,22 @@ export default function DatesEditor({
   // a new day is the whole day; a past or booked date outside the rule stays.
   const apply = (next: Rule) => {
     setRule(next)
-    const byDay = new Map(saved.current.map((row) => [row.startsAt.slice(0, 10), row]))
-    const discount = { discountType: next.discountType, discountValue: next.discountType ? next.discountValue : '' }
+    // A saved day as it is in the form now (its discount may have been changed under Rules).
+    const byDay = new Map(
+      [...saved.current, ...sessions.filter((row) => row.id)].map((row) => [row.startsAt.slice(0, 10), row]),
+    )
+    // Discounts are set under Rules (27 Oct 2026); a new date gets that one,
+    // a saved date keeps its own.
+    const discount = {
+      discountType: eventDiscount?.discountType ?? ('' as DateRow['discountType']),
+      discountValue: eventDiscount?.discountType ? eventDiscount.discountValue : '',
+    }
     const rows: DateRow[] = []
     const used = new Set<string>()
     for (const day of daysOf(next)) {
       const existing = byDay.get(day)
       if (existing) {
-        rows.push(isOver(existing) ? existing : { ...existing, ...discount })
+        rows.push(existing)
         used.add(day)
       } else if (new Date(`${day}T23:59`).getTime() >= Date.now()) {
         rows.push({ startsAt: `${day}T00:00`, endsAt: `${day}T23:59`, ...discount })
@@ -118,8 +132,8 @@ export default function DatesEditor({
 
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5">
-      <h2 className="mb-1 text-sm font-semibold text-slate-800">{t('events.dates.title')}</h2>
-      <p className="mb-3 text-xs text-slate-500">{t('events.dates.hint')}</p>
+      <h2 className="text-sm font-semibold text-slate-800">{t('events.dates.title')}</h2>
+      <p className="mb-3 text-xs text-slate-500">{hint ?? t('events.dates.hint')}</p>
 
       <div className="grid grid-cols-2 gap-3">
         <label className="text-xs font-medium text-slate-700">
@@ -159,29 +173,6 @@ export default function DatesEditor({
             </button>
           )
         })}
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-slate-700">{t('events.dates.discount')}</span>
-        <select
-          value={rule.discountType}
-          onChange={(e) => apply({ ...rule, discountType: e.target.value as DateRow['discountType'] })}
-          className="rounded-md border border-slate-300 px-2 py-1.5 text-xs"
-        >
-          <option value="">{t('events.form.discountNone')}</option>
-          <option value="percentage">{t('events.form.discountPercentage')}</option>
-          <option value="fixed">{t('events.form.discountFixed')}</option>
-        </select>
-        {rule.discountType && (
-          <input
-            type="number"
-            min={0}
-            value={rule.discountValue}
-            onChange={(e) => apply({ ...rule, discountValue: e.target.value })}
-            placeholder={t('events.form.valuePlaceholder')}
-            className="w-24 rounded-md border border-slate-300 px-2 py-1.5 text-xs"
-          />
-        )}
       </div>
 
       {upcoming.length > 0 && (
