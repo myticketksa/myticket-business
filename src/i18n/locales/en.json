@@ -488,7 +488,18 @@
       "discountHint": "Applies to every date still to come.",
       "oneLanguageIntro": "Written in one language only — customers reading the other will see it untranslated:",
       "nameOneLanguage": "{{name}}: the name has no {{language}} version",
-      "descriptionOneLanguage": "{{name}}: the description has no {{language}} version"
+      "descriptionOneLanguage": "{{name}}: the description has no {{language}} version",
+      "activityClosedDays": "{{name}}: it runs only on days the place is closed"
+    },
+    "permanent": {
+      "question": "When can customers come?",
+      "dated": "On specific dates",
+      "datedHint": "A concert, a season, a festival — pick its days.",
+      "always": "Always open",
+      "alwaysHint": "A place open all year — no start or end date.",
+      "openDays": "Open on",
+      "openDaysHint": "Customers can book any open day up to 90 days ahead; the next day is added every night.",
+      "openDaysHintActivities": "The days the place opens. Each activity picks its own days within these. Customers can book up to 90 days ahead."
     }
   },
   "applications": {

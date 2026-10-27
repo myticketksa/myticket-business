@@ -8,7 +8,6 @@ import {
   type UseFormSetValue,
 } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { createPortal } from 'react-dom'
 import type { EventFormValues } from '@/schemas/event.schema'
 import { activitySummary, weekdayName } from '@/lib/activitySummary'
 import { emptyTicketType, newActivityKey } from '@/lib/eventFormDefaults'
@@ -22,9 +21,10 @@ type TicketTypeValues = EventFormValues['ticketTypes'][number]
 /**
  * Things to book inside one event (27 Oct 2026, reworked after the form
  * review): a compact list — name, schedule, capacity, prices, what's
- * missing — and one activity at a time in a side panel, always in the order
- * Name → Schedule → Capacity → Prices. Each activity's ticket types live in
- * its panel and share its places per time.
+ * missing — and one activity at a time opened in place in the list (not a
+ * side panel: owner, 27 Oct 2026), always in the order Name → Schedule →
+ * Capacity → Prices. Each activity's ticket types live inside it and share
+ * its places per time.
  */
 export default function ActivitiesEditor({
   control,
@@ -115,60 +115,10 @@ export default function ActivitiesEditor({
     return ` · ${lo === hi ? lo : `${lo}–${hi}`} ${t('events.activities.sar')}`
   }
 
-  return (
-    <div>
-      <ul className="divide-y divide-slate-100 rounded-md border border-slate-200">
-        {fields.map((field, index) => {
-          const a = activities[index]
-          const issues = problems(index)
-          return (
-            <li key={field.rowKey} className="flex flex-wrap items-center gap-3 px-3 py-3">
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-slate-800">{label(index)}</p>
-                <p className="text-xs text-slate-500">{a ? activitySummary(a, t, i18n.language) : ''}</p>
-                <p className="text-xs text-slate-500">
-                  {a?.capacity?.trim() ? t('events.activities.capacityLine', { count: Number(a.capacity) }) : t('events.activities.noCapacity')}
-                  {priceRange(a?.key ?? '')}
-                </p>
-                {issues.length > 0 && <p className="mt-0.5 text-xs text-red-600">{issues.join(' · ')}</p>}
-              </div>
-              <div className="flex gap-3 text-sm">
-                <button type="button" onClick={() => setEditing(index)} className="font-medium text-orange-600 hover:text-orange-700">
-                  {t('events.activities.edit')}
-                </button>
-                <button type="button" onClick={() => duplicate(index)} className="text-slate-600 hover:text-slate-800">
-                  {t('events.activities.duplicate')}
-                </button>
-                <button type="button" onClick={() => removeActivity(index)} className="text-red-600 hover:text-red-700">
-                  {t('events.activities.remove')}
-                </button>
-              </div>
-            </li>
-          )
-        })}
-      </ul>
-      <button type="button" onClick={addActivity} className="mt-3 text-sm font-medium text-orange-600 hover:text-orange-700">
-        {t('events.activities.add')}
-      </button>
 
-      {/* On document.body: the form's fade-in animation makes its own layer,
-          which put the section bar over this panel. */}
-      {open != null && current && createPortal(
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={() => setEditing(null)}>
-          <div
-            role="dialog"
-            aria-label={label(open)}
-            className="h-full w-full max-w-2xl overflow-y-auto bg-slate-50 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
-              <h2 className="font-semibold text-slate-800">{label(open)}</h2>
-              <button type="button" onClick={() => setEditing(null)} className="rounded-md bg-orange-500 px-4 py-1.5 text-sm font-medium text-white">
-                {t('events.activities.done')}
-              </button>
-            </div>
-
-            <div className="space-y-4 p-5">
+  /** One activity's fields, opened in place under its row. */
+  const editor = (open: number, current: (typeof activities)[number]) => (
+            <div className="space-y-4 border-t border-orange-200 bg-orange-50/40 p-4">
               {/* 1. Name */}
               <section className="rounded-lg border border-slate-200 bg-white p-4">
                 <h3 className="mb-2 text-sm font-semibold text-slate-800">{t('events.activities.stepName')}</h3>
@@ -275,10 +225,57 @@ export default function ActivitiesEditor({
                 </button>
               </section>
             </div>
-          </div>
-        </div>,
-        document.body,
-      )}
+  )
+
+  return (
+    <div>
+      <ul className="divide-y divide-slate-100 rounded-md border border-slate-200">
+        {fields.map((field, index) => {
+          const a = activities[index]
+          const issues = problems(index)
+          return (
+            <li key={field.rowKey} className={open === index ? 'bg-white ring-2 ring-orange-300' : ''}>
+              <div className="flex flex-wrap items-center gap-3 px-3 py-3">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-slate-800">{label(index)}</p>
+                <p className="text-xs text-slate-500">{a ? activitySummary(a, t, i18n.language) : ''}</p>
+                <p className="text-xs text-slate-500">
+                  {a?.capacity?.trim() ? t('events.activities.capacityLine', { count: Number(a.capacity) }) : t('events.activities.noCapacity')}
+                  {priceRange(a?.key ?? '')}
+                </p>
+                {issues.length > 0 && <p className="mt-0.5 text-xs text-red-600">{issues.join(' · ')}</p>}
+              </div>
+              <div className="flex gap-3 text-sm">
+                <button type="button" onClick={() => setEditing(open === index ? null : index)} className="font-medium text-orange-600 hover:text-orange-700">
+                  {open === index ? t('events.activities.done') : t('events.activities.edit')}
+                </button>
+                <button type="button" onClick={() => duplicate(index)} className="text-slate-600 hover:text-slate-800">
+                  {t('events.activities.duplicate')}
+                </button>
+                <button type="button" onClick={() => removeActivity(index)} className="text-red-600 hover:text-red-700">
+                  {t('events.activities.remove')}
+                </button>
+              </div>
+              </div>
+              {open === index && current ? (
+                <>
+                  {editor(index, current)}
+                  <div className="flex justify-end border-t border-orange-200 bg-orange-50/40 px-4 py-3">
+                    <button type="button" onClick={() => setEditing(null)} className="rounded-md bg-orange-500 px-4 py-1.5 text-sm font-medium text-white">
+                      {t('events.activities.done')}
+                    </button>
+                  </div>
+                </>
+              ) : null}
+            </li>
+          )
+        })}
+      </ul>
+      <button type="button" onClick={addActivity} className="mt-3 text-sm font-medium text-orange-600 hover:text-orange-700">
+        {t('events.activities.add')}
+      </button>
+
+
     </div>
   )
 }

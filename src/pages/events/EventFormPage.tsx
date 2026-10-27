@@ -25,6 +25,7 @@ import SeatGridEditor, { emptyGrid, gridToBlocks, reservedSeats, seatCountsByTyp
 import { useReserveNewSeats } from '@/services/seatMapApi'
 import { useLocalized } from '@/lib/localized'
 import { emptyTicketType, newActivityKey } from '@/lib/eventFormDefaults'
+import { weekdayName } from '@/lib/activitySummary'
 import type { EventActivity } from '@/types/event'
 
 const ALL_WEEK = [0, 1, 2, 3, 4, 5, 6]
@@ -122,6 +123,8 @@ export default function EventFormPage() {
         }
       }),
       seatingType: event.seatingType,
+      isPermanent: Boolean(event.isPermanent),
+      openWeekdays: event.openWeekdays ?? ALL_WEEK,
       categoryId: event.manage?.categoryId ? String(event.manage.categoryId) : '',
       venueId: event.manage?.venueId ? String(event.manage.venueId) : '',
       isFree: event.isFree,
@@ -239,7 +242,7 @@ export default function EventFormPage() {
   if (needsCover && !values.coverImage) missing.push({ text: t('events.review.coverMissing'), go: toSection('overview') })
   if (!isEdit && !values.categoryId) missing.push({ text: t('events.form.validation.categoryRequired'), go: toSection('overview') })
   if (!isEdit && !values.venueId) missing.push({ text: t('events.form.validation.venueRequired'), go: toSection('overview') })
-  if (upcomingSessions.length === 0) missing.push({ text: t('events.review.noDates'), go: toSection('booking') })
+  if (!values.isPermanent && upcomingSessions.length === 0) missing.push({ text: t('events.review.noDates'), go: toSection('booking') })
   if (usesActivities) {
     activityValues.forEach((activity, index) => {
       const own = (ticketTypeValues ?? []).filter((type) => type.activityKey === activity.key)
@@ -250,6 +253,9 @@ export default function EventFormPage() {
       }
       if (!activity.nameEn.trim() && !activity.nameAr.trim()) missing.push({ text: t('events.review.activityName', { name }), go: open })
       if (activity.weekdays.length === 0) missing.push({ text: t('events.review.activityDays', { name }), go: open })
+      // Always open: an activity only runs on days the place opens.
+      if (values.isPermanent && activity.weekdays.length > 0 && !activity.weekdays.some((d) => values.openWeekdays.includes(d)))
+        missing.push({ text: t('events.review.activityClosedDays', { name }), go: open })
       if (own.length === 0) missing.push({ text: t('events.review.activityTypes', { name }), go: open })
       if (own.some((type) => !type.price?.trim())) missing.push({ text: t('events.review.activityPrice', { name }), go: open })
       if (own.some((type) => !typeName(type))) missing.push({ text: t('events.review.activityTypeName', { name }), go: open })
@@ -539,13 +545,65 @@ export default function EventFormPage() {
             </div>
           </section>
 
-          <DatesEditor
-            control={control}
-            errors={errors}
-            bookedBySession={bookedBySession}
-            discount={discount}
-            hint={usesActivities ? t('events.dates.hintActivities') : undefined}
-          />
+          {/* When it's open: on dates, or always (a place — no start or end). */}
+          <section className={card}>
+            <p className="mb-2 text-sm font-semibold text-slate-800">{t('events.permanent.question')}</p>
+            <div className="grid grid-cols-1 gap-2 pane-sm:grid-cols-2">
+              {(
+                [
+                  [false, 'events.permanent.dated', 'events.permanent.datedHint'],
+                  [true, 'events.permanent.always', 'events.permanent.alwaysHint'],
+                ] as const
+              ).map(([always, label, hint]) => (
+                <label
+                  key={label}
+                  className={`flex cursor-pointer gap-2 rounded-md border p-3 text-sm ${values.isPermanent === always ? 'border-orange-500 bg-orange-50' : 'border-slate-200'}`}
+                >
+                  <input type="radio" name="whenOpen" checked={values.isPermanent === always} onChange={() => setValue('isPermanent', always, { shouldDirty: true })} />
+                  <span>
+                    <span className="block font-medium text-slate-800">{t(label)}</span>
+                    <span className="block text-xs text-slate-500">{t(hint)}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+            {values.isPermanent && (
+              <div className="mt-4">
+                <p className="mb-1 text-xs font-medium text-slate-700">{t('events.permanent.openDays')}</p>
+                <div className="flex flex-wrap gap-2">
+                  {ALL_WEEK.map((day) => {
+                    const on = values.openWeekdays.includes(day)
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() =>
+                          setValue('openWeekdays', on ? values.openWeekdays.filter((d) => d !== day) : [...values.openWeekdays, day].sort(), { shouldDirty: true })
+                        }
+                        className={`rounded-full border px-3 py-1 text-xs ${on ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 text-slate-600'}`}
+                      >
+                        {weekdayName(day, i18n.language)}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  {usesActivities ? t('events.permanent.openDaysHintActivities') : t('events.permanent.openDaysHint')}
+                </p>
+              </div>
+            )}
+          </section>
+
+          {!values.isPermanent && (
+            <DatesEditor
+              control={control}
+              errors={errors}
+              bookedBySession={bookedBySession}
+              discount={discount}
+              hint={usesActivities ? t('events.dates.hintActivities') : undefined}
+            />
+          )}
 
           <section className={card}>
             {seatingType === 'free' && (

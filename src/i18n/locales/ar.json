@@ -489,7 +489,18 @@
       "discountHint": "يُطبّق على كل الأيام القادمة.",
       "oneLanguageIntro": "مكتوب بلغة واحدة فقط — سيراه من يقرأ باللغة الأخرى دون ترجمة:",
       "nameOneLanguage": "{{name}}: الاسم بلا نسخة {{language}}",
-      "descriptionOneLanguage": "{{name}}: الوصف بلا نسخة {{language}}"
+      "descriptionOneLanguage": "{{name}}: الوصف بلا نسخة {{language}}",
+      "activityClosedDays": "{{name}}: يعمل فقط في أيام يكون فيها المكان مغلقاً"
+    },
+    "permanent": {
+      "question": "متى يمكن للعملاء الحضور؟",
+      "dated": "في أيام محددة",
+      "datedHint": "حفلة، موسم، مهرجان — اختر أيامه.",
+      "always": "مفتوح دائماً",
+      "alwaysHint": "مكان مفتوح طوال السنة — بلا تاريخ بداية أو نهاية.",
+      "openDays": "يفتح في",
+      "openDaysHint": "يمكن للعملاء حجز أي يوم مفتوح حتى 90 يوماً مقدماً، ويُضاف يوم جديد كل ليلة.",
+      "openDaysHintActivities": "الأيام التي يفتح فيها المكان. كل نشاط يختار أيامه ضمنها. يمكن للعملاء الحجز حتى 90 يوماً مقدماً."
     }
   },
   "applications": {

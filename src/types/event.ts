@@ -86,6 +86,9 @@ export interface EventListItem {
   cover: string | null
   /** More photos after the cover, in order. */
   gallery?: string[]
+  /** Always open: no end date; open on these weekdays (null = every day). */
+  isPermanent?: boolean
+  openWeekdays?: number[] | null
   isFeatured: boolean
   isFree: boolean
   /** Hours before the start refunds stay open; null = no refunds. */

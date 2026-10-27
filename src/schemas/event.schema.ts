@@ -62,7 +62,10 @@ export function buildEventFormSchema(t: T, isEdit = false, needsCover = !isEdit)
               }
             }),
         )
-        .min(1, t('events.dates.required')),
+        , // at least one unless always open — checked below
+      // Always open: no dates, only the weekdays it opens (all = every day).
+      isPermanent: z.boolean(),
+      openWeekdays: z.array(z.number()),
 
       // Hours before the start refunds stay open; '' = no refunds.
       refundUntilHours: z.enum(['', '24', '72', '168']),
@@ -159,6 +162,9 @@ export function buildEventFormSchema(t: T, isEdit = false, needsCover = !isEdit)
     })
     // With activities, every ticket type books one of them.
     .superRefine((values, ctx) => {
+      if (!values.isPermanent && values.sessions.length === 0) {
+        ctx.addIssue({ code: 'custom', path: ['sessions'], message: t('events.dates.required') })
+      }
       // Something must limit every general-admission ticket type: its own
       // quantity, or its activity's capacity per time.
       if (values.seatingType === 'free') {
@@ -198,6 +204,8 @@ export const emptyEventFormValues: EventFormValues = {
   seatingType: 'free',
   isFree: false,
   sessions: [],
+  isPermanent: false,
+  openWeekdays: [0, 1, 2, 3, 4, 5, 6],
   refundUntilHours: '',
   translations: {
     en: { title: '', description: '' },

@@ -104,7 +104,10 @@ function toCreatePayload(values: WithSeatMap) {
     venue_id: values.venueId,
     seeting_type: values.seatingType,
     is_free: values.isFree,
-    sessions: toSessionsJson(values.sessions),
+    // Always open: no dates (the server keeps them); the days it opens.
+    is_permanent: values.isPermanent,
+    open_weekdays: values.isPermanent ? JSON.stringify(values.openWeekdays) : undefined,
+    sessions: values.isPermanent ? undefined : toSessionsJson(values.sessions),
     cover_image: values.coverImage,
     gallery: values.gallery?.length ? values.gallery : undefined,
     refund_until_hours: values.refundUntilHours || undefined,
@@ -136,7 +139,10 @@ function toUpdatePayload(values: WithSeatMap) {
     // list can be sent), then the new ones.
     gallery_keep: values.galleryKeep ? JSON.stringify(values.galleryKeep) : undefined,
     gallery: values.gallery?.length ? values.gallery : undefined,
-    sessions: toSessionsJson(values.sessions),
+    // Always open: no dates (the server keeps them); the days it opens.
+    is_permanent: values.isPermanent,
+    open_weekdays: values.isPermanent ? JSON.stringify(values.openWeekdays) : undefined,
+    sessions: values.isPermanent ? undefined : toSessionsJson(values.sessions),
     // Discounts now live on each date; the old event-wide one is cleared
     // (the form copied it onto the dates when it opened).
     discount_type: '',
