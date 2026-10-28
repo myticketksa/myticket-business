@@ -5,10 +5,11 @@ import { useLocalized } from '@/lib/localized'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import PageHeader from '@/components/PageHeader'
 import { apiErrorText } from '@/lib/apiError'
+import { formatDateTime } from '@/lib/formatDate'
 import { useDeleteEventMutation, useGetEventQuery } from '@/services/eventsApi'
 
 export default function EventDetailPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const localized = useLocalized()
   const { id } = useParams<{ id: string }>()
   const eventId = Number(id)
@@ -168,7 +169,7 @@ export default function EventDetailPage() {
                 </dt>
                 <dd className="space-y-0.5 text-end text-slate-800">
                   {(event.sessions?.length ? event.sessions.map((session) => session.startsAt) : [event.startTime]).map((startsAt) => (
-                    <div key={startsAt}>{new Date(startsAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                    <div key={startsAt}>{formatDateTime(startsAt, i18n.language)}</div>
                   ))}
                 </dd>
               </div>

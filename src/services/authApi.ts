@@ -27,7 +27,13 @@ export const authApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
-      transformResponse: (response) => loginResponseSchema.parse(response).data,
+      transformResponse: (response) => {
+        const parsed = loginResponseSchema.safeParse(response)
+        if (!parsed.success) {
+          throw new Error('Unexpected login response')
+        }
+        return parsed.data.data
+      },
     }),
     logout: build.mutation<void, void>({
       query: () => ({

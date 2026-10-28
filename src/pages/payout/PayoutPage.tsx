@@ -2,12 +2,10 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocalized } from '@/lib/localized'
 import PageHeader from '@/components/PageHeader'
+import { formatDate } from '@/lib/formatDate'
+import { formatSar } from '@/lib/money'
 import { useGetMyBalanceQuery, useGetSettlementHistoryQuery, useLazyGetSettlementReceiptQuery } from '@/services/payoutApi'
 import type { Settlement } from '@/types/payout'
-
-function money(value: number | undefined) {
-  return value === undefined ? '—' : `${value.toLocaleString()} SAR`
-}
 
 async function downloadReceipt(blob: Blob, settlementId: number) {
   const url = URL.createObjectURL(blob)
@@ -21,8 +19,9 @@ async function downloadReceipt(blob: Blob, settlementId: number) {
 }
 
 export default function PayoutPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const localized = useLocalized()
+  const money = (value: number | undefined) => formatSar(value, i18n.language)
   const { data: balance, isLoading: isLoadingBalance } = useGetMyBalanceQuery()
 
   const [page, setPage] = useState(1)
@@ -121,10 +120,10 @@ export default function PayoutPage() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-slate-600">
-                        {settlement.platformAmount.toLocaleString()} {settlement.currency}
+                        {formatSar(settlement.platformAmount, i18n.language).replace(/ SAR$/, ` ${settlement.currency}`)}
                       </td>
                       <td className="px-4 py-3 font-medium text-slate-900">
-                        {settlement.organizerAmount.toLocaleString()} {settlement.currency}
+                        {formatSar(settlement.organizerAmount, i18n.language).replace(/ SAR$/, ` ${settlement.currency}`)}
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -138,7 +137,7 @@ export default function PayoutPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-slate-600">
-                        {new Date(settlement.createdAt).toLocaleDateString()}
+                        {formatDate(settlement.createdAt, i18n.language)}
                       </td>
                       <td className="px-4 py-3">
                         <button

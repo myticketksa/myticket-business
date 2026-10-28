@@ -5,11 +5,12 @@ import ConfirmDialog from '@/components/ConfirmDialog'
 import PageHeader from '@/components/PageHeader'
 import SearchInput from '@/components/SearchInput'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
+import { formatDate } from '@/lib/formatDate'
 import { useDeleteCashierMutation, useGetCashiersQuery } from '@/services/cashierApi'
 import type { Cashier } from '@/types/cashier'
 
 export default function CashiersListPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [page, setPage] = useState(1)
   const [searchInput, setSearchInput] = useState('')
   const search = useDebouncedValue(searchInput)
@@ -81,7 +82,7 @@ export default function CashiersListPage() {
                   <td className="px-4 py-3 font-medium text-slate-900">{cashier.name}</td>
                   <td className="px-4 py-3 text-slate-600">{cashier.email}</td>
                   <td className="px-4 py-3 text-slate-600">
-                    {new Date(cashier.created_at).toLocaleDateString()}
+                    {formatDate(cashier.created_at, i18n.language)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-3 text-xs font-medium">
@@ -142,9 +143,12 @@ export default function CashiersListPage() {
       {(creating || editing) && (
         <CashierFormModal
           cashier={editing}
-          onClose={() => {
+          onClose={(saved) => {
             setCreating(false)
             setEditing(null)
+            // Rename while a search is active still filters by the old name
+            // until the query is cleared — drop the filter after a successful save.
+            if (saved) setSearchInput('')
           }}
         />
       )}

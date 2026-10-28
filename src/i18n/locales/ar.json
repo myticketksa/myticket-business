@@ -64,6 +64,7 @@
   },
   "auth": {
     "identifierPlaceholder": "البريد الإلكتروني أو رقم الهاتف",
+    "emailPlaceholder": "البريد الإلكتروني",
     "passwordPlaceholder": "كلمة المرور",
     "signIn": "تسجيل الدخول",
     "signingIn": "جارٍ تسجيل الدخول…",
@@ -71,8 +72,13 @@
     "notAdmin": "هذا الحساب لا يملك صلاحية وصول المنظم.",
     "invalidCredentials": "البريد الإلكتروني أو رقم الهاتف أو كلمة المرور غير صحيحة.",
     "identifierRequired": "أدخل البريد الإلكتروني أو رقم الهاتف",
+    "emailRequired": "أدخل البريد الإلكتروني",
+    "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا",
+    "codeRequired": "أدخل الرمز من بريدك الإلكتروني",
     "passwordRequired": "أدخل كلمة المرور",
     "forgotPasswordHint": "أدخل بريدك الإلكتروني وسنرسل لك رمزًا لإعادة تعيين كلمة المرور.",
+    "forgotPasswordSentIfExists": "إذا كان هناك حساب لـ {{email}}، فقد أرسلنا رمزًا. أدخله أدناه مع كلمة المرور الجديدة.",
+    "useDifferentEmail": "استخدام بريد إلكتروني آخر",
     "sendCode": "إرسال الرمز",
     "sendingCode": "جارٍ الإرسال…",
     "forgotPasswordError": "تعذّر إرسال الرمز. تحقق من البريد الإلكتروني وحاول مرة أخرى.",
@@ -99,6 +105,13 @@
     }
   },
   "events": {
+    "status": {
+      "draft": "مسودة",
+      "published": "منشورة",
+      "postponed": "مؤجلة",
+      "cancelled": "ملغاة",
+      "sold_out": "نفدت التذاكر"
+    },
     "list": {
       "title": "الفعاليات",
       "addEvent": "+ إضافة فعالية",

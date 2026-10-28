@@ -64,6 +64,7 @@
   },
   "auth": {
     "identifierPlaceholder": "Email or phone",
+    "emailPlaceholder": "Email",
     "passwordPlaceholder": "Password",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
@@ -71,8 +72,13 @@
     "notAdmin": "This account does not have organizer access.",
     "invalidCredentials": "Invalid email/phone or password.",
     "identifierRequired": "Enter your email or phone",
+    "emailRequired": "Enter your email",
+    "emailInvalid": "Enter a valid email address",
+    "codeRequired": "Enter the code from your email",
     "passwordRequired": "Enter your password",
     "forgotPasswordHint": "Enter your email and we'll send you a code to reset your password.",
+    "forgotPasswordSentIfExists": "If an account exists for {{email}}, we sent a code. Enter it below with your new password.",
+    "useDifferentEmail": "Use a different email",
     "sendCode": "Send code",
     "sendingCode": "Sending…",
     "forgotPasswordError": "Couldn't send the code. Check the email and try again.",
@@ -99,6 +105,13 @@
     }
   },
   "events": {
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "postponed": "Postponed",
+      "cancelled": "Cancelled",
+      "sold_out": "Sold out"
+    },
     "list": {
       "title": "Events",
       "addEvent": "+ Add Event",

@@ -5,19 +5,13 @@ import { Link } from 'react-router-dom'
 import PageHeader from '@/components/PageHeader'
 import SearchInput from '@/components/SearchInput'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
+import { formatDateTime } from '@/lib/formatDate'
 import { useGetEventCategoriesQuery, useGetEventsQuery } from '@/services/eventsApi'
 
 const statusOptions = ['draft', 'published', 'postponed', 'cancelled', 'sold_out'] as const
 
-function formatDateTime(value: string) {
-  return new Date(value).toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })
-}
-
 export default function EventsListPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const localized = useLocalized()
   const [page, setPage] = useState(1)
   const [searchInput, setSearchInput] = useState('')
@@ -60,7 +54,7 @@ export default function EventsListPage() {
             <option value="">{t('common.allStatuses')}</option>
             {statusOptions.map((value) => (
               <option key={value} value={value}>
-                {value}
+                {t(`events.status.${value}`)}
               </option>
             ))}
           </select>
@@ -152,7 +146,7 @@ export default function EventsListPage() {
                     </div>
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500">{t('events.list.colStarts')}</dt>
-                      <dd className="text-end text-slate-700">{formatDateTime(event.startTime)}</dd>
+                      <dd className="text-end text-slate-700">{formatDateTime(event.startTime, i18n.language)}</dd>
                     </div>
                   </dl>
                 </div>

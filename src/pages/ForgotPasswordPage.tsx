@@ -8,11 +8,12 @@ import { useForgotPasswordMutation, useResetPasswordMutation } from '@/services/
 
 /**
  * Two steps in one page rather than two routes — request a code, then use it.
- * Mirrors the OTP flow the backend actually has (ForgotPasswordRequest /
- * ResetPasswordRequest): email in, a code by email, code + new password out.
+ * The API always returns success for unknown emails (anti-enumeration), so the
+ * request step never claims a code was definitely sent.
  */
 export default function ForgotPasswordPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const otherLanguage = i18n.language === 'ar' ? 'en' : 'ar'
   const navigate = useNavigate()
   const [step, setStep] = useState<'request' | 'reset'>('request')
   const [email, setEmail] = useState('')
@@ -20,6 +21,7 @@ export default function ForgotPasswordPage() {
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
 
   const [forgotPassword, { isLoading: isRequesting }] = useForgotPasswordMutation()
   const [resetPassword, { isLoading: isResetting }] = useResetPasswordMutation()
@@ -27,8 +29,20 @@ export default function ForgotPasswordPage() {
   const onRequestCode = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setInfo(null)
+    const trimmed = email.trim()
+    if (!trimmed) {
+      setError(t('auth.emailRequired'))
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setError(t('auth.emailInvalid'))
+      return
+    }
     try {
-      await forgotPassword({ email }).unwrap()
+      await forgotPassword({ email: trimmed }).unwrap()
+      setEmail(trimmed)
+      setInfo(t('auth.forgotPasswordSentIfExists', { email: trimmed }))
       setStep('reset')
     } catch (err) {
       setError(apiErrorMessage(err, t, 'auth.forgotPasswordError'))
@@ -38,12 +52,25 @@ export default function ForgotPasswordPage() {
   const onResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    if (!code.trim()) {
+      setError(t('auth.codeRequired'))
+      return
+    }
+    if (!password) {
+      setError(t('auth.passwordRequired'))
+      return
+    }
     if (password !== passwordConfirmation) {
       setError(t('auth.passwordMismatch'))
       return
     }
     try {
-      await resetPassword({ email, code, password, password_confirmation: passwordConfirmation }).unwrap()
+      await resetPassword({
+        email,
+        code: code.trim(),
+        password,
+        password_confirmation: passwordConfirmation,
+      }).unwrap()
       navigate('/login', { replace: true })
     } catch (err) {
       setError(apiErrorMessage(err, t, 'auth.resetPasswordError'))
@@ -56,6 +83,13 @@ export default function ForgotPasswordPage() {
       style={{ backgroundImage: `url(${loginBg})` }}
     >
       <div className="relative flex min-h-screen w-full items-center justify-center bg-black/50">
+        <button
+          type="button"
+          onClick={() => i18n.changeLanguage(otherLanguage)}
+          className="absolute top-4 end-4 text-sm text-white/80 transition-colors hover:text-white"
+        >
+          {t(`language.${otherLanguage === 'ar' ? 'arabic' : 'english'}`)}
+        </button>
         <div className="animate-slide-up w-full max-w-sm px-6 py-12 text-center sm:px-8">
           <img
             src={logoWhite}
@@ -64,15 +98,14 @@ export default function ForgotPasswordPage() {
           />
 
           {step === 'request' ? (
-            <form onSubmit={onRequestCode} noValidate className="space-y-4 text-start">
+            <form onSubmit={onRequestCode} className="space-y-4 text-start">
               <p className="text-center text-sm text-white/80">{t('auth.forgotPasswordHint')}</p>
               <div>
                 <input
                   id="email"
                   type="email"
-                  required
                   autoComplete="email"
-                  placeholder={t('auth.identifierPlaceholder')}
+                  placeholder={t('auth.emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-md border-2 border-transparent bg-white/90 px-5 py-3 text-sm text-black placeholder-orange-400 shadow-sm focus:border-orange-400 focus:bg-white focus:outline-none"
@@ -90,15 +123,16 @@ export default function ForgotPasswordPage() {
               </button>
             </form>
           ) : (
-            <form onSubmit={onResetPassword} noValidate className="space-y-4 text-start">
+            <form onSubmit={onResetPassword} className="space-y-4 text-start">
               <p className="text-center text-sm text-white/80">
-                {t('auth.resetPasswordHint', { email })}
+                {info ?? t('auth.forgotPasswordSentIfExists', { email })}
               </p>
               <div>
                 <input
                   id="code"
                   type="text"
-                  required
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
                   placeholder={t('auth.codePlaceholder')}
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
@@ -109,7 +143,6 @@ export default function ForgotPasswordPage() {
                 <input
                   id="new-password"
                   type="password"
-                  required
                   autoComplete="new-password"
                   placeholder={t('auth.newPasswordPlaceholder')}
                   value={password}
@@ -121,7 +154,6 @@ export default function ForgotPasswordPage() {
                 <input
                   id="confirm-password"
                   type="password"
-                  required
                   autoComplete="new-password"
                   placeholder={t('auth.confirmPasswordPlaceholder')}
                   value={passwordConfirmation}
@@ -138,6 +170,20 @@ export default function ForgotPasswordPage() {
                 className="w-full border-2 border-orange-400 bg-orange-400 px-5 py-2.5 text-lg text-white shadow-lg shadow-orange-900/30 transition-all hover:bg-transparent hover:text-orange-400 active:scale-[0.98] disabled:opacity-50"
               >
                 {isResetting ? t('auth.resettingPassword') : t('auth.resetPassword')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setStep('request')
+                  setError(null)
+                  setInfo(null)
+                  setCode('')
+                  setPassword('')
+                  setPasswordConfirmation('')
+                }}
+                className="w-full text-sm text-white/80 transition-colors hover:text-orange-400"
+              >
+                {t('auth.useDifferentEmail')}
               </button>
             </form>
           )}

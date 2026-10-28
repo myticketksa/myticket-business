@@ -13,11 +13,11 @@ export default function CashierFormModal({
   onClose,
 }: {
   cashier: Cashier | null
-  onClose: () => void
+  onClose: (saved?: boolean) => void
 }) {
   const { t } = useTranslation()
   const { errors, validate, clearError } = useInlineValidation()
-  useEscapeKey(onClose)
+  useEscapeKey(() => onClose())
   const isEdit = Boolean(cashier)
   const [name, setName] = useState(cashier?.name ?? '')
   const [email, setEmail] = useState(cashier?.email ?? '')
@@ -41,7 +41,7 @@ export default function CashierFormModal({
       } else {
         await createCashier({ name, email, password }).unwrap()
       }
-      onClose()
+      onClose(true)
     } catch (err) {
       setError(apiErrorMessage(err, t, 'cashiers.form.errorGeneric'))
     }
@@ -52,7 +52,7 @@ export default function CashierFormModal({
 
   return createPortal(
     <div
-      onClick={onClose}
+      onClick={() => onClose()}
       className="animate-fade-in-fast fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
     >
       <form
@@ -117,7 +117,7 @@ export default function CashierFormModal({
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => onClose()}
             className="rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50"
           >
             {t('common.cancel')}

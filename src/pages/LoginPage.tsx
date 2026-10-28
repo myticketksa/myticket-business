@@ -29,6 +29,7 @@ export default function LoginPage() {
   })
 
   const onSubmit = async (values: LoginFormValues) => {
+    if (isLoading) return
     setFormError(null)
     try {
       const result = await login(values).unwrap()
