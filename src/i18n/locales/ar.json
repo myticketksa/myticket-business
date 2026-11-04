@@ -221,7 +221,8 @@
         "commissionRequired": "العمولة مطلوبة",
         "commissionRange": "يجب أن تكون بين 0 و100",
         "coverImageRequired": "صورة الغلاف مطلوبة",
-        "quantityBelowSold": "لا يمكن أن تقل عن {{count}} المباعة أو قيد الحجز."
+        "quantityBelowSold": "لا يمكن أن تقل عن {{count}} المباعة أو قيد الحجز.",
+        "perPersonLimit": "أدخل رقماً صحيحاً."
       },
       "myticketCommission": "عمولة MyTicket (%)",
       "myticketCommissionPlaceholder": "مثال: 15",
@@ -251,7 +252,12 @@
       "ticketNameEn": "الاسم بالإنجليزية",
       "ticketNameAr": "الاسم بالعربية",
       "ticketDescriptionEn": "الوصف بالإنجليزية (اختياري)",
-      "ticketDescriptionAr": "الوصف بالعربية (اختياري)"
+      "ticketDescriptionAr": "الوصف بالعربية (اختياري)",
+      "sportsCheckbox": "فعالية رياضية",
+      "sportsHint": "اشتراطات وزارة الرياضة: يدخل المشتري رقم الهوية أو الإقامة أو الجواز أو التأشيرة أو رقم الحدود، ويُربط بالتذاكر؛ بحد أقصى 5 تذاكر للشخص.",
+      "perPersonLimit": "أقصى عدد تذاكر للشخص",
+      "perPersonNone": "بلا حد",
+      "perPersonHint": "يُحسب عبر كل طلبات الشخص. لا يتجاوز 5 في الفعاليات الرياضية."
     },
     "seating": {
       "manageLink": "إدارة المقاعد",

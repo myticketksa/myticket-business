@@ -104,6 +104,8 @@ function toCreatePayload(values: WithSeatMap) {
     venue_id: values.venueId,
     seeting_type: values.seatingType,
     is_free: values.isFree,
+    is_sports: values.isSports,
+    max_tickets_per_person: values.maxTicketsPerPerson || '',
     // Always open: no dates (the server keeps them); the days it opens.
     is_permanent: values.isPermanent,
     open_weekdays: values.isPermanent ? JSON.stringify(values.openWeekdays) : undefined,
@@ -134,6 +136,8 @@ function toUpdatePayload(values: WithSeatMap) {
     category_id: values.categoryId,
     venue_id: values.venueId,
     is_free: values.isFree,
+    is_sports: values.isSports,
+    max_tickets_per_person: values.maxTicketsPerPerson || '',
     cover_image: values.coverImage,
     // The whole gallery: those kept, in order (one JSON field so an empty
     // list can be sent), then the new ones.

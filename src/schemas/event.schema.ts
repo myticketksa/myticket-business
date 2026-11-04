@@ -25,6 +25,10 @@ export function buildEventFormSchema(t: T, isEdit = false, needsCover = !isEdit)
         : z.string().min(1, t('events.form.validation.venueRequired')),
       seatingType: z.enum(['free', 'assigned']),
       isFree: z.boolean(),
+      // Sports event: buyer ID at booking, five tickets a person at most
+      // (Ministry of Sport rules). Per-person limit: blank = none.
+      isSports: z.boolean(),
+      maxTicketsPerPerson: z.string().regex(/^\d{0,3}$/, t('events.form.validation.perPersonLimit')),
       // The dates the event runs on, each with an optional discount of its own.
       sessions: z
         .array(
@@ -203,6 +207,8 @@ export const emptyEventFormValues: EventFormValues = {
   venueId: '',
   seatingType: 'free',
   isFree: false,
+  isSports: false,
+  maxTicketsPerPerson: '',
   sessions: [],
   isPermanent: false,
   openWeekdays: [0, 1, 2, 3, 4, 5, 6],

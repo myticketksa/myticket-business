@@ -128,6 +128,8 @@ export default function EventFormPage() {
       categoryId: event.manage?.categoryId ? String(event.manage.categoryId) : '',
       venueId: event.manage?.venueId ? String(event.manage.venueId) : '',
       isFree: event.isFree,
+      isSports: Boolean(event.isSports),
+      maxTicketsPerPerson: event.manage?.ownMaxTicketsPerPerson ? String(event.manage.ownMaxTicketsPerPerson) : '',
       // An ordinary event's single unnamed activity isn't shown: the form
       // reads it as "no activities", and saving keeps it.
       activities: shownActivities(event.activities).map((activity) => ({
@@ -542,6 +544,29 @@ export default function EventFormPage() {
                 {/* Free or paid is fixed once tickets are booked (the server refuses the change). */}
                 <input id="isFree" type="checkbox" disabled={Boolean(event?.manage?.hasBookings)} {...register('isFree')} /> {t('events.form.freeEventCheckbox')}
               </label>
+            </div>
+            {/* Sports events follow the Ministry of Sport's ticket rules. */}
+            <div>
+              <label htmlFor="isSports" className="flex items-center gap-2 text-sm text-slate-700">
+                <input id="isSports" type="checkbox" {...register('isSports')} /> {t('events.form.sportsCheckbox')}
+              </label>
+              <p className="mt-1 text-xs text-slate-500">{t('events.form.sportsHint')}</p>
+            </div>
+            <div>
+              <label htmlFor="maxTicketsPerPerson" className="mb-1 block text-sm font-medium text-slate-700">
+                {t('events.form.perPersonLimit')}
+              </label>
+              <input
+                id="maxTicketsPerPerson"
+                type="number"
+                min={1}
+                inputMode="numeric"
+                placeholder={values.isSports ? '5' : t('events.form.perPersonNone')}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                {...register('maxTicketsPerPerson')}
+              />
+              <p className="mt-1 text-xs text-slate-500">{t('events.form.perPersonHint')}</p>
+              {errors.maxTicketsPerPerson && <p className="mt-1 text-xs text-red-600">{errors.maxTicketsPerPerson.message}</p>}
             </div>
           </section>
 
