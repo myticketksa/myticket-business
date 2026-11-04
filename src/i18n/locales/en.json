@@ -254,7 +254,7 @@
       "ticketDescriptionEn": "Description in English (optional)",
       "ticketDescriptionAr": "Description in Arabic (optional)",
       "sportsCheckbox": "Sports event",
-      "sportsHint": "Ministry of Sport rules: buyers enter their ID, iqama, passport, visa or border number, linked to the tickets; at most 5 tickets a person.",
+      "sportsHint": "Ministry of Sport rules: at most 5 tickets a person.",
       "perPersonLimit": "Most tickets per person",
       "perPersonNone": "No limit",
       "perPersonHint": "Counted across all of a person's orders. Sports events can't go above 5."
