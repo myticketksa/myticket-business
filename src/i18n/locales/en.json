@@ -253,11 +253,9 @@
       "ticketNameAr": "Name in Arabic",
       "ticketDescriptionEn": "Description in English (optional)",
       "ticketDescriptionAr": "Description in Arabic (optional)",
-      "sportsCheckbox": "Sports event",
-      "sportsHint": "Ministry of Sport rules: at most 5 tickets a person.",
       "perPersonLimit": "Most tickets per person",
       "perPersonNone": "No limit",
-      "perPersonHint": "Counted across all of a person's orders. Sports events can't go above 5."
+      "perPersonHint": "Counted across all of a person's orders. For a sports event the Ministry of Sport allows at most 5."
     },
     "seating": {
       "manageLink": "Manage seating",

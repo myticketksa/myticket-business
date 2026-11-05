@@ -93,8 +93,6 @@ export interface EventListItem {
   openWeekdays?: number[] | null
   isFeatured: boolean
   isFree: boolean
-  /** A sports event: buyer ID at booking, five tickets a person at most. */
-  isSports?: boolean
   /** Most tickets one person may hold (null: no limit). */
   maxTicketsPerPerson?: number | null
   /** Hours before the start refunds stay open; null = no refunds. */
