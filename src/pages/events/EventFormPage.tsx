@@ -233,6 +233,13 @@ export default function EventFormPage() {
       { shouldDirty: true, shouldValidate: submitCount > 0 },
     )
 
+  // A sports event announced less than 20 days ahead: the Ministry of Sport's
+  // rules want prices, limits and terms public at least 20 days before (16 Nov 2026).
+  const isSports = Boolean(categories?.find((c) => String(c.id) === String(values.categoryId))?.requiresVerifiedPhone)
+  const firstDate = upcomingSessions.map((row) => new Date(row.startsAt).getTime()).filter(Number.isFinite).sort((x, y) => x - y)[0]
+  const daysAhead = firstDate ? Math.floor((firstDate - Date.now()) / 86_400_000) : null
+  const sportsTooSoon = isSports && !values.isPermanent && daysAhead != null && daysAhead < 20
+
   // What's still missing, in words, each pointing at where to fix it.
   const missing: { text: string; go: () => void }[] = []
   const toSection = (section: SectionId) => () => scrollTo(section)
@@ -483,6 +490,11 @@ export default function EventFormPage() {
                 ))}
               </select>
               {errors.categoryId && <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>}
+              {sportsTooSoon ? (
+                <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                  {t('events.form.sportsTwentyDays', { count: Math.max(0, daysAhead ?? 0) })}
+                </p>
+              ) : null}
             </div>
             <div>
               <div className="mb-1 flex items-center justify-between gap-2">

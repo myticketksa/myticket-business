@@ -255,7 +255,8 @@
       "ticketDescriptionAr": "Description in Arabic (optional)",
       "perPersonLimit": "Most tickets per person",
       "perPersonNone": "No limit",
-      "perPersonHint": "Counted across all of a person's orders. For a sports event the Ministry of Sport allows at most 5."
+      "perPersonHint": "Counted across all of a person's orders. For a sports event the Ministry of Sport allows at most 5.",
+      "sportsTwentyDays": "Sports event: prices, purchase limits and terms must be public at least 20 days before the event (Ministry of Sport). The first date is in {{count}} days."
     },
     "seating": {
       "manageLink": "Manage seating",

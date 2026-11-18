@@ -126,6 +126,8 @@ export interface EventCategory {
   name: LocalizedText
   slug: string
   icon: string | null
+  /** A sports category (16 Nov 2026): Ministry of Sport rules apply. */
+  requiresVerifiedPhone?: boolean
   created_at: string
 }
 
